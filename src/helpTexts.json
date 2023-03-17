@@ -1,0 +1,14 @@
+{
+    "emlForm": {
+        "title": "A title for your dataset. It could for example be the title of your main paper or a project name",
+        "license": "Choose a license for data sharing",
+        "doi": "If you already have a DOI for your main paper, you can reuse it for your data. Otherwise GBIF will generate a DOI for your dataset that you can cite in your paper",
+        "description": "A short description/abstract about your dataset",
+        "methodSteps": "Describe the method steps (sampling, DNA extraction, sequencing, denoising, etc)",
+        "contact": "The main contact person for the dataset",
+        "creator": "All persons that should be accredited when citing the dataset",
+        "keywords": "A list of keywords that may help users find your dataset",
+        "url": "If you have a project website or similar that you want to display om the dataset homepage",
+        "bibliographicReferences": "Papers that have been published based on the dataset. "
+    }
+}
