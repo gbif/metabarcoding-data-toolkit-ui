@@ -6,6 +6,7 @@ import {
   JWT_STORAGE_NAME,
 } from "../../Auth/userApi";
 import {getDwcTerms, getRequiredTerms} from "../../Api/terms.js"
+import { getFormat , getLicense} from "../../Api/enum.js";
 import country from "../../Enum/country.json"
  // import {getTrees} from '../../Api'
 
@@ -18,9 +19,10 @@ class ContextProvider extends React.Component {
   state = {
     dwcTerms: {},
     requiredTerms: {},
+    license: {},
+    format: {},
      country,
      user: getTokenUser(),
-    stepState: {reviewDisabled: true, publishDisabled: true, loadingStep: null},
     dataset: null,
     setDataset: (dataset) => this.setState({dataset}),
     login: (values) => {
@@ -29,17 +31,19 @@ class ContextProvider extends React.Component {
     logout: () => {
       this.logout();
     },
-    setStepState: stepState => this.setState({stepState}),
+    
 
   };
 
   componentDidMount() {
     
-   Promise.all([getDwcTerms(), getRequiredTerms()])
+   Promise.all([getDwcTerms(), getRequiredTerms(), getLicense(), getFormat()])
     .then(responses => {
       this.setState({
         dwcTerms: responses[0]?.data,
-        requiredTerms: responses[1]?.data
+        requiredTerms: responses[1]?.data,
+        license: responses[2]?.data,
+        format: responses[3]?.data
       })
     }) 
 

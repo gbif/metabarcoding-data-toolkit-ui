@@ -7,8 +7,7 @@ import PageContent from "../Layout/PageContent";
 import withContext from "../Components/hoc/withContext";
 import TermMapper from "../Components/TermMapper";
 
-const Prepare = ({dataset}) => {
-  const match = useMatch('/dataset/:key/prepare');
+const TermMapping = ({dataset}) => {
 
   return (
     <Layout><PageContent>
@@ -17,13 +16,11 @@ const Prepare = ({dataset}) => {
   );
 }
 
-const mapContextToProps = ({ user, login, logout, dataset, setDataset, stepState, setStepState }) => ({
+const mapContextToProps = ({ user, login, logout, dataset, setDataset}) => ({
   user,
   login,
   logout,
-  dataset, setDataset,
-  stepState,
-  setStepState
+  dataset, setDataset
 });
 
-export default withContext(mapContextToProps)(Prepare);
+export default withContext(mapContextToProps)(TermMapping);

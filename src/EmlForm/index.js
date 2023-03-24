@@ -8,7 +8,8 @@ import {
     Form,
     Switch,
     Row,
-    Col
+    Col,
+    Typography
 } from "antd";
 import { useNavigate, useLocation, useMatch } from "react-router-dom";
 import axios from "axios";
@@ -21,6 +22,8 @@ import TagControl from "./TagControl";
 //import Auth from "../Auth"
 import withContext from "../Components/hoc/withContext";
 import helpTexts from "../helpTexts.json"
+const { Text, Link } = Typography;
+
 const {emlForm: help} = helpTexts;
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -54,10 +57,9 @@ const tailFormItemLayout = {
     },
 };
 
-const MetaDataForm = ({data, onSaveSuccess, saveButtonLabel, dataset, setDataset}) => {
+const MetaDataForm = ({data, onSaveSuccess, saveButtonLabel, dataset, setDataset, licenseEnum}) => {
 
     const match = useMatch('/dataset/:key/metadata')
-    const licenseEnum = ['CC0', 'CC-BY', 'CC-BY-NC']
     const [submissionError, setSubmissionError] = useState(null);
     const [showHelp, setShowHelp] = useState(true)
     const [form] = Form.useForm();
@@ -152,12 +154,13 @@ const MetaDataForm = ({data, onSaveSuccess, saveButtonLabel, dataset, setDataset
                 }
 
             >
-                <Select style={{ width: 200 }} showSearch>
+                <Select style={{ width: 500 }} showSearch>
                     <Option value={undefined}>-</Option>
-                    {licenseEnum.map((f) => {
+                    {Object.keys(licenseEnum).map((f) => {
                         return (
                             <Option key={f} value={f}>
                                 {f}
+                                <br/><Text type="secondary">{licenseEnum[f].title}</Text>
                             </Option>
                         );
                     })}

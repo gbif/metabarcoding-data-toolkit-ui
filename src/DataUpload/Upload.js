@@ -1,5 +1,5 @@
 import { UploadOutlined } from '@ant-design/icons';
-import { Button, message, Upload, Alert, Progress } from 'antd';
+import { Button, message, Upload, Alert, Row, Col, Progress } from 'antd';
 import { useState, useEffect } from 'react';
 import axios from "axios";
 import config from "../config";
@@ -119,8 +119,9 @@ const Uploader = ({onSuccess, onError, datasetKey}) => {
                 }}
             />}
             </Dragger>
-           
-            <Button
+           <Row>
+            <Col flex="auto"></Col>
+            <Col><Button
                 type="primary"
                 onClick={handleUpload}
                 disabled={fileList.length === 0}
@@ -130,7 +131,9 @@ const Uploader = ({onSuccess, onError, datasetKey}) => {
                 }}
             >
                 {uploading ? 'Uploading' : 'Start Upload'}
-            </Button>
+            </Button></Col>
+           </Row>
+            
         </>
     );
 };

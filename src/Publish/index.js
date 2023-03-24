@@ -4,9 +4,7 @@ import axios from "axios"
 import { useNavigate, useLocation, useMatch } from "react-router-dom";
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
-import {marked} from "marked"
 import { Row, Col, Alert, Button, message } from "antd"
-import { InboxOutlined } from '@ant-design/icons';
 import config from "../config";
 import withContext from "../Components/hoc/withContext";
 import { refreshLogin } from "../Auth/userApi";
@@ -16,14 +14,24 @@ const Publish = ({setDataset, dataset}) => {
   const match = useMatch('/dataset/:key/publish');
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
-  const [data, setData] = useState(null);
+  const [data, setData] = useState(dataset || null);
   const [error, setError] = useState(null)
   const [valid, setValid] = useState(false);
-  const [failed, setFailed] = useState(false);
-  const [finished, setFinished] = useState(false);
-  
+  const [failed, setFailed] = useState(dataset?.dwc?.steps?.find(s => s.status === 'failed') || false);
+  const [finished, setFinished] = useState(dataset?.dwc?.steps?.find(s => s.status === 'finished') || false);
+  const [registering, setRegistering] = useState(false);
+  const [gbifKey, setGbifKey] = useState(dataset?.publishing?.gbifDatasetKey)
   let hdl = useRef();
   let refreshUserHdl = useRef();
+
+  useEffect(()=>{
+    if(!data && !!dataset){
+      setData(dataset)
+      setFailed(dataset?.dwc?.steps?.find(s => s.status === 'failed') || false)
+      setFinished(dataset?.dwc?.steps?.find(s => s.status === 'finished') || false)
+      setGbifKey(dataset?.publishing?.gbifDatasetKey)
+    }
+  }, [dataset])
 
   const processData = async key => {
     
@@ -54,8 +62,8 @@ const getData  = async (key, hdl) => {
         setDataset({...res?.data, ...dataset})
       }
       setLoading(false)
-      const isFinished = !!res?.data?.steps.find(s => s.status === 'finished');
-      const isFailed = !!res?.data?.steps.find(s => s.status === 'failed');
+      const isFinished = !!res?.data?.dwc?.steps.find(s => s.status === 'finished');
+      const isFailed = !!res?.data?.dwc?.steps.find(s => s.status === 'failed');
       if(isFinished || isFailed){
           clearInterval(hdl);
       }
@@ -68,10 +76,45 @@ const getData  = async (key, hdl) => {
 
   }
 } 
+
+const registerData = async key => {
+    
+  setRegistering(true)
+  try {
+    message.info("Registering dataset in GBIF");
+
+      const registerRes = await axiosWithAuth.post(`${config.backend}/dataset/${key}/register-in-gbif`);
+      
+      if(registerRes?.data?.publishing?.gbifDatasetKey){
+        setGbifKey(registerRes?.data?.publishing?.gbifDatasetKey)
+      }
+      setDataset(registerRes?.data)
+       setRegistering(false)
+  } catch (error) {
+    alert(error)
+      console.log(error)
+      setRegistering(false)
+      setError(error)
+  }
+  
+
+}
+
+
+
   return (
     <Layout><PageContent>
         {error && <Alert type="error" >{error}</Alert>}
-                <Button onClick={() => processData(match?.params?.key)} >Create DWC and publish</Button>
+        <Row>
+          <Col><Button onClick={() => processData(match?.params?.key)} >Create DWC archive</Button></Col>
+          <Col>
+          <Button loading={registering} disabled={registering || !finished || !!gbifKey} onClick={() => registerData(match?.params?.key)} >Publish to GBIF</Button>
+          </Col>
+          <Col>
+            {gbifKey && <Button type="link" href={`https://www.gbif-uat.org/dataset/${gbifKey}`}>Dataset at gbif.org</Button>}
+          </Col>
+        </Row>
+                
                 <Row>
                     <Col span={24} >
                         {data && <pre>{JSON.stringify(data, null, 2)}</pre>}
@@ -84,13 +127,11 @@ const getData  = async (key, hdl) => {
 }
 
 
-const mapContextToProps = ({ user, login, logout, dataset, setDataset, stepState, setStepState }) => ({
+const mapContextToProps = ({ user, login, logout, dataset, setDataset}) => ({
   user,
   login,
   logout,
-  dataset, setDataset,
-  stepState,
-  setStepState
+  dataset, setDataset
 });
 
 export default withContext(mapContextToProps)(Publish);

@@ -14,8 +14,7 @@ const DataUpload = ({ user,
     login,
     logout,
     dataset,
-    setDataset,
-    setStepState }) => {
+    setDataset }) => {
 
     const match = useMatch('/dataset/:key/process');
     const navigate = useNavigate()
@@ -49,7 +48,7 @@ const DataUpload = ({ user,
             // this should check that the backend thinks it understands the uploaded files
             validate(key)
             // TODO fetch from backend, maybe it has already been processed, then show files etc
-        } else if (!!dataset.steps) {
+        } else if (!!dataset?.steps) {
             const isFinished = !!dataset.steps.find(s => s.status === 'finished');
             const isFailed = !!dataset.steps.find(s => s.status === 'failed');
             setFailed(isFailed)
@@ -67,14 +66,6 @@ const DataUpload = ({ user,
 
     }, [dataset, match?.params?.key]);
 
-    useEffect(() => {
-        if (finished) {
-            setStepState({ reviewDisabled: false, publishDisabled: false, loadingStep: null })
-        }
-        if (failed) {
-            setStepState({ reviewDisabled: true, publishDisabled: true, loadingStep: null })
-        }
-    }, [finished, failed, setStepState])
 
     const validate = async (key) => {
         try {
@@ -142,7 +133,7 @@ const DataUpload = ({ user,
             <PageContent>
                 {error && <Alert type="error" >{error}</Alert>}
                 <Row>
-                    <Col flex="auto">                <Button onClick={() => processData(match?.params?.key)} disabled={!valid} loading={!!dataset.steps && !(failed || finished)}>Process data</Button>
+                    <Col flex="auto">                <Button onClick={() => processData(match?.params?.key)} disabled={!valid} loading={!!dataset?.steps && !(failed || finished)}>Process data</Button>
                     </Col>
                     <Col><Button onClick={() => navigate(`/dataset/${match?.params?.key}/review`)} disabled={!finished}>Proceed to review</Button></Col>
                 </Row>
@@ -159,13 +150,11 @@ const DataUpload = ({ user,
     );
 }
 
-const mapContextToProps = ({ user, login, logout, dataset, setDataset, stepState, setStepState }) => ({
+const mapContextToProps = ({ user, login, logout, dataset, setDataset}) => ({
     user,
     login,
     logout,
-    dataset, setDataset,
-    stepState,
-    setStepState
+    dataset, setDataset
 });
 
 export default withContext(mapContextToProps)(DataUpload);
