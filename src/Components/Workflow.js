@@ -45,10 +45,13 @@ const Workflow = ({ dataset }) => {
                 const {steps} = dataset;
                 const isFinished = !!steps && !!steps.find(s => s.status === 'finished');
                 const isFailed = !!steps && !!steps.find(s => s.status === 'failed');
+                const activeSteps = (isFailed || isFinished) ? steps : steps.filter(s => s.status === 'processing')
+                const currentStep = activeSteps[activeSteps.length -1];
+
                 if(steps){
-                    setMessage(steps[steps.length -1]?.message || null);
+                    setMessage(activeSteps[activeSteps.length -1]?.message || null);
                 }
-                const currentStep = steps[steps.length -1];
+                
                 if(currentStep.status === 'queued'){
                     setStatus('wait')
                 } else if(currentStep.status === 'processing'){

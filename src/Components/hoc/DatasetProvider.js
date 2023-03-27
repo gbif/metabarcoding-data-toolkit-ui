@@ -43,7 +43,7 @@ const DatasetProvider = ({dataset, setDataset}) => {
     try {
         const res = await axiosWithAuth.get(`${config.backend}/dataset/${key}/process`)
         
-        console.log(res?.data)
+        console.log(`Dataset provider set dataset ${res?.data?.id}`)
         setDataset(res?.data)
        // const isFinished = !!res?.data?.steps.find(s => s.status === 'finished');
         // const isFailed = !!res?.data?.steps.find(s => s.status === 'failed');

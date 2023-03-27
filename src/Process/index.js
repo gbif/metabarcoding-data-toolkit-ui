@@ -3,8 +3,8 @@ import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation, useMatch } from "react-router-dom";
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
-import { Row, Col, Alert, Button, message } from "antd"
-import { InboxOutlined } from '@ant-design/icons';
+import { Row, Col, Alert, Button, Timeline, Progress, message } from "antd"
+import { CheckCircleOutlined } from '@ant-design/icons';
 import config from "../config";
 import withContext from "../Components/hoc/withContext";
 import { refreshLogin } from "../Auth/userApi";
@@ -21,7 +21,7 @@ const DataUpload = ({ user,
     const [loading, setLoading] = useState(false)
     const [data, setData] = useState(null);
     const [error, setError] = useState(null)
-    const [valid, setValid] = useState(false);
+   // const [valid, setValid] = useState(false);
     const [failed, setFailed] = useState(false);
     const [finished, setFinished] = useState(false);
 
@@ -44,11 +44,11 @@ const DataUpload = ({ user,
         console.log(match?.params?.key)
         setFailed(false)
         setFinished(false)
-        if (!dataset && key !== 'new') {
+        /* if (!dataset && key !== 'new') {
             // this should check that the backend thinks it understands the uploaded files
             validate(key)
             // TODO fetch from backend, maybe it has already been processed, then show files etc
-        } else if (!!dataset?.steps) {
+        } else  */if (!!dataset?.steps) {
             const isFinished = !!dataset.steps.find(s => s.status === 'finished');
             const isFailed = !!dataset.steps.find(s => s.status === 'failed');
             setFailed(isFailed)
@@ -60,18 +60,28 @@ const DataUpload = ({ user,
                 }
                 hdl.current = setInterval(() => getData(key, hdl.current), 1000);
             }
-        } else if (key !== 'new') {
-            validate(key)
-        }
+        } /* else if (!!dataset) {
+           // validate(key)
+           hdl.current = setInterval(() => getData(dataset?.id, hdl.current), 1000);
+        } */
 
     }, [dataset, match?.params?.key]);
 
+    useEffect(() => { }, [data])
 
-    const validate = async (key) => {
+    const isValidForProcessing = () => {
+        if(!dataset){
+            return false
+        } else {
+            return dataset?.files?.format === 'TSV_3_FILE' || dataset?.files?.format === 'XLSX'
+        }
+    }
+
+  /*   const validate = async (key) => {
         try {
             setLoading(true)
             const res = await axiosWithAuth.get(`${config.backend}/validate/${key}`)
-            if (res?.data?.format === 'TSV_3_FILE' || res?.data?.format === 'XLSX') {
+            if (res?.data?.files?.format === 'TSV_3_FILE' || res?.data?.files?.format === 'XLSX') {
                 //const processRes = await axiosWithAuth.post(`${config.backend}/dataset/${key}/process`)
                 setValid(true)
                 // setDataset(res?.data)
@@ -86,10 +96,10 @@ const DataUpload = ({ user,
             setLoading(false)
 
         }
-    }
+    } */
 
     const processData = async key => {
-        if (valid) {
+        if (isValidForProcessing()) {
             setFailed(false)
             setFinished(false)
             try {
@@ -114,7 +124,7 @@ const DataUpload = ({ user,
             setLoading(false)
             const isFinished = !!res?.data?.steps.find(s => s.status === 'finished');
             const isFailed = !!res?.data?.steps.find(s => s.status === 'failed');
-            if (isFinished || isFailed) {
+            if (hdl && (isFinished || isFailed)) {
                 clearInterval(hdl);
             }
             setFailed(isFailed)
@@ -127,30 +137,67 @@ const DataUpload = ({ user,
         }
     }
 
+    const getStatusColor = (status) => {
+        switch (status) {
+            case "processing":
+                return 'blue'
+            case "finished":
+                return 'green'
+            case "failed":
+                return 'red'
+            default:
+                return 'grey'
+        }
+
+    }
 
     return (
         <Layout>
             <PageContent>
                 {error && <Alert type="error" >{error}</Alert>}
                 <Row>
-                    <Col flex="auto">                <Button onClick={() => processData(match?.params?.key)} disabled={!valid} loading={!!dataset?.steps && !(failed || finished)}>Process data</Button>
+                    <Col > <Button onClick={() => processData(match?.params?.key)} disabled={!isValidForProcessing()} loading={!!dataset?.steps && !(failed || finished)}>Process data</Button>
+                    </Col>
+                    <Col flex="auto">
+                        {data?.steps && data?.steps?.length > 0 && <Timeline
+                            items={                             
+                                data?.steps.map((s, idx) => ({
+                                dot: s.status === "finished" || idx < data?.steps.length -1 ? <CheckCircleOutlined /> : null,    
+                                color: getStatusColor(s.status), // === "processing" ? "blue" : s.status === "finished" ? "green" : s.status === "failed" ? "red" : "grey",
+                                children: s.status === "finished" ? "Finished" : 
+                                <>
+                                {`${s.status === "processing" && idx === data?.steps.length -1  ? s.message : s.messagePending}${s.subTask && idx === data?.steps.length -1 ? " - "+ s.subTask: ""}`}
+                               {s.total && s.progress && 
+                               <div
+                               style={{
+                                 width: 200,
+                               }}
+                             >
+                               <Progress size="small" percent={Math.round(s.progress / s.total * 100)} />
+                               </div>} 
+                                </>
+                                
+                            }))
+                            }
+                        />}
+
                     </Col>
                     <Col><Button onClick={() => navigate(`/dataset/${match?.params?.key}/review`)} disabled={!finished}>Proceed to review</Button></Col>
                 </Row>
-                <Row>
+                {  <Row>
                     <Col span={16} >
                         {data && <pre>{JSON.stringify(data, null, 2)}</pre>}
 
                     </Col>
 
                     <Col></Col>
-                </Row>
+                </Row> }
             </PageContent>
         </Layout>
     );
 }
 
-const mapContextToProps = ({ user, login, logout, dataset, setDataset}) => ({
+const mapContextToProps = ({ user, login, logout, dataset, setDataset }) => ({
     user,
     login,
     logout,
