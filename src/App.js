@@ -5,7 +5,7 @@ import { ConfigProvider } from 'antd';
 import { BrowserRouter as Router, useRoutes , Routes, Route} from "react-router-dom";
 /* import MyRuns from "./MyRuns";
  */
-import DatasetProvider from "./Components/hoc/DatasetProvider"
+import DatasetProvider from "./Components/hoc/DatasetProvider2"
 import Home from "./Home";
 import DataUpload from "./DataUpload";
 import Process from "./Process";

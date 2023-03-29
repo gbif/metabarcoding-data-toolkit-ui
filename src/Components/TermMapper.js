@@ -1,5 +1,5 @@
 import { useEffect, useState, useReducer } from "react";
-import { Table, Popover, Typography, Row, Col, theme, Button } from "antd"
+import { Table, Popover, Typography, Row, Col, theme, Button, message } from "antd"
 import HeaderSelect from "./HeaderSelect";
 import { InfoCircleOutlined } from '@ant-design/icons';
 import withContext from "./hoc/withContext"
@@ -61,7 +61,6 @@ const TermMapper = ({ dwcTerms, requiredTerms, dataset }) => {
     }, [dwcTerms, requiredTerms, dataset])
 
     useEffect(() => {
-        console.log('test')
     }, [dataset])
 
     const saveMapping = async () => {
@@ -83,10 +82,11 @@ const TermMapper = ({ dwcTerms, requiredTerms, dataset }) => {
                     return acc
                 }, {})
                 const res = await axiosWithAuth.post(`${config.backend}/dataset/${dataset?.id}/mapping`, {taxa: taxaMapping, samples: samplesMapping})
-               
+                message.success("Mapping saved")
                 setError(null) 
                 setLoading(false)
             } catch (error) {
+                message.error("Ouch - Something went wrong, the mapping was not saved")
                 setError(error)
                 setLoading(false)
     

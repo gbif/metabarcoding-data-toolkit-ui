@@ -10,7 +10,6 @@ const Workflow = ({ dataset }) => {
     const metadataMatch = useMatch('/dataset/:key/metadata');
     const publishMatch = useMatch('/dataset/:key/publish');
     let {key} = useParams();
-   // const [key, setKey] = useState(uploadMatch?.params?.key || reviewMatch?.params?.key || metadataMatch?.params?.key || publishMatch?.params?.key || mappingMatch?.params?.key)
     const [step, setStep] = useState(null)
     const location = useLocation();
     const navigate = useNavigate();
@@ -36,14 +35,13 @@ const Workflow = ({ dataset }) => {
         } else {
             setStep(null)
         }
-      // setKey( uploadMatch?.params?.key || reviewMatch?.params?.key || metadataMatch?.params?.key || publishMatch?.params?.key || mappingMatch?.params?.key)
-    }, [location/* , uploadMatch?.params?.key,  reviewMatch?.params?.key,  metadataMatch?.params?.key,  publishMatch?.params?.key, mappingMatch?.params?.key, location?.pathname */])
+    }, [location])
 
     useEffect(() => {
         try {
             if(!!dataset?.steps){
                 const {steps} = dataset;
-                const isFinished = !!steps && !!steps.find(s => s.status === 'finished');
+                const isFinished = !!steps && !!steps[steps.length -1].status === 'finished'  // .find(s => s.status === 'finished');
                 const isFailed = !!steps && !!steps.find(s => s.status === 'failed');
                 const activeSteps = (isFailed || isFinished) ? steps : steps.filter(s => s.status === 'processing')
                 const currentStep = activeSteps[activeSteps.length -1];
@@ -107,25 +105,7 @@ const Workflow = ({ dataset }) => {
             default:
                 break;
         }
-      /*   switch (newStep) {
-            case 0:
-                navigate(`/dataset/${key}/prepare`) //navigate("/prepare")
-                break;
-            case 1:
-                navigate(`/dataset/${key || 'new'}`)
-                break;
-            case 2:
-                    navigate(`/dataset/${key}/review`)
-                break;
-            case 3:
-                navigate(`/dataset/${key}/metadata`)
-                break;
-            case 4:
-                navigate(`/dataset/${key}/publish`)
-                break;
-            default:
-                break;
-        } */
+
     }
 
     return step !== null ? <Steps onChange={onChange} current={step} percent={step === 2 ? (percent || "") : ""}
@@ -145,40 +125,17 @@ const Workflow = ({ dataset }) => {
             },
             {
                 title: 'Review',
-                disabled: !finished
+                disabled: !dataset?.filesAvailable.find(f => f.format === 'BIOM 1.0')
             },
             {
                 title: dataset?.metadata ? 'Edit metadata' : 'Add metadata',
-                disabled: !key
+                disabled: !dataset
             },
             {
                 title: 'Publish',
-                disabled: !(dataset?.metadata && finished)
+                disabled: !(dataset?.metadata && dataset?.filesAvailable.find(f => f.format === 'BIOM 1.0'))
             },
-        ]/* [
-            {
-                title: 'Prepare data',
-            },
-            {
-                title: 'Upload data',
-                status: status,
-                description: message,
-                percent: percent 
-
-            },
-            {
-                title: 'Review',
-                disabled: !finished
-            },
-            {
-                title: dataset?.metadata ? 'Edit metadata' : 'Add metadata',
-                disabled: !((!!key) && key !== 'new')
-            },
-            {
-                title: 'Publish',
-                disabled: !(dataset?.metadata && finished)
-            },
-        ] */}
+        ]}
     />
         : null
 
