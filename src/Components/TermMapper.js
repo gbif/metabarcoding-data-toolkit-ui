@@ -1,6 +1,7 @@
 import { useEffect, useState, useReducer } from "react";
 import { Table, Popover, Typography, Row, Col, theme, Button, message } from "antd"
 import HeaderSelect from "./HeaderSelect";
+import DefaultValueSelect from "./DefaultValueSelect";
 import { InfoCircleOutlined } from '@ant-design/icons';
 import withContext from "./hoc/withContext"
 import config from "../config";
@@ -18,12 +19,16 @@ const reducer = (state, action) => {
             return { ...state, taxa: {...state.taxa, [action.payload.term]: action.payload.value}};
         case 'mapSampleTerm':
             return { ...state, samples: {...state.samples, [action.payload.term]: action.payload.value}};
+        case 'createDefaultValue':
+            return {...state, defaultValues: {...state.defaultValues, [action.payload.term]: action.payload.value}}
+        case 'loadStoredMapping':
+            return action.payload
         default:
           throw new Error(`Unknown action type: ${action.type}`);
       }
   }; 
 
-const initialState = {taxa: {}, samples: {}};
+const initialState = {taxa: {}, samples: {}, defaultValues: {}};
 
 const TermMapper = ({ dwcTerms, requiredTerms, dataset }) => {
     const { token } = useToken();
@@ -56,6 +61,11 @@ const TermMapper = ({ dwcTerms, requiredTerms, dataset }) => {
                     return t
                 }
             }), ...dataset?.taxonHeaders?.filter(h => !reqTaxonTerms.has(h) && termMap.has(h)).map(h => termMap.get(h))])
+        }
+
+        if(dataset?.mapping){
+            dispatch({ type: 'loadStoredMapping', payload: dataset?.mapping })
+
         }
 
     }, [dwcTerms, requiredTerms, dataset])
@@ -110,15 +120,37 @@ const TermMapper = ({ dwcTerms, requiredTerms, dataset }) => {
         {
             title: 'Mapping',
             dataIndex: 'mapping',
-            key: 'name',
-            render: (text, term) => <HeaderSelect term={term} headers={headers} onChange={ val => {
-                /* console.log('update '+term.name)
-                console.log('Value '+val) */
-                if(type === 'taxon'){
-                    dispatch({ type: 'mapTaxonTerm', payload: {term: term.name, value: val} })
-                } else if(type === 'sample'){
-                    dispatch({ type: 'mapSampleTerm', payload: {term: term.name, value: val} })
+            key: 'mapping',
+            render: (text, term) => {
+                let val;
+                if(type === 'taxon' && state?.taxa?.[term.name]){
+                    val =  state?.taxa?.[term.name]
+                } else if(type === 'sample' && state?.samples?.[term.name]){
+                    val =  state?.samples?.[term.name]
                 }
+                return (<HeaderSelect term={term} headers={headers} val={val} onChange={ val => {
+                    /* console.log('update '+term.name)
+                    console.log('Value '+val) */
+                    if(type === 'taxon'){
+                        dispatch({ type: 'mapTaxonTerm', payload: {term: term.name, value: val} })
+                    } else if(type === 'sample'){
+                        dispatch({ type: 'mapSampleTerm', payload: {term: term.name, value: val} })
+                    }
+                }
+                } />)
+            }
+        }
+    )
+
+    const getDefaultValueColumn = () => (
+        {
+            title: 'Default value',
+            dataIndex: 'defaultValue',
+            key: 'defaultValue',
+            render: (text, term) => <DefaultValueSelect term={term} onChange={ val => {
+               
+                    dispatch({ type: 'createDefaultValue', payload: {term: term.name, value: val} })
+                
             }
             } />
         }
@@ -131,7 +163,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, dataset }) => {
         </Row>
         <><Title level={5}>Sample</Title>
             <Table
-                dataSource={sampleTerms} columns={[...columns, getMappingColumn(dataset?.sampleHeaders, 'sample')]}
+                dataSource={sampleTerms} columns={[...columns, getMappingColumn(dataset?.sampleHeaders, 'sample'), getDefaultValueColumn()]}
                 size="small"
                 showHeader={false}
                 pagination={false}
@@ -141,7 +173,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, dataset }) => {
         <><Title level={5} style={{ marginTop: '10px' }}>Taxon</Title>
 
             <Table
-                dataSource={taxonTerms} columns={[...columns, getMappingColumn(dataset?.taxonHeaders, 'taxon')]}
+                dataSource={taxonTerms} columns={[...columns, getMappingColumn(dataset?.taxonHeaders, 'taxon'), getDefaultValueColumn()]}
                 size="small"
                 showHeader={false}
                 pagination={false}

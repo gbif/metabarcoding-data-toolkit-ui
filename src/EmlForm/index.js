@@ -4,7 +4,7 @@ import {
     Select,
     Button,
     Alert,
-    notification,
+    message,
     Form,
     Switch,
     Row,
@@ -27,12 +27,7 @@ const { Text, Link } = Typography;
 const {emlForm: help} = helpTexts;
 const FormItem = Form.Item;
 const Option = Select.Option;
-const openNotification = (title, description) => {
-    notification.open({
-        message: title,
-        description: description,
-    });
-};
+
 
 const formItemLayout = {
     labelCol: {
@@ -61,7 +56,7 @@ const MetaDataForm = ({data, onSaveSuccess, saveButtonLabel, dataset, setDataset
 
     const match = useMatch('/dataset/:key/metadata')
     const [submissionError, setSubmissionError] = useState(null);
-    const [showHelp, setShowHelp] = useState(true)
+    const [showHelp, setShowHelp] = useState(false)
     const [form] = Form.useForm();
 
 
@@ -76,18 +71,15 @@ const MetaDataForm = ({data, onSaveSuccess, saveButtonLabel, dataset, setDataset
                 ...values
             })
             .then((res) => {
-                let title = key ? "Meta data updated" : "Dataset registered";
-                let msg = key
-                    ? `Meta data updated successfully updated for ${values.title}`
-                    : `${values.title} registered and ready for import`;
+               
                 if (onSaveSuccess && typeof onSaveSuccess === "function") {
                     if (key) {
                         onSaveSuccess(res);
                     } else {
-                        onSaveSuccess(res, values.origin);
+                        onSaveSuccess(res);
                     }
                 }
-                openNotification(title, msg);
+                message.success('Metada saved')
                 setDataset({...dataset, metadata: values})
                 setSubmissionError(null);
             })
@@ -105,7 +97,7 @@ const MetaDataForm = ({data, onSaveSuccess, saveButtonLabel, dataset, setDataset
 
     return (
        <>
-       <Row><Col flex="auto"></Col><Col>Show help <Switch onChange={setShowHelp}/></Col></Row>
+        
         <Form
             initialValues={initialValues}
             onFinish={submitData}
@@ -113,6 +105,18 @@ const MetaDataForm = ({data, onSaveSuccess, saveButtonLabel, dataset, setDataset
             style={{ paddingTop: "12px" }}
             form={form}
         >
+            <Row>
+            <Col>Show help <Switch onChange={setShowHelp} checked={showHelp}/></Col>
+                <Col flex="auto"></Col>
+            
+            <Col> <FormItem >
+                <Button htmlType="submit">
+                    {saveButtonLabel || "Save metadata"}
+                </Button>
+            </FormItem></Col>
+            </Row>
+            
+           
             {submissionError && (
                 <FormItem>
                     <Alert
@@ -291,11 +295,7 @@ const MetaDataForm = ({data, onSaveSuccess, saveButtonLabel, dataset, setDataset
 
 
 
-            <FormItem {...tailFormItemLayout}>
-                <Button type="primary" htmlType="submit">
-                    {saveButtonLabel || "Save"}
-                </Button>
-            </FormItem>
+           
         </Form>
         </>
     );

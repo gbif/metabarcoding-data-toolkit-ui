@@ -1,22 +1,22 @@
 
-import React, {useEffect, useState, useRef} from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios"
 import { useNavigate, useLocation, useMatch } from "react-router-dom";
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
-import { Row, Col, Alert, Button, message } from "antd"
+import { Row, Col, Alert, Button, Progress, Timeline, Typography, List, message } from "antd"
+import { CheckCircleOutlined, ClockCircleOutlined, DownloadOutlined } from '@ant-design/icons';
 import config from "../config";
+import FilesAvailable from '../Components/FilesAvailable'
+
 import withContext from "../Components/hoc/withContext";
 import { refreshLogin } from "../Auth/userApi";
 import { axiosWithAuth } from "../Auth/userApi";
+const { Title } = Typography;
+const Publish = ({ setDataset, dataset }) => {
 
-const Publish = ({setDataset, dataset}) => {
-  const match = useMatch('/dataset/:key/publish');
-  const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
-  const [data, setData] = useState(dataset || null);
   const [error, setError] = useState(null)
-  const [valid, setValid] = useState(false);
   const [failed, setFailed] = useState(dataset?.dwc?.steps?.find(s => s.status === 'failed') || false);
   const [finished, setFinished] = useState(dataset?.dwc?.steps?.find(s => s.status === 'finished') || false);
   const [registering, setRegistering] = useState(false);
@@ -24,110 +24,139 @@ const Publish = ({setDataset, dataset}) => {
   let hdl = useRef();
   let refreshUserHdl = useRef();
 
-  useEffect(()=>{
-    if(!data && !!dataset){
-      setData(dataset)
+  useEffect(() => {
+    if (!!dataset) {
       setFailed(dataset?.dwc?.steps?.find(s => s.status === 'failed') || false)
-      setFinished(dataset?.dwc?.steps?.find(s => s.status === 'finished') || false)
+      setFinished(dataset?.dwc?.steps[dataset?.dwc?.steps.length - 1].status === 'finished' || false)
       setGbifKey(dataset?.publishing?.gbifDatasetKey)
     }
   }, [dataset])
 
   const processData = async key => {
-    
-        setFailed(false)
-        setFinished(false)
-        try {
-            const processRes = await axiosWithAuth.post(`${config.backend}/dataset/${key}/dwc`);
-            message.info("Processing data");
-            
-             hdl.current = setInterval(() => getData(key, hdl.current), 1000);
-             refreshUserHdl = setInterval(refreshLogin, 900000);
 
-        } catch (error) {
-          alert(error)
-            console.log(error)
-            setError(error)
-        }
-        
-    
-}
+    setFailed(false)
+    setFinished(false)
+    try {
+      const processRes = await axiosWithAuth.post(`${config.backend}/dataset/${key}/dwc`);
+      message.info("Processing data");
 
-const getData  = async (key, hdl) => {
-  try {
+      hdl.current = setInterval(() => getData(key, hdl.current), 1000);
+      refreshUserHdl = setInterval(refreshLogin, 900000);
+
+    } catch (error) {
+      alert(error)
+      console.log(error)
+      setError(error)
+    }
+
+
+  }
+
+  const getData = async (key, hdl) => {
+    try {
       setLoading(true)
       const res = await axiosWithAuth.get(`${config.backend}/dataset/${key}/dwc`)
-      setData(res?.data)
-      if(dataset?.id === match?.params?.id){
-        setDataset({...res?.data, ...dataset})
-      }
+      setDataset(res?.data)
+
       setLoading(false)
-      const isFinished = !!res?.data?.dwc?.steps.find(s => s.status === 'finished');
+      const isFinished = res?.data?.dwc?.steps[res?.data?.dwc?.steps.length - 1].status === 'finished';
       const isFailed = !!res?.data?.dwc?.steps.find(s => s.status === 'failed');
-      if(isFinished || isFailed){
-          clearInterval(hdl);
+      if (isFinished || isFailed) {
+        clearInterval(hdl);
       }
       setFailed(isFailed)
       setFinished(isFinished)
-      
-     
-  } catch (error) {
+
+
+    } catch (error) {
       setLoading(false)
 
+    }
   }
-} 
 
-const registerData = async key => {
-    
-  setRegistering(true)
-  try {
-    message.info("Registering dataset in GBIF");
+  const registerData = async key => {
+
+    setRegistering(true)
+    try {
+      message.info("Registering dataset in GBIF");
 
       const registerRes = await axiosWithAuth.post(`${config.backend}/dataset/${key}/register-in-gbif`);
-      
-      if(registerRes?.data?.publishing?.gbifDatasetKey){
+
+      if (registerRes?.data?.publishing?.gbifDatasetKey) {
         setGbifKey(registerRes?.data?.publishing?.gbifDatasetKey)
       }
       setDataset(registerRes?.data)
-       setRegistering(false)
-  } catch (error) {
-    alert(error)
+      setRegistering(false)
+    } catch (error) {
+      alert(error)
       console.log(error)
       setRegistering(false)
       setError(error)
+    }
+
+
   }
-  
 
-}
-
-
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "processing":
+        return '#108ee9'
+      case "finished":
+        return 'green'
+      case "failed":
+        return 'red'
+      default:
+        return 'grey'
+    }
+  }
 
   return (
     <Layout><PageContent>
-        {error && <Alert type="error" >{error}</Alert>}
-        <Row>
-          <Col><Button onClick={() => processData(match?.params?.key)} >Create DWC archive</Button></Col>
-          <Col>
-          <Button loading={registering} disabled={registering || !finished || !!gbifKey} onClick={() => registerData(match?.params?.key)} >Publish to GBIF</Button>
-          </Col>
-          <Col>
-            {gbifKey && <Button type="link" href={`https://www.gbif-uat.org/dataset/${gbifKey}`}>Dataset at gbif.org</Button>}
-          </Col>
-        </Row>
-                
-                <Row>
-                    <Col span={24} >
-                        {data && <pre>{JSON.stringify(data, null, 2)}</pre>}
+      {error && <Alert type="error" >{error}</Alert>}
+      <Row>
+        <Col span={6}>
+          <Button style={{ marginBottom: "24px" }} onClick={() => processData(dataset?.id)} >Create DWC archive</Button>
+          {dataset?.dwc?.steps && dataset?.dwc?.steps?.length > 0 && <Timeline
+            items={
+              dataset?.dwc?.steps.map((s, idx) => ({
+                dot: s.status === "finished" ? <CheckCircleOutlined /> : s.status === "pending" ? <ClockCircleOutlined /> : null,
+                color: getStatusColor(s.status),
+                children: (s.status === "finished" && idx === dataset?.dwc?.steps?.length - 1) ? "Finished" :
+                  <>
+                    {`${s.status === "processing" ? s.message : s.messagePending}${s.subTask && idx === dataset?.dwc?.steps.length - 1 ? " - " + s.subTask : ""}`}
+                    {s.total && s.progress && s.status === "processing" &&
+                      <div
+                        style={{
+                          width: 200,
+                        }}
+                      >
+                        <Progress size="small" percent={Math.round(s.progress / s.total * 100)} />
+                      </div>}
+                  </>
 
-                    </Col>
-                    
-                </Row>
-        </PageContent></Layout>
+              }))
+            }
+          />}
+        </Col>
+        {dataset?.filesAvailable && dataset?.filesAvailable.length > 0 && <Col span={6}>
+                        <FilesAvailable dataset={dataset}/>
+                    </Col>}
+        <Col flex="auto"></Col>
+        <Col>
+          <Button loading={registering} disabled={registering || !finished || !!gbifKey} onClick={() => registerData(dataset?.id)} >Publish to GBIF</Button>
+        </Col>
+        <Col>
+          {gbifKey && <Button type="link" href={`https://www.gbif-uat.org/dataset/${gbifKey}`}>Dataset at gbif.org</Button>}
+        </Col>
+      </Row>
+
+
+    </PageContent></Layout>
   );
 }
 
 
-const mapContextToProps = ({ user, login, logout, dataset, setDataset}) => ({
+const mapContextToProps = ({ user, login, logout, dataset, setDataset }) => ({
   user,
   login,
   logout,

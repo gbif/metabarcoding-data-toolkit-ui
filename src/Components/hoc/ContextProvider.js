@@ -3,6 +3,7 @@ import {
   authenticate as logUserIn,
   logout as logUserOut,
   getTokenUser,
+  refreshLogin,
   JWT_STORAGE_NAME,
 } from "../../Auth/userApi";
 import {getDwcTerms, getRequiredTerms} from "../../Api/terms.js"
@@ -22,7 +23,7 @@ class ContextProvider extends React.Component {
     license: {},
     format: {},
      country,
-     user: getTokenUser(),
+     user: null, //getTokenUser(),
     dataset: null,
     setDataset: (dataset) => this.setState({dataset}),
     login: (values) => {
@@ -36,7 +37,17 @@ class ContextProvider extends React.Component {
   };
 
   componentDidMount() {
-    
+    const tokenUser = getTokenUser();
+    if(tokenUser){
+      refreshLogin().then(user => {
+        this.setState({user})
+      })
+    }
+    /* if(this?.state?.user){
+      refreshLogin().then(user => {
+        this.setState({user})
+      })
+    } */
    Promise.all([getDwcTerms(), getRequiredTerms(), getLicense(), getFormat()])
     .then(responses => {
       this.setState({

@@ -37,7 +37,8 @@ export const authenticate = async (username, password) => {
 
 export const refreshLogin = async () => {
   try {
-    await axiosWithAuth.post(`${config.authWebservice}/whoami`)
+    const response = await axiosWithAuth.post(`${config.authWebservice}/whoami`)
+    return response?.data;
   } catch (err) {
     logout()
   }

@@ -14,6 +14,8 @@ import TermMapping from "./TermMapping";
 import Review from "./Review";
 import Metadata from "./Metadata";
 import Publish from "./Publish";
+
+import UserProfile from "./UserProfile"
 import history from "./history";
 //import "./App.css";
 
@@ -27,6 +29,7 @@ const App = () => {
     { key: "review", path: "/dataset/:key/review", element: [<DatasetProvider />,<Review />] },
     { key: "metadata", path: "/dataset/:key/metadata", element: [<DatasetProvider />,<Metadata />] },
     { key: "publish",path: "/dataset/:key/publish", element: [<DatasetProvider />,<Publish /> ]},
+    { key: "user-profile",path: "/user-profile", element: [<UserProfile /> ]},
     
     /* { path: "/run", element: <Workflow /> }, */
 

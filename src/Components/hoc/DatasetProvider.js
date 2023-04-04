@@ -56,8 +56,6 @@ const DatasetProvider = ({dataset, setDataset}) => {
 }
 
 
-
-
 const mapContextToProps = ({ dataset, setDataset }) => ({
     dataset, setDataset
   });

@@ -4,11 +4,11 @@ import { useNavigate, useLocation, useMatch, useParams, matchPath } from "react-
 import withContext from "./hoc/withContext"
 
 const Workflow = ({ dataset }) => {
-    const uploadMatch = useMatch('/dataset/:key/upload');
+   /*  const uploadMatch = useMatch('/dataset/:key/upload');
     const reviewMatch = useMatch('/dataset/:key/review');
     const mappingMatch = useMatch('/dataset/:key/term-mapping');
     const metadataMatch = useMatch('/dataset/:key/metadata');
-    const publishMatch = useMatch('/dataset/:key/publish');
+    const publishMatch = useMatch('/dataset/:key/publish'); */
     let {key} = useParams();
     const [step, setStep] = useState(null)
     const location = useLocation();
@@ -125,7 +125,7 @@ const Workflow = ({ dataset }) => {
             },
             {
                 title: 'Review',
-                disabled: !dataset?.filesAvailable.find(f => f.format === 'BIOM 1.0')
+                disabled: !dataset?.filesAvailable?.find(f => f.format === 'BIOM 1.0')
             },
             {
                 title: dataset?.metadata ? 'Edit metadata' : 'Add metadata',
@@ -133,7 +133,7 @@ const Workflow = ({ dataset }) => {
             },
             {
                 title: 'Publish',
-                disabled: !(dataset?.metadata && dataset?.filesAvailable.find(f => f.format === 'BIOM 1.0'))
+                disabled: !(dataset?.metadata && dataset?.filesAvailable?.find(f => f.format === 'BIOM 1.0'))
             },
         ]}
     />

@@ -1,7 +1,7 @@
 import { UploadOutlined } from '@ant-design/icons';
 import { Button, message, Upload, Alert, Row, Col, Progress } from 'antd';
 import { useState, useEffect } from 'react';
-import axios from "axios";
+import {axiosWithAuth} from "../Auth/userApi";
 import config from "../config";
 const { Dragger } = Upload;
 
@@ -21,14 +21,14 @@ const Uploader = ({onSuccess, onError, datasetKey}) => {
         });
         setUploading(true);
 
-       (datasetKey ? axios
+       (datasetKey ? axiosWithAuth
             .put(`${config.backend}/dataset/${datasetKey}/upload`, formData, {
                 onUploadProgress:  progressEvent => {
                     console.log(progressEvent.loaded)
                     setProgress(progressEvent)
                 }
             }) : 
-            axios
+            axiosWithAuth
             .post(`${config.backend}/dataset/upload`, formData, {
                 onUploadProgress:  progressEvent => {
                     console.log(progressEvent.loaded)

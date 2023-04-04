@@ -47,10 +47,10 @@ const MenuContent = ({logout}) => {
     <LogoutOutlined /> Logout
   </Menu.Item>
   <Menu.Item
-    key="myruns"
-    onClick={() => navigate('/myruns')}
+    key="user-profile"
+    onClick={() => navigate('/user-profile')}
   >
-    <BarsOutlined /> Pipeline Runs
+    <BarsOutlined /> Datasets
   </Menu.Item>
 </Menu>
 } 
@@ -119,10 +119,10 @@ const UserMenu = ({login, user, logout}) => {
                 style={{ marginRight: 8 }}
                 size="small"
                // className={classes.avatar}
-                src={currentUser.avatar}
+                src={currentUser?.avatar}
                 alt="avatar"
               />
-              <span>{currentUser.name}</span>
+              <span>{currentUser?.name}</span>
             </span>
           </Dropdown>
         )}

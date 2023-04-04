@@ -5,6 +5,7 @@ import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
 import { Row, Col, Alert, Button, Timeline, Progress, Statistic, Space, Typography, List, message } from "antd"
 import { CheckCircleOutlined, ClockCircleOutlined, DownloadOutlined } from '@ant-design/icons';
+import FilesAvailable from '../Components/FilesAvailable'
 import config from "../config";
 import withContext from "../Components/hoc/withContext";
 import { refreshLogin } from "../Auth/userApi";
@@ -115,7 +116,6 @@ const DataUpload = ({ user,
             default:
                 return 'grey'
         }
-
     }
 
     return (
@@ -149,6 +149,10 @@ const DataUpload = ({ user,
                         />}
 
                     </Col>
+                    
+                    {dataset?.filesAvailable && dataset?.filesAvailable.length > 0 && <Col span={6}>
+                        <FilesAvailable dataset={dataset}/>
+                    </Col>}
                     <Col span={6}>
                        {dataset?.summary?.sampleCount && <Title level={3}>Data collected</Title>}
                         <Row >
@@ -159,23 +163,6 @@ const DataUpload = ({ user,
                         </Row>
 
                     </Col>
-                    {dataset?.filesAvailable && dataset?.filesAvailable.length > 0 && <Col span={6}>
-                        <Title level={3}>Files generated</Title>
-                        <List
-                            itemLayout="horizontal"
-                            dataSource={dataset?.filesAvailable}
-                            renderItem={(file) => (
-                                <List.Item
-                                    actions={[<Button type="link" download={file.fileName} href={`${config.backend}/dataset/${dataset?.id}/file/${file.fileName}`}><DownloadOutlined /></Button>]}
-                                >
-                                    <List.Item.Meta
-                                        title={file.fileName}
-                                        description={`${file?.format} - ${file?.mimeType} - ${Math.round(file.size * 10) / 10} mb`}
-                                    />
-                                </List.Item>
-                            )}
-                        />
-                    </Col>}
                     <Col flex="auto"></Col>
                     <Col><Button onClick={() => navigate(`/dataset/${dataset?.id}/review`)} disabled={!finished}>Proceed to review</Button></Col>
                 </Row>
