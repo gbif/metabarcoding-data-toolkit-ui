@@ -12,7 +12,9 @@ import {
     Typography
 } from "antd";
 import { useNavigate, useLocation, useMatch } from "react-router-dom";
-import axios from "axios";
+// import axios from "axios";
+import { axiosWithAuth } from "../Auth/userApi";
+
 import config from "../config";
 import TextArea from "antd/lib/input/TextArea";
 import AgentControl from "./AgentControl";
@@ -67,7 +69,7 @@ const MetaDataForm = ({data, onSaveSuccess, saveButtonLabel, dataset, setDataset
     const submitData = (values) => {
         const key = match?.params?.key;
 
-            axios.post(`${config.backend}/dataset/${key}/metadata`, {
+        axiosWithAuth.post(`${config.backend}/dataset/${key}/metadata`, {
                 ...values
             })
             .then((res) => {

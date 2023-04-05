@@ -122,7 +122,7 @@ const UserMenu = ({login, user, logout}) => {
                 src={currentUser?.avatar}
                 alt="avatar"
               />
-              <span>{currentUser?.name}</span>
+              <span style={{color: token.colorWhite}}>{currentUser?.name}</span>
             </span>
           </Dropdown>
         )}

@@ -6,6 +6,7 @@ import { InfoCircleOutlined } from '@ant-design/icons';
 import withContext from "./hoc/withContext"
 import config from "../config";
 import { axiosWithAuth } from "../Auth/userApi";
+import {useNavigate, useMatch} from 'react-router-dom'
 const { useToken } = theme;
 const { Title } = Typography
 
@@ -32,7 +33,8 @@ const initialState = {taxa: {}, samples: {}, defaultValues: {}};
 
 const TermMapper = ({ dwcTerms, requiredTerms, dataset }) => {
     const { token } = useToken();
-
+    const navigate = useNavigate()
+    const match = useMatch(`/dataset/:key/term-mapping`)
     const [termMap, setTermMap] = useState(new Map(Object.keys(dwcTerms).map(t => [t, dwcTerms[t]])))
     const [sampleTerms, setSampleTerms] = useState([]);
     const [taxonTerms, setTaxonTerms] = useState([]);
@@ -159,7 +161,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, dataset }) => {
     return <>
         <Row>
             <Col flex="auto"></Col>
-            <Col><Button onClick={saveMapping}>Save</Button></Col>
+            <Col><Button onClick={saveMapping}>Save mapping</Button><Button style={{marginLeft: "10px"}} onClick={() => navigate(`/dataset/${match?.params?.id}/process`)}>Proceed to processing</Button></Col>
         </Row>
         <><Title level={5}>Sample</Title>
             <Table

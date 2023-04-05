@@ -8,7 +8,7 @@ const HeaderSelect = ({ headers, style = { width: 300 }, onChange, term , val}) 
     const [value, setValue] = useState(null)
     useEffect(() => {
         if (term?.synonyms) {
-            setMatchedHeaders(headers.filter(s => term?.synonyms.indexOf(s.toLowerCase()) > -1))
+            setMatchedHeaders(headers.filter(s => !!s && term?.synonyms.indexOf(s.toLowerCase()) > -1))
         }
         const matchedTerm = headers.find(matchTerm)
         if (matchTerm && matchedTerm) {
@@ -32,7 +32,7 @@ const HeaderSelect = ({ headers, style = { width: 300 }, onChange, term , val}) 
         }
     }, [value])
     const matchTerm = (header) => {
-        return header.toLowerCase() === term?.name?.toLowerCase()
+        return !!header && header.toLowerCase() === term?.name?.toLowerCase()
     }
 
     return <><Select style={style} value={value} onChange={val => {
