@@ -31,11 +31,12 @@ const reducer = (state, action) => {
 
 const initialState = {taxa: {}, samples: {}, defaultValues: {}};
 
-const TermMapper = ({ dwcTerms, requiredTerms, dataset }) => {
+const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
     const { token } = useToken();
     const navigate = useNavigate()
     const match = useMatch(`/dataset/:key/term-mapping`)
     const [termMap, setTermMap] = useState(new Map(Object.keys(dwcTerms).map(t => [t, dwcTerms[t]])))
+    const [defaultTermMap, setDefaultTermMap ] = useState(new Map())
     const [sampleTerms, setSampleTerms] = useState([]);
     const [taxonTerms, setTaxonTerms] = useState([]);
     const [state, dispatch] = useReducer(reducer, initialState);
@@ -65,12 +66,16 @@ const TermMapper = ({ dwcTerms, requiredTerms, dataset }) => {
             }), ...dataset?.taxonHeaders?.filter(h => !reqTaxonTerms.has(h) && termMap.has(h)).map(h => termMap.get(h))])
         }
 
+        if(defaultTerms){
+            setDefaultTermMap(new Map([...defaultTerms.map(t => [t.name, t])]))
+        }
+
         if(dataset?.mapping){
             dispatch({ type: 'loadStoredMapping', payload: dataset?.mapping })
 
         }
 
-    }, [dwcTerms, requiredTerms, dataset])
+    }, [dwcTerms, requiredTerms, defaultTerms, dataset])
 
     useEffect(() => {
     }, [dataset])
@@ -93,7 +98,13 @@ const TermMapper = ({ dwcTerms, requiredTerms, dataset }) => {
                     }
                     return acc
                 }, {})
-                const res = await axiosWithAuth.post(`${config.backend}/dataset/${dataset?.id}/mapping`, {taxa: taxaMapping, samples: samplesMapping})
+                const defaultValues = Object.keys(state.defaultValues).reduce((acc, key) => {
+                    if(!!state.defaultValues[key]){
+                        acc[key] = state.defaultValues[key]
+                    }
+                    return acc
+                }, {})
+                const res = await axiosWithAuth.post(`${config.backend}/dataset/${dataset?.id}/mapping`, {taxa: taxaMapping, samples: samplesMapping, defaultValues: defaultValues})
                 message.success("Mapping saved")
                 setError(null) 
                 setLoading(false)
@@ -123,6 +134,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, dataset }) => {
             title: 'Mapping',
             dataIndex: 'mapping',
             key: 'mapping',
+            width: "30%",
             render: (text, term) => {
                 let val;
                 if(type === 'taxon' && state?.taxa?.[term.name]){
@@ -149,19 +161,19 @@ const TermMapper = ({ dwcTerms, requiredTerms, dataset }) => {
             title: 'Default value',
             dataIndex: 'defaultValue',
             key: 'defaultValue',
-            render: (text, term) => <DefaultValueSelect term={term} onChange={ val => {
+            render: (text, term) => defaultTermMap.has(term?.name) ? <DefaultValueSelect initialValue={state?.defaultValues?.[term?.name]} vocabulary={defaultTermMap.get(term?.name)?.vocabulary} term={term} onChange={ val => {
                
                     dispatch({ type: 'createDefaultValue', payload: {term: term.name, value: val} })
                 
             }
-            } />
+            } /> : null
         }
     )
 
     return <>
         <Row>
             <Col flex="auto"></Col>
-            <Col><Button onClick={saveMapping}>Save mapping</Button><Button style={{marginLeft: "10px"}} onClick={() => navigate(`/dataset/${match?.params?.id}/process`)}>Proceed to processing</Button></Col>
+            <Col><Button onClick={saveMapping}>Save mapping</Button><Button style={{marginLeft: "10px"}} onClick={() => navigate(`/dataset/${dataset?.id}/process`)}>Proceed to processing</Button></Col>
         </Row>
         <><Title level={5}>Sample</Title>
             <Table
@@ -185,13 +197,14 @@ const TermMapper = ({ dwcTerms, requiredTerms, dataset }) => {
 
 }
 
-const mapContextToProps = ({ user, login, logout, dataset, dwcTerms, requiredTerms }) => ({
+const mapContextToProps = ({ user, login, logout, dataset, dwcTerms, requiredTerms, defaultTerms }) => ({
     user,
     login,
     logout,
     dataset,
     dwcTerms,
-    requiredTerms
+    requiredTerms,
+    defaultTerms
 });
 
 export default withContext(mapContextToProps)(TermMapper);

@@ -18,3 +18,12 @@ export const getRequiredTerms = async () => {
         throw error
     }
 }
+
+export const getDefault = async () => {
+    try {
+        const res = await axios(`${config.backend}/terms/defaultvalue`)
+        return res
+    } catch (error) {
+        throw error
+    }
+}

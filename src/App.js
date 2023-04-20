@@ -16,7 +16,7 @@ import Publish from "./Publish";
 import UserProfile from "./UserProfile"
 import Dataset from "./Dataset"
 import history from "./history";
-//import "./App.css";
+import "./App.css";
 
 const App = () => {
   const routes = useRoutes([
