@@ -50,7 +50,8 @@ const App = ({ children, setDataset, user }) => {
             >
              <span style={{ color: token.colorPrimary }}> New dataset</span>
             </Button>
-            <Button onClick={() => navigate("/")}> <span style={{ color: token.colorPrimary }}>About </span></Button>
+            <Button style={{ marginRight: "8px" }} onClick={() => navigate("/")}> <span style={{ color: token.colorPrimary }}>About </span></Button>
+            <Button onClick={() => navigate("/faq")}> <span style={{ color: token.colorPrimary }}>FAQ </span></Button>
             <UserMenu />
           </Col>
         </Row>
