@@ -15,12 +15,14 @@ import Publish from "./Publish";
 
 import UserProfile from "./UserProfile"
 import Dataset from "./Dataset"
+import Faq from "./Faq"
 import history from "./history";
 import "./App.css";
 
 const App = () => {
   const routes = useRoutes([
     { key: "home", path: "/", element: [<Home /> ]},
+    { key: "faq", path: "/faq", element: [<Faq /> ]},
     { key: "newdataset", path: "/dataset/new", element: [<DatasetProvider />, <DataUpload />] }, 
     { key: "dataset", path: "/dataset/:key", element: [<DatasetProvider />, <Dataset /> ]},
     { key: "upload", path: "/dataset/:key/upload", element: [<DatasetProvider />, <DataUpload />] }, 

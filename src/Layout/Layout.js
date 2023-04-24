@@ -35,7 +35,7 @@ const App = ({ children, setDataset, user }) => {
            
           </Col>
           <Col>
-          <Title style={{color: "white",  padding: "8px"}}>GBIF eDNA Publishing Tool</Title>
+          <Title style={{color: "white",  padding: "8px"}}>GBIF eDNA Tool</Title>
           </Col>
           <Col flex="auto"></Col>
           <Col>

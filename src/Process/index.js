@@ -50,7 +50,7 @@ const DataUpload = ({ user,
                 if (hdl.current) {
                     clearInterval(hdl.current);
                 }
-                hdl.current = setInterval(() => getData(dataset?.id, hdl.current), 1000);
+                hdl.current = setInterval(() => getData(dataset?.id, hdl.current), 5000);
             }
         } 
 
@@ -74,7 +74,7 @@ const DataUpload = ({ user,
                 const processRes = await axiosWithAuth.post(`${config.backend}/dataset/${key}/process`);
                 message.info("Processing data");
 
-                hdl.current = setInterval(() => getData(key, hdl.current), 500);
+                hdl.current = setInterval(() => getData(key, hdl.current), 2000);
                 refreshUserHdl = setInterval(refreshLogin, 900000);
 
             } catch (error) {

@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 //import injectSheet from "react-jss";
 import { useNavigate } from "react-router-dom";
 import { LogoutOutlined, BarsOutlined } from "@ant-design/icons";
 import { Menu, Dropdown, Avatar, Modal, Button, theme } from "antd";
 import withContext from "../Components/hoc/withContext";
 import LoginForm from "./LoginForm"
+import {refreshLogin} from './userApi'
 const { useToken } = theme;
 
 const hashCode = function (str) {
@@ -61,16 +62,28 @@ const UserMenu = ({login, user, logout}) => {
   const [invalid, setInvalid] = useState(false)
   const [currentUser, setCurrentUser] = useState(null)
   const { token } = useToken();
+  let refreshUserHdl = useRef();
 
   useEffect(()=>{
-    
     if (user) {
       const imgNr = Math.abs(hashCode(user.userName)) % 10;
       setCurrentUser({
         name: user.userName,
         avatar: `/_palettes/${imgNr}.png`,
       });
+      refreshUserHdl = setInterval(refreshLogin, 900000);
+    } else {
+      if (refreshUserHdl.current) {
+        clearInterval(refreshUserHdl.current);
     }
+    }
+
+   
+    return () => {
+      if (refreshUserHdl.current) {
+        clearInterval(refreshUserHdl.current);
+    }
+    };
   }, [user])
   const showLogin = () => {
     setVisible(true)

@@ -42,19 +42,20 @@ const TaxonomyChart = ({dataset, sampleIndex, selectedSample}) => {
 
     }
   }
+
+ 
   
     
       const initChart = (data, selectedSample) => {
        // const DOI = dataset.doi ? "https://doi.org/" + dataset.doi : null;
        
-    
        
         let options = {
 
             chart: {
               height: '100%'
             },
-          
+           
             // Let the center circle be transparent
             colors: ['transparent'].concat(Highcharts.getOptions().colors),
           
@@ -70,6 +71,7 @@ const TaxonomyChart = ({dataset, sampleIndex, selectedSample}) => {
               type: 'sunburst',
               data: data,
               name: 'Root',
+              turboThreshold: 2500,
               allowDrillToNode: true,
               cursor: 'pointer',
               dataLabels: {
@@ -116,11 +118,22 @@ const TaxonomyChart = ({dataset, sampleIndex, selectedSample}) => {
                 }
               }, {
                 level: 6,
+                enabled: false,
                 colorVariation: {
                   key: 'brightness',
                   to: 0.5,
                   dataLabels: null
                 }
+              }, {
+                level: 7,
+                enabled: false,
+                dataLabels: {
+                  enabled: false,
+                },
+                levelSize: {
+                  value: 0
+                },
+                
               },]
           
             }],

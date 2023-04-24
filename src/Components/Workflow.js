@@ -50,21 +50,21 @@ const Workflow = ({ dataset, format }) => {
                     setMessage(activeSteps[activeSteps.length -1]?.message || null);
                 }
                 
-                if(currentStep.status === 'queued'){
+                if(currentStep?.status === 'queued'){
                     setStatus('wait')
-                } else if(currentStep.status === 'processing'){
+                } else if(currentStep?.status === 'processing'){
                     setStatus('process')
-                } else if(currentStep.status === 'finished'){
+                } else if(currentStep?.status === 'finished'){
                     setStatus('finish')
-                } else if(currentStep.status === 'failed'){
+                } else if(currentStep?.status === 'failed'){
                     setStatus('error')
                 } else {
                     setStatus(null)
                 }
 
-                if(!isNaN(currentStep.total) && Number(currentStep.total) > 0 && !isNaN(currentStep.progress) &&  Number(currentStep.progress)){
-                    console.log((Number(currentStep.progress)/Number(currentStep.total) * 100))
-                    setPercent(Number(currentStep.progress)/Number(currentStep.total) * 100)
+                if(!isNaN(currentStep?.total) && Number(currentStep?.total) > 0 && !isNaN(currentStep?.progress) &&  Number(currentStep?.progress)){
+                    console.log((Number(currentStep?.progress)/Number(currentStep?.total) * 100))
+                    setPercent(Number(currentStep?.progress)/Number(currentStep?.total) * 100)
                 } else {
                     setPercent(null)
                 }
