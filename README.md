@@ -2,6 +2,7 @@
 
 This is the user interface for a tool that converts OTU/ASV tables in tsv and xlsx to [BIOM format](https://biom-format.org/).
 The generated BIOM files can be converted to [Darwin core](https://dwc.tdwg.org/) and published to https://www.gbif.org/.
+It works on top of [edna-tool-backend](https://github.com/gbif/edna-tool-backend).
 
 ## Overall idea
 * Web-based interface/tool that lets researchers (or other) publish an eDNA metabarcoding dataset to GBIF
