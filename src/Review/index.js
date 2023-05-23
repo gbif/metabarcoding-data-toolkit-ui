@@ -27,7 +27,7 @@ const Review = ({dataset}) => {
 
   const [selectedSample, setSelectedSample] = useState(null)
   const [ordination, setOrdination] = useState(null)
-  const [ordinartionPromise, setOrdinationPromise] = useState(Promise.resolve())
+  const [ordinationPromise, setOrdinationPromise] = useState(Promise.resolve())
 
   const [loading, setLoading] = useState(false)
 
@@ -100,7 +100,7 @@ console.log(selectedSample)
 
   const getOrdination = async (key) => {
     try {
-      const status = await getPromiseState(ordinartionPromise)
+      const status = await getPromiseState(ordinationPromise)
       if(status === "pending"){
         return;
       }

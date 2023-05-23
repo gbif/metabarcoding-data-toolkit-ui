@@ -71,7 +71,7 @@ const UserMenu = ({login, user, logout}) => {
         name: user.userName,
         avatar: `/_palettes/${imgNr}.png`,
       });
-      refreshUserHdl = setInterval(refreshLogin, 900000);
+      refreshUserHdl.current = setInterval(refreshLogin,  900000 );
     } else {
       if (refreshUserHdl.current) {
         clearInterval(refreshUserHdl.current);

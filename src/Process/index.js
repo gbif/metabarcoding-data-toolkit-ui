@@ -3,13 +3,17 @@ import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
-import { Row, Col, Alert, Button, Timeline, Progress, Statistic, Space, Typography, List, message } from "antd"
-import { CheckCircleOutlined, ClockCircleOutlined, DownloadOutlined } from '@ant-design/icons';
+import { Row, Col, Alert, Button, Timeline, Progress, Statistic, Space, Typography, List, Checkbox, message } from "antd"
+import { CheckCircleOutlined, ClockCircleOutlined, DownloadOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import FilesAvailable from '../Components/FilesAvailable'
 import config from "../config";
 import withContext from "../Components/hoc/withContext";
 import { refreshLogin } from "../Auth/userApi";
 import { axiosWithAuth } from "../Auth/userApi";
+import {getPromiseState} from "../Util/promises"
+import { setAnimation } from "highcharts";
+const POLLING_INTERVAL = 1000;
+const MAX_POLLING_INTERVAL = 10000;
 const { Title } = Typography;
 const DataUpload = ({ user,
     login,
@@ -22,24 +26,19 @@ const DataUpload = ({ user,
     const [error, setError] = useState(null)
     const [failed, setFailed] = useState(false);
     const [finished, setFinished] = useState(false);
-
-    let hdl = useRef();
-    let refreshUserHdl = useRef();
+    const [validationIssues, setValidationIssues] = useState([])
+    const [showProcessingErrors, setShowProcessingErrors] = useState(false)
+    const [assignTaxonomy, setAssignTaxonomy] = useState(dataset?.assignTaxonomy || false)
+ //    let hdl = useRef();
+  //  let refreshUserHdl = useRef();
 
     useEffect(() => {
-        return () => {
-            if (hdl.current) {
-                clearInterval(hdl.current);
-            }
-            if (refreshUserHdl.current) {
-                clearInterval(refreshUserHdl.current);
-            }
-        };
-    }, [])
+       
+    }, [dataset?.assignTaxonomy])
 
     useEffect(() => {
         
-        setFailed(false)
+       /*  setFailed(false)
         setFinished(false)
         if (!!dataset?.steps) {
             const isFinished = dataset.steps[dataset.steps.length - 1].status === 'finished';
@@ -50,11 +49,23 @@ const DataUpload = ({ user,
                 if (hdl.current) {
                     clearInterval(hdl.current);
                 }
-                hdl.current = setInterval(() => getData(dataset?.id, hdl.current), 5000);
+                hdl.current = setInterval(() => getData(dataset?.id, hdl.current), 1000);
             }
-        } 
+        }  */
+        if(dataset?.id && dataset?.steps /* && !processDatasetID */){
+           // setProcessDatasetID(dataset?.id)
+            subscribe()
+           
+        }
 
-    }, [dataset]);
+    }, [dataset?.id]);
+
+    useEffect(() =>{
+
+        if(dataset){
+            validate(dataset)
+        }
+    },[dataset?.mapping])
 
 
     const isValidForProcessing = () => {
@@ -65,45 +76,113 @@ const DataUpload = ({ user,
         }
     }
 
+    const validate = async (dataset) => {
+        try {
+            let errors = []
+            const {mapping, sampleHeaders, taxonHeaders} = dataset;
+            const taxonIdMapping = mapping?.taxa?.id;
+            const sampleIdMapping = mapping?.samples?.id;
+            if(!taxonIdMapping && !taxonHeaders?.includes['id']){
+                errors.push("There is no 'id' column in the taxon file and no other column has been marked as the identifier ('id')")
+            }
+            if(!sampleIdMapping && !sampleHeaders?.includes['id']){
+                errors.push("There is no 'id' column in the sample file and no other column has been marked as the identifier ('id')")
 
-    const processData = async key => {
+            }
+
+            setValidationIssues(errors)
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const displayProcessingWarnings = () => {
+
+        try {
+            const {processingErrors} = dataset;
+
+        } catch (error) {
+            
+        }
+    }
+    const processData = async () => {
         if (isValidForProcessing()) {
             setFailed(false)
             setFinished(false)
             try {
-                const processRes = await axiosWithAuth.post(`${config.backend}/dataset/${key}/process`);
+                const processRes = await axiosWithAuth.post(`${config.backend}/dataset/${dataset?.id}/process${assignTaxonomy ? '?assignTaxonomy=true':''}`);
                 message.info("Processing data");
 
-                hdl.current = setInterval(() => getData(key, hdl.current), 2000);
-                refreshUserHdl = setInterval(refreshLogin, 900000);
-
+               // hdl.current = setInterval(() => getData(key, hdl.current), 1000);
+               // refreshUserHdl = setInterval(refreshLogin, 900000);
+                subscribe()
             } catch (error) {
                 setError(error)
             }
 
         }
     }
-    const getData = async (key, hdl) => {
-        try {
-            setLoading(true)
-            const res = await axiosWithAuth.get(`${config.backend}/dataset/${key}/process`)
-           // setData(res?.data)
-            setDataset(res?.data)
-            setLoading(false)
-            const isFinished = res?.data?.steps[res?.dataset?.steps.length - 1].status === 'finished';
-            const isFailed = !!res?.data?.steps.find(s => s.status === 'failed');
-            if (hdl && (isFinished || isFailed)) {
-                clearInterval(hdl);
-            }
-            setFailed(isFailed)
-            setFinished(isFinished)
 
-
-        } catch (error) {
-            setLoading(false)
-
+    const getPollingInterval = (_dataset) => {
+        if(!_dataset?.summary?.sampleCount){
+            return POLLING_INTERVAL;
+        } else if(_dataset?.summary?.sampleCount && !_dataset?.summary?.taxonCount){
+            return Math.max(POLLING_INTERVAL, _dataset?.summary?.sampleCount)
+        } else {
+            
+            const interval = Math.max(POLLING_INTERVAL, Math.max(MAX_POLLING_INTERVAL, Math.round(_dataset?.summary?.sampleCount * _dataset?.summary?.taxonCount / 100000)))
+          //  console.log(interval)
+            return interval;
         }
+
     }
+
+
+    const subscribe = async (interval = POLLING_INTERVAL) => {
+        try {
+            let res = await axiosWithAuth.get(`${config.backend}/dataset/${dataset?.id}/process`);
+      
+        if (res.status === 502) {
+          // Status 502 is a connection timeout error,
+          // may happen when the connection was pending for too long,
+          // and the remote server or a proxy closed it
+          // let's reconnect
+         // await subscribe();
+        } else if (res.status !== 200) {
+          // An error - let's show it
+          console.log(res)
+         // showMessage(response.statusText);
+          // Reconnect in one second
+          await new Promise(resolve => setTimeout(resolve, interval));
+          await subscribe(getPollingInterval(dataset));
+        } else {
+          // Get and show the message
+          const isFinished = res?.data?.steps && res?.data?.steps[res?.data?.steps?.length - 1]?.status === 'finished';
+          const isFailed = res?.data?.steps && !!res?.data?.steps.find(s => s.status === 'failed');
+          if(res?.data?.assignTaxonomy){
+            setAssignTaxonomy(res?.data?.assignTaxonomy)
+
+          }
+          setFailed(isFailed)
+          setFinished(isFinished)
+          setDataset(res?.data)
+          if(!(isFinished || isFailed)){
+            await new Promise(resolve => setTimeout(resolve, interval));
+            await subscribe(getPollingInterval(res?.data));
+          }
+
+          if((isFailed || isFinished) && res?.data?.processingErrors?.missingSamples){
+            setShowProcessingErrors(true)
+            
+          }
+         
+        } 
+        } catch (error) {
+            console.log(error)
+        }
+       
+      }
 
     const getStatusColor = (status) => {
         switch (status) {
@@ -121,20 +200,26 @@ const DataUpload = ({ user,
     return (
         <Layout>
             <PageContent>
-                {error && <Alert type="error" >{error}</Alert>}
+                {error && <Alert style={{marginBottom: "10px"}} type="error" >{error}</Alert>}
+                {validationIssues?.length > 0 && <Alert style={{marginBottom: "10px"}} message={<ul style={{listStyle: 'none'}}>
+                    {validationIssues.map(i => <li key={i}>{i}</li>)}
+                </ul>} type="error" showIcon/>}
+                {showProcessingErrors && <Alert closable onClose={() => setShowProcessingErrors(false)} style={{marginBottom: "10px"}} message={`These samples are not present in the OTU table: ${dataset?.processingErrors?.missingSamples?.join(', ')}`} type="warning" showIcon/>}
                 <Row>
                     <Col span={6}>
                         <Button style={{ marginBottom: "24px" }} onClick={() => processData(dataset?.id)} disabled={!isValidForProcessing() || (!!dataset?.steps && !(failed || finished))} loading={!!dataset?.steps && !(failed || finished)}>Process data</Button>
+                        <Checkbox disabled={!!dataset?.steps && !(failed || finished)} style={{marginLeft: "10px"}} value={assignTaxonomy} onChange={(e) => setAssignTaxonomy(e?.target?.checked)}>Assign taxonomy </Checkbox>
 
                         {dataset?.steps && dataset?.steps?.length > 0 && <Timeline
                             items={
                                 dataset?.steps.map((s, idx) => ({
-                                    dot: s.status === "finished" ? <CheckCircleOutlined /> : s.status === "pending" ? <ClockCircleOutlined /> : null,
+                                    dot: s.status === "finished" ? <CheckCircleOutlined /> : s.status === "failed" ? <ExclamationCircleOutlined /> : s.status === "pending" ? <ClockCircleOutlined /> : null,
                                     color: getStatusColor(s.status),
                                     children: (s.status === "finished" && idx === dataset?.steps?.length - 1) ? "Finished" :
+                                    (s.status === "failed" ) ? "Failed" :
                                         <>
-                                            {`${s.status === "processing" ? s.message : s.messagePending}${s.subTask && idx === dataset?.steps.length - 1 ? " - " + s.subTask : ""}`}
-                                            {s.total && s.progress && s.status === "processing" &&
+                                            {`${s.status === "processing" ? s.message : s.messagePending}${(s.subTask && idx === dataset?.steps.length - 1) ? " - " + s.subTask : ""}`}
+                                            {s.status === "processing" && (!isNaN(s.total) && s.total !==0 && s.progress ) &&
                                                 <div
                                                     style={{
                                                         width: 200,

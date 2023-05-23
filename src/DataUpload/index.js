@@ -3,7 +3,8 @@ import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation, useMatch } from "react-router-dom";
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
-import { Row, Col, Alert, Button, List, Typography, Popconfirm, Tag, message } from "antd"
+import _ from "lodash"
+import { Row, Col, Alert, Button, List, Typography, Popconfirm, Tag, theme, message } from "antd"
 import {
     CheckCircleOutlined,
     CloseCircleOutlined,
@@ -13,6 +14,7 @@ import config from "../config";
 import withContext from "../Components/hoc/withContext";
 import { refreshLogin } from "../Auth/userApi";
 import { axiosWithAuth } from "../Auth/userApi";
+const { useToken } = theme;
 
 const { Text } = Typography;
 
@@ -22,6 +24,7 @@ const DataUpload = ({ user,
     format,
     dataset,
     setDataset }) => {
+        const { token } = useToken();
 
     const match = useMatch('/dataset/:key/upload');
     const navigate = useNavigate()
@@ -126,7 +129,10 @@ const DataUpload = ({ user,
                             itemLayout="horizontal"
                             header={<Text>Files uploaded</Text>}
                             bordered
-                            dataSource={dataset?.files?.files}
+                            dataSource={ _.isArray(dataset?.files?.invalidErrors) ? dataset?.files?.files.map(f => {
+                                f.errors = dataset?.files?.invalidErrors?.find(e => e.file === f?.name)
+                                return f;
+                            }): dataset?.files?.files}
                             renderItem={(file) => (
                                 <List.Item
                                     actions={[<Popconfirm
@@ -138,8 +144,11 @@ const DataUpload = ({ user,
                                         cancelText="No"><Button type="link">Delete</Button></Popconfirm>]}
                                 >
                                     <List.Item.Meta
-                                        title={file.name}
-                                        description={`${file?.mimeType} - ${Math.round(file.size * 10) / 10} mb`}
+                                        title={<span style={file?.errors ? { color: token.colorError }: null}>{file.name}</span>}
+                                        description={<>
+                                        {`${file?.mimeType} - ${Math.round(file.size * 10) / 10} mb`}
+                                        {file?.errors && <Alert  message={file?.errors.message} type="error" showIcon />}
+                                        </>}
                                     />
                                 </List.Item>
                             )}

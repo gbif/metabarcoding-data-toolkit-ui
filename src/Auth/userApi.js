@@ -8,9 +8,9 @@ export const axiosWithAuth = axios.create();
 axiosWithAuth.interceptors.response.use(
   (res) => { 
     // extend login
-    if(res?.headers?.token){
-      axiosWithAuth.defaults.headers.common["Authorization"] = `Bearer ${res?.headers?.token}`;
-      storeToken(res?.headers?.token)
+    if(res?.data?.token){
+      axiosWithAuth.defaults.headers.common["Authorization"] = `Bearer ${res?.data?.token}`;
+      storeToken(res?.data?.token)
     }
     return res;
   });
