@@ -143,7 +143,7 @@ const Publish = ({ setDataset, dataset }) => {
                     </Col>}
         <Col flex="auto"></Col>
         <Col>
-          <Button loading={registering} disabled={registering || !finished || !!gbifKey} onClick={() => registerData(dataset?.id)} >Publish to GBIF</Button>
+          <Button loading={registering}  disabled={registering || !finished }  onClick={() => registerData(dataset?.id)} >Publish to GBIF</Button>
         </Col>
         <Col>
           {gbifKey && <Button type="link" href={`https://www.gbif-uat.org/dataset/${gbifKey}`}>Dataset at gbif.org</Button>}

@@ -89,11 +89,16 @@ const LeafletMap = ({geoJson, onFeatureClick, selectedSample}) => {
     {extent.length > 0 &&  
     <MapContainer style={css}  center={[0, 0]} zoom={1} scrollWheelZoom={false} whenReady={e => {
             /* mapRef = e.target; */
-            e.target.flyToBounds([
-              [extent[1],extent[0]],
-              [extent[3], extent[2]]
-                
-              ]);
+            try {
+              e.target.flyToBounds([
+                [extent[1],extent[0]],
+                [extent[3], extent[2]]
+                  
+                ]);
+            } catch (error) {
+              console.log(error)
+            }
+            
           }}>
           <MapContent geoJson={geoJson} onFeatureClick={onFeatureClick} selectedSample={selectedSample} />
     <TileLayer

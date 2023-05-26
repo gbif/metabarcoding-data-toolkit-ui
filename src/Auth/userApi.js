@@ -41,6 +41,7 @@ export const refreshLogin = async () => {
     return response?.data;
   } catch (err) {
     logout()
+    throw err
   }
 }
 

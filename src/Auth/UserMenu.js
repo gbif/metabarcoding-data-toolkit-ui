@@ -56,7 +56,7 @@ const MenuContent = ({logout}) => {
 </Menu>
 } 
 
-const UserMenu = ({login, user, logout}) => {
+const UserMenu = ({login, user, logout, setUser}) => {
   
   const [visible, setVisible] = useState(false)
   const [invalid, setInvalid] = useState(false)
@@ -71,7 +71,16 @@ const UserMenu = ({login, user, logout}) => {
         name: user.userName,
         avatar: `/_palettes/${imgNr}.png`,
       });
-      refreshUserHdl.current = setInterval(refreshLogin,  900000 );
+      refreshUserHdl.current = setInterval(
+        () => {
+          refreshLogin()
+            .then(usr => setUser(usr))
+            .catch(err => {
+              console.log(err)
+              setUser(null)
+            })
+        }
+        ,  900000 );
     } else {
       if (refreshUserHdl.current) {
         clearInterval(refreshUserHdl.current);
@@ -160,10 +169,11 @@ const UserMenu = ({login, user, logout}) => {
   
 }
 
-const mapContextToProps = ({ user, login, logout }) => ({
+const mapContextToProps = ({ user, login, logout, setUser}) => ({
   user,
   login,
-  logout
+  logout,
+  setUser
 });
 
 export default withContext(mapContextToProps)(UserMenu);

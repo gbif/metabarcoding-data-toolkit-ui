@@ -27,6 +27,7 @@ class ContextProvider extends React.Component {
      user: null, //getTokenUser(),
     dataset: null,
     setDataset: (dataset) => this.setState({dataset}),
+    setUser: (user) => this.setState({user}),
     login: (values) => {
       return this.login(values);
     },

@@ -8,11 +8,14 @@ import { Row, Col, Alert, Button, List, Typography, Popconfirm, Tag, theme, mess
 import {
     CheckCircleOutlined,
     CloseCircleOutlined,
+    DeleteOutlined,
+    EyeOutlined,
+    DownloadOutlined
 } from '@ant-design/icons';
 import Uploader from "./Upload"
+import FileView from "./FileView";
 import config from "../config";
 import withContext from "../Components/hoc/withContext";
-import { refreshLogin } from "../Auth/userApi";
 import { axiosWithAuth } from "../Auth/userApi";
 const { useToken } = theme;
 
@@ -24,25 +27,19 @@ const DataUpload = ({ user,
     format,
     dataset,
     setDataset }) => {
-        const { token } = useToken();
+    const { token } = useToken();
 
     const match = useMatch('/dataset/:key/upload');
     const navigate = useNavigate()
     const [loading, setLoading] = useState(false)
-    const [data, setData] = useState(null);
     const [error, setError] = useState(null)
     const [valid, setValid] = useState(false);
-    const [failed, setFailed] = useState(false);
-    const [finished, setFinished] = useState(false);
     const [dataFormat, setDataFormat] = useState(null)
-    let refreshUserHdl = useRef();
-
+    const [selectedFile, setSelectedFile] = useState(null)
 
     useEffect(() => {
         const key = match?.params?.key;
         console.log(match?.params?.key)
-        setFailed(false)
-        setFinished(false)
         if (!dataset && !!key) {
             // this should check that the backend thinks it understands the uploaded files
             validate(key)
@@ -59,6 +56,19 @@ const DataUpload = ({ user,
     }, [dataset, match?.params?.key]);
 
     useEffect(() => { }, [dataFormat])
+
+    useEffect(() => {
+        const keydown = (e) => {
+            if (e?.key === 'Escape' && selectedFile) {
+                setSelectedFile(null)
+            }
+        }
+        document.addEventListener('keydown', keydown)
+
+        return () => {
+            document.removeEventListener('keydown', keydown)
+        }
+    }, [selectedFile])
 
     const validate = async (key) => {
         try {
@@ -92,7 +102,7 @@ const DataUpload = ({ user,
         <Layout>
             <PageContent>
                 {error && <Alert type="error" >{error}</Alert>}
-                <Row>
+                {selectedFile ? <FileView file={selectedFile} dismiss={() => setSelectedFile(null)} /> : <Row>
 
                     <Col span={12}>
 
@@ -129,25 +139,28 @@ const DataUpload = ({ user,
                             itemLayout="horizontal"
                             header={<Text>Files uploaded</Text>}
                             bordered
-                            dataSource={ _.isArray(dataset?.files?.invalidErrors) ? dataset?.files?.files.map(f => {
+                            dataSource={_.isArray(dataset?.files?.invalidErrors) ? dataset?.files?.files.map(f => {
                                 f.errors = dataset?.files?.invalidErrors?.find(e => e.file === f?.name)
                                 return f;
-                            }): dataset?.files?.files}
+                            }) : dataset?.files?.files}
                             renderItem={(file) => (
                                 <List.Item
-                                    actions={[<Popconfirm
-                                        placement="leftTop"
-                                        title={`Are you sure you want to delete this file?`}
-                                        description={file.name}
-                                        onConfirm={() => deleteFile(file)}
-                                        okText="Yes"
-                                        cancelText="No"><Button type="link">Delete</Button></Popconfirm>]}
+                                    actions={[
+                                        <Button type="link" onClick={() => setSelectedFile(file)}><EyeOutlined /></Button>,
+                                        <Button type="link"  download={file.name} href={`${config.backend}/dataset/${dataset?.id}/uploaded-file/${file.name}`}><DownloadOutlined /></Button>,
+                                        <Popconfirm
+                                            placement="leftTop"
+                                            title={`Are you sure you want to delete this file?`}
+                                            description={file.name}
+                                            onConfirm={() => deleteFile(file)}
+                                            okText="Yes"
+                                            cancelText="No"><Button type="link"><DeleteOutlined /></Button></Popconfirm>]}
                                 >
                                     <List.Item.Meta
-                                        title={<span style={file?.errors ? { color: token.colorError }: null}>{file.name}</span>}
+                                        title={<span style={file?.errors ? { color: token.colorError } : null}>{file.name}</span>}
                                         description={<>
-                                        {`${file?.mimeType} - ${Math.round(file.size * 10) / 10} mb`}
-                                        {file?.errors && <Alert  message={file?.errors.message} type="error" showIcon />}
+                                            {`${file?.mimeType} - ${Math.round(file.size * 10) / 10} mb`}
+                                            {file?.errors && <Alert message={file?.errors.message} type="error" showIcon />}
                                         </>}
                                     />
                                 </List.Item>
@@ -155,7 +168,7 @@ const DataUpload = ({ user,
                         />}
 
                     </Col>
-                </Row>
+                </Row>}
             </PageContent>
         </Layout>
     );
