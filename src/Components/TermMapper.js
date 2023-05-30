@@ -2,6 +2,7 @@ import { useEffect, useState, useReducer } from "react";
 import { Table, Popover, Typography, Row, Col, theme, Button, message } from "antd"
 import HeaderSelect from "./HeaderSelect";
 import DefaultValueSelect from "./DefaultValueSelect";
+import DwcTermSelect from "./DwcTermSelect";
 import { InfoCircleOutlined } from '@ant-design/icons';
 import withContext from "./hoc/withContext"
 import config from "../config";
@@ -170,6 +171,20 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
         }
     )
 
+    const getDeleteRowColumn = (type) => (
+        {
+            title: 'Action',
+            key: 'action',
+            render: (text, term) => !!term.isRequired ? null : <Button type="link" onClick={() => {
+                if(type === 'taxon'){
+                    setTaxonTerms(taxonTerms.filter(t => t?.name !== term?.name))
+                } else if(type === 'sample'){
+                    setSampleTerms(sampleTerms.filter(t => t?.name !== term?.name))
+                }
+            }}>Delete</Button>,
+          }
+    )
+
     return <>
         <Row>
             <Col flex="auto"></Col>
@@ -177,21 +192,26 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
         </Row>
         <><Title level={5}>Sample</Title>
             <Table
-                dataSource={sampleTerms} columns={[...columns, getMappingColumn(dataset?.sampleHeaders, 'sample'), getDefaultValueColumn()]}
+                dataSource={sampleTerms} columns={[...columns, getMappingColumn(dataset?.sampleHeaders, 'sample'), getDefaultValueColumn(), getDeleteRowColumn('sample')]}
                 size="small"
                 showHeader={false}
                 pagination={false}
             />
+            
+            <DwcTermSelect style={{width: 500, marginTop: "10px"}} placeholder={"Add mapping for another sample field"} dwcTerms={dwcTerms}  onSelect={val => setSampleTerms([...sampleTerms, termMap.get(val)])}/>
         </>
 
         <><Title level={5} style={{ marginTop: '10px' }}>Taxon</Title>
 
             <Table
-                dataSource={taxonTerms} columns={[...columns, getMappingColumn(dataset?.taxonHeaders, 'taxon'), getDefaultValueColumn()]}
+                dataSource={taxonTerms} columns={[...columns, getMappingColumn(dataset?.taxonHeaders, 'taxon'), getDefaultValueColumn(), getDeleteRowColumn('taxon')]}
                 size="small"
                 showHeader={false}
                 pagination={false}
             />
+            
+            <DwcTermSelect style={{width: 500, marginTop: "10px"}} placeholder={"Add mapping for another Taxon/ASV field"} dwcTerms={dwcTerms}  onSelect={val => setTaxonTerms([...taxonTerms, termMap.get(val)])}/>
+
         </>
     </>
 

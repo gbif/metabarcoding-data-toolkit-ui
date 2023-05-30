@@ -16,7 +16,7 @@ const FileView = ({ file, dismiss }) => {
       <Col span={20}>
         <Descriptions  >
           <Descriptions.Item label={`File`}>{file?.name}</Descriptions.Item>
-          <Descriptions.Item label={`Delimiter`}>{file?.properties?.delimiter}</Descriptions.Item>
+          <Descriptions.Item label={`Delimiter`}>{file?.properties?.delimiter === '\t' ? "\\t" : file?.properties?.delimiter}</Descriptions.Item>
           <Descriptions.Item label={`Number of columns`}>{file?.properties?.numColumns}</Descriptions.Item>
 
         </Descriptions>
