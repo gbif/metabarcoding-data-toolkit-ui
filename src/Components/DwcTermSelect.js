@@ -1,9 +1,10 @@
 import { Select, Typography , Space, Button} from 'antd';
 import { useState } from 'react';
+import _ from 'lodash';
 import linkifyHtml from 'linkify-html';
 const { Text } = Typography;
 
-const DwcTermSelect = ({ dwcTerms, onSelect, placeholder, style }) => {
+const DwcTermSelect = ({ dwcTerms, filterToGroups, omitGroups, onSelect, placeholder, style }) => {
     const [selected, setSelected] = useState(null)
    
     return <div style={style || {width: "500px"}}><Space.Compact
@@ -30,8 +31,11 @@ const DwcTermSelect = ({ dwcTerms, onSelect, placeholder, style }) => {
       Object.keys(dwcTerms).map(k => (
           {
               value: k, description: dwcTerms[k]?.['dc:description'],
-              label: k
-          }))}
+              label: k,
+              group: dwcTerms[k]?.group
+          }))
+          .filter(o => _.isArray(omitGroups) ? !omitGroups.includes(o?.group) : true)
+          .filter(o => _.isArray(filterToGroups) ? filterToGroups.includes(o?.group) : true)}
 />
     <Button disabled={!selected} onClick={() => {
         if(typeof onSelect === 'function'){

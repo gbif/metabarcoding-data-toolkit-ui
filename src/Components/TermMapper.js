@@ -11,9 +11,6 @@ import {useNavigate, useMatch} from 'react-router-dom'
 const { useToken } = theme;
 const { Title } = Typography
 
-/**
- * Todo: Allow user to search for remaining terms they would like to add (i.e. non mandatory and without a direct match in their own headers)
- */
 
 const reducer = (state, action) => {
     switch (action.type) {
@@ -198,7 +195,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
                 pagination={false}
             />
             
-            <DwcTermSelect style={{width: 500, marginTop: "10px"}} placeholder={"Add mapping for another sample field"} dwcTerms={dwcTerms}  onSelect={val => setSampleTerms([...sampleTerms, termMap.get(val)])}/>
+            <DwcTermSelect style={{width: 500, marginTop: "10px"}} placeholder={"Add mapping for another sample field"} dwcTerms={dwcTerms} omitGroups={['Taxon']} onSelect={val => setSampleTerms([...sampleTerms, termMap.get(val)])}/>
         </>
 
         <><Title level={5} style={{ marginTop: '10px' }}>Taxon</Title>
@@ -210,7 +207,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
                 pagination={false}
             />
             
-            <DwcTermSelect style={{width: 500, marginTop: "10px"}} placeholder={"Add mapping for another Taxon/ASV field"} dwcTerms={dwcTerms}  onSelect={val => setTaxonTerms([...taxonTerms, termMap.get(val)])}/>
+            <DwcTermSelect style={{width: 500, marginTop: "10px"}} placeholder={"Add mapping for another Taxon/ASV field"} dwcTerms={dwcTerms} filterToGroups={['Taxon']}  onSelect={val => setTaxonTerms([...taxonTerms, termMap.get(val)])}/>
 
         </>
     </>

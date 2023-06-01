@@ -20,7 +20,7 @@ class ContextProvider extends React.Component {
   state = {
     dwcTerms: {},
     requiredTerms: {},
-    defaultTerms: {}, // terms that may have a default value
+    defaultTerms: [], // terms that may have a default value
     license: {},
     format: {},
      country,
