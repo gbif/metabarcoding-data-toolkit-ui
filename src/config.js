@@ -4,10 +4,9 @@ const config = {
     authWebservice: 'http://localhost:9000/auth'
 }
 
-
 const prod = {
-    backend: 'http://localhost:9000',
-    authWebservice: 'http://localhost:9000/auth'
+    backend: '',
+    authWebservice: '/auth'
 }
 
-export default config; //prod;
+export default prod;
