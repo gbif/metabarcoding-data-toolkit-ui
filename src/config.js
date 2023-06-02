@@ -5,7 +5,7 @@ const config = {
 }
 
 const prod = {
-    backend: '',
+    backend: '/service',
     authWebservice: '/auth'
 }
 
