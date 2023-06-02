@@ -5,8 +5,8 @@ const config = {
 }
 
 const prod = {
-    backend: '/service',
-    authWebservice: '/auth'
+    backend: 'https://edna-tool.gbif-uat.org/service',
+    authWebservice: 'https://edna-tool.gbif-uat.org/service/auth'
 }
 
 export default prod;
