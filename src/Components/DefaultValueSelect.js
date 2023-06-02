@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { Row, Col, Typography, Select, Input, theme } from "antd"
-
+import OntologySelect from "./OntologySelect";
 const { Text, Divider, Link } = Typography;
 
-const DefaultValueSelect = ({style = { width: 300 }, onChange, term, vocabulary = null, initialValue }) => {
+const DefaultValueSelect = ({style = { width: 300 }, onChange, term, vocabulary = null, ontology, initialValue }) => {
     const [value, setValue] = useState(initialValue || null)
     useEffect(() => {
         
@@ -22,7 +22,7 @@ const DefaultValueSelect = ({style = { width: 300 }, onChange, term, vocabulary 
         setValue(val)
     }}>
         {vocabulary?.map(h => <Select.Option key={h} value={h}>{h}</Select.Option>)}
-    </Select> : 
+    </Select> : ontology ? <OntologySelect ontology={ontology} onChange={onChange} initialValue={initialValue} term={term}/> :
     <Input value={value} style={style} placeholder="Add default value" onChange={e => {
         setValue(e?.target?.value)
     } } />}

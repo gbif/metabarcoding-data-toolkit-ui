@@ -35,7 +35,7 @@ const HeaderSelect = ({ headers, style = { width: 300 }, onChange, term , val}) 
         return !!header && header.toLowerCase() === term?.name?.toLowerCase()
     }
 
-    return <><Select style={style} value={value} onChange={val => {
+    return <><Select style={style} value={value} allowClear onChange={val => {
         setValue(val)
     }}>
         {headers?.map(h => <Select.Option key={h} value={h}>{h}</Select.Option>)}

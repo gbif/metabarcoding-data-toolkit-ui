@@ -45,13 +45,15 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
         setTermMap(new Map(Object.keys(dwcTerms).map(t => [t, dwcTerms[t]])))
         if (termMap.size > 0 && requiredTerms?.sample && dataset?.sampleHeaders) {
             const reqSampleTerms = new Set(requiredTerms?.sample.map(t => t.name))
+            const otherFieldsAndDefaultVals = new Set([...dataset?.sampleHeaders, ...(dataset?.mapping?.defaultValues ? Object.keys(dataset?.mapping?.defaultValues): [])])
+            console.log(...otherFieldsAndDefaultVals)
             setSampleTerms([...requiredTerms?.sample.map(t => {
                 if (t.name !== 'id' && termMap.has(t.name)) {
                     return { ...t, ...termMap.get(t.name) }
                 } else {
                     return t
                 }
-            }), ...dataset?.sampleHeaders?.filter(h => !reqSampleTerms.has(h) && termMap.has(h)).map(h => termMap.get(h))])
+            }), ...[...otherFieldsAndDefaultVals].filter(h => !reqSampleTerms.has(h) && termMap.has(h)).map(h => termMap.get(h))])
         }
         if (termMap.size > 0 && requiredTerms?.taxon && dataset?.taxonHeaders) {
             const reqTaxonTerms = new Set(requiredTerms?.taxon.map(t => t.name))
@@ -118,7 +120,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
 
     const columns = [{
         width: 250,
-        title: 'Name',
+        title: 'Term Name',
         dataIndex: 'name',
         key: 'name',
         render: (text, term) => <>
@@ -129,7 +131,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
     ]
     const getMappingColumn = (headers,type) => (
         {
-            title: 'Mapping',
+            title: 'Map to field',
             dataIndex: 'mapping',
             key: 'mapping',
             width: "30%",
@@ -159,7 +161,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
             title: 'Default value',
             dataIndex: 'defaultValue',
             key: 'defaultValue',
-            render: (text, term) => defaultTermMap.has(term?.name) ? <DefaultValueSelect initialValue={state?.defaultValues?.[term?.name]} vocabulary={defaultTermMap.get(term?.name)?.vocabulary} term={term} onChange={ val => {
+            render: (text, term) => defaultTermMap.has(term?.name) ? <DefaultValueSelect initialValue={state?.defaultValues?.[term?.name]} vocabulary={defaultTermMap.get(term?.name)?.vocabulary} ontology={defaultTermMap.get(term?.name)?.ontology} term={term} onChange={ val => {
                
                     dispatch({ type: 'createDefaultValue', payload: {term: term.name, value: val} })
                 
@@ -191,7 +193,6 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
             <Table
                 dataSource={sampleTerms} columns={[...columns, getMappingColumn(dataset?.sampleHeaders, 'sample'), getDefaultValueColumn(), getDeleteRowColumn('sample')]}
                 size="small"
-                showHeader={false}
                 pagination={false}
             />
             
@@ -203,7 +204,6 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
             <Table
                 dataSource={taxonTerms} columns={[...columns, getMappingColumn(dataset?.taxonHeaders, 'taxon'), getDefaultValueColumn(), getDeleteRowColumn('taxon')]}
                 size="small"
-                showHeader={false}
                 pagination={false}
             />
             
