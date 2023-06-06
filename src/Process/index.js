@@ -8,10 +8,7 @@ import { CheckCircleOutlined, ClockCircleOutlined, DownloadOutlined, Exclamation
 import FilesAvailable from '../Components/FilesAvailable'
 import config from "../config";
 import withContext from "../Components/hoc/withContext";
-import { refreshLogin } from "../Auth/userApi";
 import { axiosWithAuth } from "../Auth/userApi";
-import {getPromiseState} from "../Util/promises"
-import { setAnimation } from "highcharts";
 const POLLING_INTERVAL = 1000;
 const MAX_POLLING_INTERVAL = 10000;
 const { Title } = Typography;
@@ -114,8 +111,7 @@ const DataUpload = ({ user,
                 const processRes = await axiosWithAuth.post(`${config.backend}/dataset/${dataset?.id}/process${assignTaxonomy ? '?assignTaxonomy=true':''}`);
                 message.info("Processing data");
 
-               // hdl.current = setInterval(() => getData(key, hdl.current), 1000);
-               // refreshUserHdl = setInterval(refreshLogin, 900000);
+              
                 subscribe()
             } catch (error) {
                 setError(error)
