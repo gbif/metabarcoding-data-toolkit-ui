@@ -4,10 +4,9 @@ const config = {
     authWebservice: 'http://localhost:9000/auth'
 }
 
-
 const prod = {
-    backend: 'http://localhost:9000',
-    authWebservice: 'http://localhost:9000/auth'
+    backend: 'https://edna-tool.gbif-uat.org/service',
+    authWebservice: 'https://edna-tool.gbif-uat.org/service/auth'
 }
 
-export default config; //prod;
+export default prod;
