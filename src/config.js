@@ -1,12 +1,12 @@
+import environments from "./env.json";
 
-const config = {
-    backend: 'http://localhost:9000',
-    authWebservice: 'http://localhost:9000/auth'
-}
+const domain = window.location.hostname;
 
-const prod = {
-    backend: 'https://edna-tool.gbif-uat.org/service',
-    authWebservice: 'https://edna-tool.gbif-uat.org/service/auth'
-}
+let env = environments.local;
+if (
+  domain.endsWith("edna-tool.gbif-uat.org") 
+) {
+  env = environments.uat;
+} 
 
-export default prod;
+export default env;
