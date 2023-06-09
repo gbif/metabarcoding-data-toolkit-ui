@@ -14,6 +14,7 @@ import {
 } from '@ant-design/icons';
 import Uploader from "./Upload"
 import FileView from "./FileView";
+import WorkBookView from "./WorkBookView";
 import config from "../config";
 import withContext from "../Components/hoc/withContext";
 import { axiosWithAuth } from "../Auth/userApi";
@@ -102,7 +103,11 @@ const DataUpload = ({ user,
         <Layout>
             <PageContent>
                 {error && <Alert type="error" >{error}</Alert>}
-                {selectedFile ? <FileView file={selectedFile} dismiss={() => setSelectedFile(null)} /> : <Row>
+                {(selectedFile && dataset?.files?.format?.startsWith('TSV')) && <FileView file={selectedFile} dismiss={() => setSelectedFile(null)} />} 
+                {(selectedFile && selectedFile?.sheets) && <WorkBookView sheets={selectedFile?.sheets} dismiss={() => setSelectedFile(null)} />} 
+
+                
+                {!selectedFile && <Row>
 
                     <Col span={12}>
 
@@ -146,7 +151,7 @@ const DataUpload = ({ user,
                             renderItem={(file) => (
                                 <List.Item
                                     actions={[
-                                        <Button type="link" onClick={() => setSelectedFile(file)}><EyeOutlined /></Button>,
+                                        <Button type="link" loading={loading} onClick={() => setSelectedFile(file)}><EyeOutlined /></Button>,
                                         <Button type="link"  download={file.name} href={`${config.backend}/dataset/${dataset?.id}/uploaded-file/${file.name}`}><DownloadOutlined /></Button>,
                                         <Popconfirm
                                             placement="leftTop"

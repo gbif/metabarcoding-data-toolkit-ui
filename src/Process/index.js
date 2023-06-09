@@ -79,10 +79,10 @@ const DataUpload = ({ user,
             const {mapping, sampleHeaders, taxonHeaders} = dataset;
             const taxonIdMapping = mapping?.taxa?.id;
             const sampleIdMapping = mapping?.samples?.id;
-            if(!taxonIdMapping && !taxonHeaders?.includes['id']){
+            if(mapping && !taxonIdMapping && !taxonHeaders?.includes['id']){
                 errors.push("There is no 'id' column in the taxon file and no other column has been marked as the identifier ('id')")
             }
-            if(!sampleIdMapping && !sampleHeaders?.includes['id']){
+            if(mapping && !sampleIdMapping && !sampleHeaders?.includes['id']){
                 errors.push("There is no 'id' column in the sample file and no other column has been marked as the identifier ('id')")
 
             }
