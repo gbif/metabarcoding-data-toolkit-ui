@@ -66,8 +66,10 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
             }), ...dataset?.taxonHeaders?.filter(h => !reqTaxonTerms.has(h) && termMap.has(h)).map(h => termMap.get(h))])
         }
 
-        if(defaultTerms){
-            setDefaultTermMap(new Map([...defaultTerms.map(t => [t.name, t])]))
+        if(defaultTerms || dataset?.mapping?.defaultValues){
+
+            let additionalDefaults = !dataset?.mapping?.defaultValues ? [] : Object.keys(dataset?.mapping?.defaultValues).filter(t => termMap.has(t)).map(t => [t, termMap.get(t)])
+            setDefaultTermMap(new Map([...additionalDefaults, ...defaultTerms.map(t => [t.name, t])]))
         }
 
         if(dataset?.mapping){
@@ -161,7 +163,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
             title: 'Default value',
             dataIndex: 'defaultValue',
             key: 'defaultValue',
-            render: (text, term) => defaultTermMap.has(term?.name) ? <DefaultValueSelect initialValue={state?.defaultValues?.[term?.name]} vocabulary={defaultTermMap.get(term?.name)?.vocabulary} ontology={defaultTermMap.get(term?.name)?.ontology} term={term} onChange={ val => {
+            render: (text, term) =>  defaultTermMap.has(term?.name)  ? <DefaultValueSelect initialValue={state?.defaultValues?.[term?.name]} vocabulary={defaultTermMap.get(term?.name)?.vocabulary} ontology={defaultTermMap.get(term?.name)?.ontology} term={term} onChange={ val => {
                
                     dispatch({ type: 'createDefaultValue', payload: {term: term.name, value: val} })
                 

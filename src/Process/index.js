@@ -94,15 +94,7 @@ const DataUpload = ({ user,
         }
     }
 
-    const displayProcessingWarnings = () => {
-
-        try {
-            const {processingErrors} = dataset;
-
-        } catch (error) {
-            
-        }
-    }
+  
     const processData = async () => {
         if (isValidForProcessing()) {
             setFailed(false)

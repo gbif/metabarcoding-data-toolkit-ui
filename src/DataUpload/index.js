@@ -10,11 +10,13 @@ import {
     CloseCircleOutlined,
     DeleteOutlined,
     EyeOutlined,
-    DownloadOutlined
+    DownloadOutlined,
+    FileExcelOutlined
 } from '@ant-design/icons';
 import Uploader from "./Upload"
 import FileView from "./FileView";
 import WorkBookView from "./WorkBookView";
+import Help from "../Components/Help";
 import config from "../config";
 import withContext from "../Components/hoc/withContext";
 import { axiosWithAuth } from "../Auth/userApi";
@@ -110,6 +112,16 @@ const DataUpload = ({ user,
                 {!selectedFile && <Row>
 
                     <Col span={12}>
+
+                        <Button style={{ marginBottom: "10px" }} href="/templates/edna_template.xlsx">Download template <FileExcelOutlined /></Button> 
+                        <Help style={{marginLeft: '8px'}} content={<><span>The template is an Excel workbook with 4 sheets:
+                                <ul>
+                                    <li>OTU_table: a matrix with Sample IDs as column headers and OTU IDs as Row identifiers</li>
+                                    <li>Taxa: This should include the DNA sequence and taxonomic information about the sequence if available</li>
+                                    <li>Sample: Any metadata about the samples, i.e. event date (collection date), decimal latitude and longitude</li>
+                                    <li>Study: This sheet may contain defaults for the whole study such as target gene, primers, standard operating procedures etc.</li>
+                                </ul>
+                            </span></>}/>
 
                         <Uploader datasetKey={match?.params?.key}
                             onError={(e) => { message.error(e?.message) }}
