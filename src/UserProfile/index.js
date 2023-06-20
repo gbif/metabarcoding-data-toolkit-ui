@@ -5,7 +5,7 @@ import { useNavigate, useLocation, useMatch } from "react-router-dom";
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
 import { Row, Col, Button, Result, Typography, List,theme, Skeleton, message } from "antd"
-import { EditOutlined, DownloadOutlined } from '@ant-design/icons';
+import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import config from "../config";
 import FilesAvailable from '../Components/FilesAvailable'
 
@@ -68,10 +68,10 @@ const getDatasets = async (usr) => {
         renderItem={(d) => (
             <List.Item
            
-                actions={[<Button type="link" onClick={() =>  navigate(`/dataset/${d.id}/upload`)}><EditOutlined /></Button>]}
+                actions={[<Button type="link" onClick={() =>  navigate(`/dataset/${d.id}`)}><EyeOutlined /></Button>,<Button type="link" onClick={() =>  navigate(`/dataset/${d.id}/upload`)}><EditOutlined /></Button>]}
             >
                 <List.Item.Meta
-                    title={<a href={`/dataset/${d.id}`} style={{color: token.colorLink}} onClick={() =>  navigate(`/dataset/${d.id}`)}>{d?.metadata?.title || d.id}</a>}
+                    title={d?.metadata?.title || d.id}
                     description={`Samples: ${d?.summary?.sampleCount} - Taxa/ASVs: ${d?.summary?.taxonCount}`}
                 />
             </List.Item>

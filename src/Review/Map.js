@@ -39,7 +39,7 @@ const MapContent = ({geoJson, onFeatureClick, selectedSample}) => {
     useEffect(()=>{
         if(selectedSample){
          const layers = geoJsonRef.current.getLayers();
-         const selectedLayer = layers.find(l => l?.feature?.properties?.id === selectedSample);
+         const selectedLayer = layers.find(l => l?.feature?.properties?.id == selectedSample);
          if(selectedLayer){
              selectedLayer.openPopup()
              map.flyTo([selectedLayer?.feature?.geometry?.coordinates[1],selectedLayer?.feature?.geometry?.coordinates[0]], 10)

@@ -12,11 +12,10 @@ import { axiosWithAuth } from "../Auth/userApi";
 const POLLING_INTERVAL = 1000;
 const MAX_POLLING_INTERVAL = 10000;
 const { Title } = Typography;
-const DataUpload = ({ user,
-    login,
-    logout,
+const ProcessDataset = ({ 
     dataset,
-    setDataset }) => {
+    setDataset,
+    supportedMarkers }) => {
 
     const navigate = useNavigate()
     const [loading, setLoading] = useState(false)
@@ -26,12 +25,21 @@ const DataUpload = ({ user,
     const [validationIssues, setValidationIssues] = useState([])
     const [showProcessingErrors, setShowProcessingErrors] = useState(false)
     const [assignTaxonomy, setAssignTaxonomy] = useState(dataset?.assignTaxonomy || false)
+    const [showAssignTaxonomyCheckbox, setShowAssignTaxonomyCheckbox] = useState(false)
  //    let hdl = useRef();
   //  let refreshUserHdl = useRef();
 
     useEffect(() => {
-       
-    }, [dataset?.assignTaxonomy])
+        
+        if(dataset?.mapping?.defaultValues?.target_gene && supportedMarkers.map(m => m?.name).includes(dataset?.mapping?.defaultValues?.target_gene?.toLowerCase())){
+            setShowAssignTaxonomyCheckbox(true)
+        }
+        if(dataset?.assignTaxonomy){
+            setAssignTaxonomy(true)
+        } else {
+            setAssignTaxonomy(false)
+        }
+    }, [dataset?.mapping?.defaultValues?.target_gene, dataset?.assignTaxonomy, supportedMarkers])
 
     useEffect(() => {
         
@@ -79,10 +87,11 @@ const DataUpload = ({ user,
             const {mapping, sampleHeaders, taxonHeaders} = dataset;
             const taxonIdMapping = mapping?.taxa?.id;
             const sampleIdMapping = mapping?.samples?.id;
-            if(mapping && !taxonIdMapping && !taxonHeaders?.includes['id']){
+            
+            if(mapping && !taxonIdMapping && !taxonHeaders?.includes('id')){
                 errors.push("There is no 'id' column in the taxon file and no other column has been marked as the identifier ('id')")
             }
-            if(mapping && !sampleIdMapping && !sampleHeaders?.includes['id']){
+            if(mapping && !sampleIdMapping && !sampleHeaders?.includes('id')){
                 errors.push("There is no 'id' column in the sample file and no other column has been marked as the identifier ('id')")
 
             }
@@ -100,7 +109,7 @@ const DataUpload = ({ user,
             setFailed(false)
             setFinished(false)
             try {
-                const processRes = await axiosWithAuth.post(`${config.backend}/dataset/${dataset?.id}/process${assignTaxonomy ? '?assignTaxonomy=true':''}`);
+                const processRes = await axiosWithAuth.post(`${config.backend}/dataset/${dataset?.id}/process${ (showAssignTaxonomyCheckbox && assignTaxonomy) ? '?assignTaxonomy=true':''}`);
                 message.info("Processing data");
 
               
@@ -196,7 +205,7 @@ const DataUpload = ({ user,
                 <Row>
                     <Col span={6}>
                         <Button style={{ marginBottom: "24px" }} onClick={() => processData(dataset?.id)} disabled={!isValidForProcessing() || (!!dataset?.steps && !(failed || finished))} loading={!!dataset?.steps && !(failed || finished)}>Process data</Button>
-                        <Checkbox disabled={!!dataset?.steps && !(failed || finished)} style={{marginLeft: "10px"}} value={assignTaxonomy} onChange={(e) => setAssignTaxonomy(e?.target?.checked)}>Assign taxonomy </Checkbox>
+                      {showAssignTaxonomyCheckbox &&  <Checkbox disabled={!!dataset?.steps && !(failed || finished)} style={{marginLeft: "10px"}} checked={assignTaxonomy} onChange={(e) => setAssignTaxonomy(e?.target?.checked)}>Assign taxonomy </Checkbox>}
 
                         {dataset?.steps && dataset?.steps?.length > 0 && <Timeline
                             items={
@@ -245,11 +254,11 @@ const DataUpload = ({ user,
     );
 }
 
-const mapContextToProps = ({ user, login, logout, dataset, setDataset }) => ({
+const mapContextToProps = ({ user, login, logout, dataset, setDataset, supportedMarkers }) => ({
     user,
     login,
     logout,
-    dataset, setDataset
+    dataset, setDataset, supportedMarkers
 });
 
-export default withContext(mapContextToProps)(DataUpload);
+export default withContext(mapContextToProps)(ProcessDataset);

@@ -18,3 +18,12 @@ export const getFormat = async () => {
         throw error
     }
 }
+
+export const getSupportedMarkers = async () => {
+    try {
+        const res = await axios(`${config.backend}/enum/supported-markers`)
+        return res
+    } catch (error) {
+        throw error
+    }
+}

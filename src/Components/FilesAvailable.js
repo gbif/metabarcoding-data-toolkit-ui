@@ -6,8 +6,8 @@ import { DownloadOutlined, WarningOutlined } from '@ant-design/icons';
 import config from "../config";
 const { Title } = Typography;
 
-const FilesAvailable = ({ dataset }) => <>
-    <Title level={3}>Files available</Title>
+const FilesAvailable = ({ dataset, showTitle = true }) => <div style={{maxWidth: "400px"}}>
+    {showTitle && <Title level={3}>Files available</Title>}
     <List
         itemLayout="horizontal"
         dataSource={dataset?.filesAvailable}
@@ -29,6 +29,6 @@ const FilesAvailable = ({ dataset }) => <>
         )}
     />
 
-</>
+</div>
 
 export default FilesAvailable;

@@ -7,7 +7,7 @@ import {
   JWT_STORAGE_NAME,
 } from "../../Auth/userApi";
 import {getDwcTerms, getRequiredTerms, getDefault} from "../../Api/terms.js"
-import { getFormat , getLicense} from "../../Api/enum.js";
+import { getFormat , getLicense, getSupportedMarkers} from "../../Api/enum.js";
 import country from "../../Enum/country.json"
  // import {getTrees} from '../../Api'
 
@@ -21,6 +21,7 @@ class ContextProvider extends React.Component {
     dwcTerms: {},
     requiredTerms: {},
     defaultTerms: [], // terms that may have a default value
+    supportedMarkers: [],
     license: {},
     format: {},
      country,
@@ -50,7 +51,7 @@ class ContextProvider extends React.Component {
         this.setState({user})
       })
     } */
-   Promise.all([getDwcTerms(), getRequiredTerms(), getLicense(), getFormat(), getDefault()])
+   Promise.all([getDwcTerms(), getRequiredTerms(), getLicense(), getFormat(), getDefault(), getSupportedMarkers()])
     .then(responses => {
       this.setState({
         dwcTerms: responses[0]?.data,
@@ -58,6 +59,7 @@ class ContextProvider extends React.Component {
         license: responses[2]?.data,
         format: responses[3]?.data,
         defaultTerms: responses[4]?.data,
+        supportedMarkers: responses[5]?.data,
       })
     }) 
 
