@@ -1,7 +1,7 @@
 # What does this tool do?
 It helps you to easily format an DNA metabarcoding dataset to be published on GBIF.org. [more promotion here]
     
-# What kind of data can I publish/submit using this tool?
+# What kind of data can be published/submitted using this tool?
 This tool processes an \OTU table\ so they can be published to GBIF.org. With an OTU table we think if a table containing some sequences (ASVs/OTUs) and their sequence abundance in a set of samples. This would be the result of the PCR amplification of DNA extracted from a sample and sequences on a HTS
     
     
