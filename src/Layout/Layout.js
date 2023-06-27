@@ -1,4 +1,4 @@
-import { Layout, Button, Row, Col, Typography, theme } from "antd";
+import { Layout, Button, Row, Col, Typography, Space, Divider, theme } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, useMatch } from "react-router-dom";
@@ -31,6 +31,8 @@ const App = ({ children, setDataset, user }) => {
           <Col span={1} style={{ padding: "4px" }} >
             <Logo />
           </Col>
+          <Col>  <Title level={4} style={{color: "tomato",  padding: "20px"}}>TEST VERSION</Title>
+</Col>
           <Col flex="auto">
            
           </Col>
@@ -55,7 +57,6 @@ const App = ({ children, setDataset, user }) => {
             <UserMenu />
           </Col>
         </Row>
-
       </Header>
       <Content
         style={{
@@ -70,7 +71,29 @@ const App = ({ children, setDataset, user }) => {
           textAlign: "center",
         }}
       >
-        GBIF eDNA Tool
+        <Row>
+          <Col flex="auto"></Col>
+          <Col>
+          <Row >
+          
+          <img src="/images/GBIF-2015-standard-ipt.png"  alt="GBIF logo" style={{width: "55px", marginTop: "-2px"}}/> 
+          <Typography.Text >eDNA Tool</Typography.Text>
+        
+        </Row>
+        <Row>
+        <Space split={<Divider type="vertical" />}>
+        <Button style={{paddingLeft: 8}} type="link" onClick={() => navigate("/faq")}>FAQ</Button>
+    <Button style={{paddingLeft: 8}} type="link" href="https://github.com/gbif/edna-tool-ui/issues/new">Report a bug</Button>
+    <Button style={{paddingLeft: 8}} type="link" href="https://github.com/gbif/edna-tool-ui/issues/new">Request a feauture</Button>
+  </Space>
+        </Row>
+          
+          
+          </Col>
+          <Col flex="auto"></Col>
+
+        </Row>
+       
       </Footer>
     </Layout>
   );
