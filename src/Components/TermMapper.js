@@ -37,7 +37,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
     const [defaultTermMap, setDefaultTermMap ] = useState(new Map())
     const [sampleTerms, setSampleTerms] = useState([]);
     const [taxonTerms, setTaxonTerms] = useState([]);
-    const [state, dispatch] = useReducer(reducer, initialState);
+    const [state, dispatch] = useReducer(reducer, (dataset?.mapping || initialState));
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
 
@@ -46,7 +46,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
         if (termMap.size > 0 && requiredTerms?.sample && dataset?.sampleHeaders) {
             const reqSampleTerms = new Set(requiredTerms?.sample.map(t => t.name))
             const otherFieldsAndDefaultVals = new Set([...dataset?.sampleHeaders, ...(dataset?.mapping?.defaultValues ? Object.keys(dataset?.mapping?.defaultValues): [])])
-            console.log(...otherFieldsAndDefaultVals)
+           // console.log(...otherFieldsAndDefaultVals)
             setSampleTerms([...requiredTerms?.sample.map(t => {
                 if (t.name !== 'id' && termMap.has(t.name)) {
                     return { ...t, ...termMap.get(t.name) }
@@ -84,7 +84,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
 
     const saveMapping = async () => {
 
-        console.log(state)
+       // console.log(state)
        
             try {
                 setLoading(true)
@@ -121,8 +121,8 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
     }
 
     const columns = [{
-        width: 250,
-        title: 'Term Name',
+        width: 300,
+        title: 'Standardised field name (DwC term)',
         dataIndex: 'name',
         key: 'name',
         render: (text, term) => <>
@@ -133,7 +133,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
     ]
     const getMappingColumn = (headers,type) => (
         {
-            title: 'Map to field',
+            title: 'Map to field in your data',
             dataIndex: 'mapping',
             key: 'mapping',
             width: "30%",
@@ -145,7 +145,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
                     val =  state?.samples?.[term.name]
                 }
                 return (<HeaderSelect term={term} headers={headers} val={val} onChange={ val => {
-                    /* console.log('update '+term.name)
+                    /*  console.log('update '+term.name)
                     console.log('Value '+val) */
                     if(type === 'taxon'){
                         dispatch({ type: 'mapTaxonTerm', payload: {term: term.name, value: val} })
@@ -160,7 +160,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
 
     const getDefaultValueColumn = () => (
         {
-            title: 'Default value',
+            title: 'or select/enter a Default value',
             dataIndex: 'defaultValue',
             key: 'defaultValue',
             render: (text, term) =>  defaultTermMap.has(term?.name)  ? <DefaultValueSelect initialValue={state?.defaultValues?.[term?.name]} vocabulary={defaultTermMap.get(term?.name)?.vocabulary} ontology={defaultTermMap.get(term?.name)?.ontology} term={term} onChange={ val => {
@@ -174,7 +174,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
 
     const getDeleteRowColumn = (type) => (
         {
-            title: 'Action',
+            title: '',
             key: 'action',
             render: (text, term) => !!term.isRequired ? null : <Button type="link" onClick={() => {
                 if(type === 'taxon'){
@@ -189,8 +189,13 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
     return <>
         <Row>
             <Col flex="auto"></Col>
-            <Col><Button onClick={saveMapping}>Save mapping</Button><Button style={{marginLeft: "10px"}} onClick={() => navigate(`/dataset/${dataset?.id}/process`)}>Proceed to processing</Button></Col>
-        </Row>
+            <Col>
+            <Button onClick={saveMapping}>Save mapping</Button>
+            <Button style={{marginLeft: "10px"}} type="primary"
+                onClick={async () => { 
+                    await saveMapping()
+                    navigate(`/dataset/${dataset?.id}/process`)}}>Proceed to processing</Button></Col>
+            </Row>
         <><Title level={5}>Sample</Title>
             <Table
                 dataSource={sampleTerms} columns={[...columns, getMappingColumn(dataset?.sampleHeaders, 'sample'), getDefaultValueColumn(), getDeleteRowColumn('sample')]}
@@ -198,7 +203,17 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
                 pagination={false}
             />
             
-            <DwcTermSelect style={{width: 500, marginTop: "10px"}} placeholder={"Add mapping for another sample field"} dwcTerms={dwcTerms} omitGroups={['Taxon']} onSelect={val => setSampleTerms([...sampleTerms, termMap.get(val)])}/>
+            <DwcTermSelect 
+                style={{width: 500, marginTop: "10px"}} 
+                placeholder={"Add mapping for another sample field"} 
+                dwcTerms={dwcTerms} 
+                omitGroups={['Taxon']} 
+                onSelect={val => {
+                    if(!defaultTermMap.has(val)){
+                        defaultTermMap.set(val, termMap.get(val))
+                    }  
+                    setSampleTerms([...sampleTerms, termMap.get(val)])
+                } }/>
         </>
 
         <><Title level={5} style={{ marginTop: '10px' }}>Taxon</Title>

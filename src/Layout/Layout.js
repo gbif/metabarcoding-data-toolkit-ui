@@ -11,7 +11,7 @@ const {Title} = Typography;
 const { useToken } = theme;
 
 
-const App = ({ children, setDataset, user }) => {
+const AppLayout = ({ children, setDataset, user }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -106,4 +106,4 @@ const mapContextToProps = ({
   setDataset,
   user
 });
-export default withContext(mapContextToProps)(App);
+export default withContext(mapContextToProps)(AppLayout);

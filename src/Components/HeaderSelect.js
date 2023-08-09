@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { Form, Space, Typography, Select, theme } from "antd"
+import {  Space, Typography, Select, Divider } from "antd"
 
-const { Text, Divider, Link } = Typography;
+const { Text, Link } = Typography;
 
-const HeaderSelect = ({ headers, style = { width: 300 }, onChange, term , val}) => {
+const HeaderSelect = ({ headers = [], style = { width: 300 }, onChange, term, val }) => {
     const [matchedHeaders, setMatchedHeaders] = useState([])
     const [value, setValue] = useState(null)
     useEffect(() => {
@@ -11,7 +11,7 @@ const HeaderSelect = ({ headers, style = { width: 300 }, onChange, term , val}) 
             setMatchedHeaders(headers.filter(s => !!s && term?.synonyms.indexOf(s.toLowerCase()) > -1))
         }
         const matchedTerm = headers.find(matchTerm)
-        if (matchTerm && matchedTerm) {
+        if (!val && matchedTerm) {
             setValue(matchedTerm)
             if (typeof onChange === 'function') {
                 onChange(matchedTerm)
@@ -21,7 +21,7 @@ const HeaderSelect = ({ headers, style = { width: 300 }, onChange, term , val}) 
     }, [headers, term])
 
     useEffect(() => {
-        if(val){
+        if (val) {
             setValue(val)
         }
     }, [val])
@@ -40,7 +40,13 @@ const HeaderSelect = ({ headers, style = { width: 300 }, onChange, term , val}) 
     }}>
         {headers?.map(h => <Select.Option key={h} value={h}>{h}</Select.Option>)}
     </Select>
-        {matchedHeaders.length > 0 && <><br /> <Text type="secondary">Use </Text> <Space split={<Divider type="vertical" />}>{matchedHeaders.map(h => <Link onClick={() => setValue(h)}>{h}</Link>)}</Space></>}
+        {
+            matchedHeaders.length > 0 &&
+            <div>
+                <Text type="secondary">Use </Text>
+                <Space split={<Divider type="vertical" />}>{matchedHeaders.map(h => <Link key={h} onClick={() => setValue(h)}>{h}</Link>)}
+                </Space>
+            </div>}
     </>
 
 }

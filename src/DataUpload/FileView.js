@@ -10,7 +10,7 @@ const FileView = ({ file, dismiss }) => {
 
     <Row>
       <Col span={4}>
-        <Button style={{ marginBottom: "8px" }} onClick={dismiss}>Back</Button>
+        <Button style={{ marginBottom: "8px" }} onClick={dismiss} type="primary">Back</Button>
 
       </Col>
       <Col span={20}>

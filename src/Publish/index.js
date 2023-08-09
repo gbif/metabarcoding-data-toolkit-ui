@@ -10,7 +10,6 @@ import config from "../config";
 import FilesAvailable from '../Components/FilesAvailable'
 
 import withContext from "../Components/hoc/withContext";
-import { refreshLogin } from "../Auth/userApi";
 import { axiosWithAuth } from "../Auth/userApi";
 const { Title } = Typography;
 const Publish = ({ setDataset, dataset }) => {
@@ -41,7 +40,6 @@ const Publish = ({ setDataset, dataset }) => {
       message.info("Processing data");
 
       hdl.current = setInterval(() => getData(key, hdl.current), 1000);
-      refreshUserHdl = setInterval(refreshLogin, 900000);
 
     } catch (error) {
       alert(error)

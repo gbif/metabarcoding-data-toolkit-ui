@@ -146,7 +146,7 @@ const DataUpload = ({ user,
                                 </Tag>}
                             </Col>
                             <Col>
-                                <Button onClick={() => navigate(`/dataset/${match?.params?.key}/term-mapping`)} disabled={!valid}>
+                                <Button onClick={() => navigate(`/dataset/${match?.params?.key}/term-mapping`)} type={valid ? 'primary': 'dashed'} disabled={!valid}>
                                     Proceed to term/field mapping
                                 </Button>
                             </Col>

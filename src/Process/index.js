@@ -201,10 +201,10 @@ const ProcessDataset = ({
                 {validationIssues?.length > 0 && <Alert style={{marginBottom: "10px"}} message={<ul style={{listStyle: 'none'}}>
                     {validationIssues.map(i => <li key={i}>{i}</li>)}
                 </ul>} type="error" showIcon/>}
-                {showProcessingErrors && <Alert closable onClose={() => setShowProcessingErrors(false)} style={{marginBottom: "10px"}} message={`These samples are not present in the OTU table: ${dataset?.processingErrors?.missingSamples?.join(', ')}`} type="warning" showIcon/>}
+                {showProcessingErrors && <Alert closable onClose={() => setShowProcessingErrors(false)} style={{marginBottom: "10px"}} message={`These samples are not present in the Sample meta data file: ${dataset?.processingErrors?.missingSamples?.join(', ')}`} type="warning" showIcon/>}
                 <Row>
                     <Col span={6}>
-                        <Button style={{ marginBottom: "24px" }} onClick={() => processData(dataset?.id)} disabled={!isValidForProcessing() || (!!dataset?.steps && !(failed || finished))} loading={!!dataset?.steps && !(failed || finished)}>Process data</Button>
+                        <Button type="primary" style={{ marginBottom: "24px" }} onClick={() => processData(dataset?.id)} disabled={!isValidForProcessing() || (!!dataset?.steps && !(failed || finished))} loading={!!dataset?.steps && !(failed || finished)}>Process data</Button>
                       {showAssignTaxonomyCheckbox &&  <Checkbox disabled={!!dataset?.steps && !(failed || finished)} style={{marginLeft: "10px"}} checked={assignTaxonomy} onChange={(e) => setAssignTaxonomy(e?.target?.checked)}>Assign taxonomy </Checkbox>}
 
                         {dataset?.steps && dataset?.steps?.length > 0 && <Timeline
@@ -246,7 +246,7 @@ const ProcessDataset = ({
 
                     </Col>
                     <Col flex="auto"></Col>
-                    <Col><Button onClick={() => navigate(`/dataset/${dataset?.id}/review`)} disabled={!finished}>Proceed to review</Button></Col>
+                    <Col><Button type="primary" onClick={() => navigate(`/dataset/${dataset?.id}/review`)} disabled={!finished}>Proceed to review</Button></Col>
                 </Row>
            
             </PageContent>

@@ -17,6 +17,12 @@ const { useToken } = theme;
 const { Title } = Typography;
 const { Text } = Typography;
 
+const dataFormatter = new Intl.DateTimeFormat("en", {
+    dateStyle: 'short',
+    timeStyle: 'short'
+   
+ })
+
 const UserProfile = ({ user }) => {
 const {token} = useToken()
  const [datasets, setDatasets] = useState([])
@@ -72,7 +78,10 @@ const getDatasets = async (usr) => {
             >
                 <List.Item.Meta
                     title={d?.metadata?.title || d.id}
-                    description={`Samples: ${d?.summary?.sampleCount} - Taxa/ASVs: ${d?.summary?.taxonCount}`}
+                    description={<>
+                        {d?.summary && `Samples: ${d?.summary?.sampleCount} - Taxa/ASVs: ${d?.summary?.taxonCount}`}
+                        {d.createdAt && `Created ${dataFormatter.format(new Date(d.createdAt))}`}
+                    </>}
                 />
             </List.Item>
         )}
