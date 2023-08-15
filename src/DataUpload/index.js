@@ -105,7 +105,8 @@ const DataUpload = ({ user,
         <Layout>
             <PageContent>
                 {error && <Alert type="error" >{error}</Alert>}
-                {(selectedFile && dataset?.files?.format?.startsWith('TSV')) && <FileView file={selectedFile} dismiss={() => setSelectedFile(null)} />} 
+                {(selectedFile && (selectedFile?.name?.endsWith('.tsv') || selectedFile?.name?.endsWith('.txt') || selectedFile?.name?.endsWith('.csv'))) 
+                && <FileView file={selectedFile} dismiss={() => setSelectedFile(null)} />} 
                 {(selectedFile && selectedFile?.sheets) && <WorkBookView sheets={selectedFile?.sheets} dismiss={() => setSelectedFile(null)} />} 
 
                 
@@ -157,7 +158,7 @@ const DataUpload = ({ user,
                             header={<Text>Files uploaded</Text>}
                             bordered
                             dataSource={_.isArray(dataset?.files?.invalidErrors) ? dataset?.files?.files.map(f => {
-                                f.errors = dataset?.files?.invalidErrors?.find(e => e.file === f?.name)
+                                f.errors = dataset?.files?.invalidErrors?.filter(e => e.file === f?.name)
                                 return f;
                             }) : dataset?.files?.files}
                             renderItem={(file) => (
@@ -174,10 +175,10 @@ const DataUpload = ({ user,
                                             cancelText="No"><Button type="link"><DeleteOutlined /></Button></Popconfirm>]}
                                 >
                                     <List.Item.Meta
-                                        title={<span style={file?.errors ? { color: token.colorError } : null}>{file.name}</span>}
+                                        title={<span style={file?.errors?.length >0 ? { color: token.colorError } : null}>{file.name}</span>}
                                         description={<>
                                             {`${file?.mimeType} - ${Math.round(file.size * 10) / 10} mb`}
-                                            {file?.errors && <Alert message={file?.errors.message} type="error" showIcon />}
+                                            {file?.errors && file?.errors.map(e => <Alert message={e?.message} type="error" showIcon style={{marginBottom: "8px"}} />)}
                                         </>}
                                     />
                                 </List.Item>

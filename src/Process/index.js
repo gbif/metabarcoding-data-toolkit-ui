@@ -213,7 +213,7 @@ const ProcessDataset = ({
                                     dot: s.status === "finished" ? <CheckCircleOutlined /> : s.status === "failed" ? <ExclamationCircleOutlined /> : s.status === "pending" ? <ClockCircleOutlined /> : null,
                                     color: getStatusColor(s.status),
                                     children: (s.status === "finished" && idx === dataset?.steps?.length - 1) ? "Finished" :
-                                    (s.status === "failed" ) ? "Failed" :
+                                    (s.status === "failed" ) ? `${s.messagePending} - Failed${s?.message ? ": "+ s.message : ""}` :
                                         <>
                                             {`${s.status === "processing" ? s.message : s.messagePending}${(s.subTask && idx === dataset?.steps.length - 1) ? " - " + s.subTask : ""}`}
                                             {s.status === "processing" && (!isNaN(s.total) && s.total !==0 && s.progress ) &&
