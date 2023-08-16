@@ -1,10 +1,10 @@
 import { UploadOutlined } from '@ant-design/icons';
-import { Button, message, Upload, Alert, Row, Col, Progress } from 'antd';
+import { Button, message, Upload, Alert, Row, Col, Progress, Typography } from 'antd';
 import { useState, useEffect } from 'react';
 import {axiosWithAuth} from "../Auth/userApi";
 import config from "../config";
 const { Dragger } = Upload;
-
+const {Text} = Typography;
 const Uploader = ({onSuccess, onError, datasetKey}) => {
     const [fileList, setFileList] = useState([]);
     const [uploading, setUploading] = useState(false);
@@ -108,7 +108,10 @@ const Uploader = ({onSuccess, onError, datasetKey}) => {
                 <p className="ant-upload-drag-icon">
                     <UploadOutlined />
                 </p>
-                {!uploading && <p className="ant-upload-text">Click or drag files to this area to upload</p>}
+                {!uploading && <>
+                    <p className="ant-upload-text">Click or drag files to this area to upload</p>
+                    <Text type="secondary">If you upload in tsv format, name your files "OTUtable.tsv", "samples.tsv" and "taxa.tsv". File extension could also be .csv or .txt</Text>
+                    </>}
                 {progress && <p className="ant-upload-text">Uploading ({`${bytesToReadable(progress.loaded)} of ${bytesToReadable(progress.total)}`})</p>}
                 {progress && <Progress
                 percent={(progress.progress * 100).toFixed(0)}
