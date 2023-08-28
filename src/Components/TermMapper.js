@@ -144,7 +144,8 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
                 } else if(type === 'sample' && state?.samples?.[term.name]){
                     val =  state?.samples?.[term.name]
                 }
-                return (<HeaderSelect term={term} headers={headers} val={val} onChange={ val => {
+                // first check special case when a fasta file is given
+                return dataset?.files?.format.endsWith('_FASTA') && term.name === 'DNA_sequence' ? "Retrieved from fasta file" : (<HeaderSelect term={term} headers={headers} val={val} onChange={ val => {
                     /*  console.log('update '+term.name)
                     console.log('Value '+val) */
                     if(type === 'taxon'){

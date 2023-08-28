@@ -87,7 +87,7 @@ const ProcessDataset = ({
         if (!dataset) {
             return false
         } else {
-            return dataset?.files?.format === 'TSV_3_FILE' || dataset?.files?.format === 'XLSX'
+            return dataset?.files?.format === 'TSV_3_FILE' || dataset?.files?.format === 'XLSX' || dataset?.files?.format === 'XLSX_WITH_FASTA'
         }
     }
 

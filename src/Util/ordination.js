@@ -15,7 +15,7 @@ export const getDistanceMatrix = (data) => {
         const sample1 = samples[i]
         for(let j= i+1; j < samples.length; j++){
             const sample2 = samples[j]
-            let idx = (jaccard.index(data[sample1], data[sample2]) || 0)  * 10000;
+            let idx = (jaccard.index(data[sample1], data[sample2]) /* || 0 */)  // * 10000;
             
             res[j] = idx;
             matrix[j][i] = idx;
