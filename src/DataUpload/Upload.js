@@ -92,7 +92,7 @@ const Uploader = ({onSuccess, onError, datasetKey}) => {
     }
 
     return (
-        <>
+        <div style={{minHeight: "400px"}}>
             {submissionError && (
                 <Alert
                     style={{ marginBottom: "8px" }}
@@ -137,7 +137,7 @@ const Uploader = ({onSuccess, onError, datasetKey}) => {
             </Button></Col>
            </Row>
             
-        </>
+        </div>
     );
 };
 export default Uploader;
