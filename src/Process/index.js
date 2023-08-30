@@ -242,7 +242,14 @@ const ProcessDataset = ({
                         </ul>} />}
                 <Row>
                     <Col span={6}>
-                        <Button type="primary" style={{ marginBottom: "24px" }} onClick={() => processData(dataset?.id)} disabled={!isValidForProcessing() || (!!dataset?.steps && !(failed || finished))} loading={!!dataset?.steps && !(failed || finished)}>Process data</Button>
+                        <Button 
+                            type="primary" 
+                            style={{ marginBottom: "24px" }} 
+                            onClick={() => processData(dataset?.id)} 
+                            disabled={!isValidForProcessing() || (!!dataset?.steps && !(failed || finished))} 
+                            loading={!!dataset?.steps && !(failed || finished)}>
+                               {!!dataset?.steps && (failed || finished) ? 'Re-process data':'Process data'} 
+                                </Button>
                         {showAssignTaxonomyCheckbox && <Checkbox disabled={!!dataset?.steps && !(failed || finished)} style={{ marginLeft: "10px" }} checked={assignTaxonomy} onChange={(e) => setAssignTaxonomy(e?.target?.checked)}>Assign taxonomy </Checkbox>}
 
                         {dataset?.steps && dataset?.steps?.length > 0 && <Timeline

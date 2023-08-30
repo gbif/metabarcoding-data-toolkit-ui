@@ -100,7 +100,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
                     }
                     return acc
                 }, {})
-                const defaultValues = Object.keys(state.defaultValues).reduce((acc, key) => {
+                const defaultValues = Object.keys(state?.defaultValues || {}).reduce((acc, key) => {
                     if(!!state.defaultValues[key]){
                         acc[key] = state.defaultValues[key]
                     }
@@ -112,6 +112,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
                 setLoading(false)
             } catch (error) {
                 message.error("Ouch - Something went wrong, the mapping was not saved")
+                console.log(error)
                 setError(error)
                 setLoading(false)
     

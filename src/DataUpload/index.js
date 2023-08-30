@@ -153,7 +153,7 @@ const DataUpload = ({ user,
                             </Col>
                         </Row>
                         {/* {dataset && <pre>{JSON.stringify(dataset, null, 2)}</pre>} */}
-                        {dataset?.files?.files && <List
+                        { <List
                             itemLayout="horizontal"
                             header={<Text>Files uploaded</Text>}
                             bordered

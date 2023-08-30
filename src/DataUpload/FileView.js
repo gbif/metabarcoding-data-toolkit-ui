@@ -34,12 +34,12 @@ const FileView = ({ file, dismiss }) => {
         x: file?.properties?.headers.length * 250,
       }}
       columns={file?.properties?.headers?.map(h => ({
-        title: h,
-        key: h,
-        dataIndex: h,
+        title: h || "#",
+        key: h || "#",
+        dataIndex: h || "#",
         ellipsis: true
       }))}
-      dataSource={file?.properties?.rows?.slice(1).map(r => file?.properties?.headers?.reduce((acc, cur, idx) => { acc[cur] = r[idx]; return acc }, {}))}
+      dataSource={file?.properties?.rows?.slice(1).map(r => file?.properties?.headers?.reduce((acc, cur, idx) => { acc[cur || "#"] = r[idx]; return acc }, {}))}
       pagination={false}
     /></>
 
