@@ -1,6 +1,8 @@
 # What does this tool do?
-It helps format a DNA metabarcoding dataset (OTU table style) to be published on GBIF.org without the user having to learn darwin core terms and know a lot about data standardisation and reformating.
+It helps format a DNA metabarcoding dataset (OTU table style) to be published on GBIF.org without the user having to learn Darwin Core terms and know a lot about data standardisation and reformating.
 
+# Who can use the tool?
+Currently, GBIF is deveopling and testing the tool internally, but it will be opened to a wider audience later. Anybody can provide datasets for the test phase, and these datasets may be published to GBIF.org if the data holder wishes. See more [here](https://edna-tool.gbif-uat.org/templates/edna_template.xlsx)
     
 # What kind of data can be published/submitted using this tool?
 This tool processes an OTU table so the data can be published to GBIF.org. With an OTU table we think if a table containing some sequences (ASVs/OTUs) and their sequence abundance in a set of samples. This would be the result of the PCR amplification of DNA extracted from a sample and sequenced on a high throughput seqeuncing platform like Illumina MiSeq.
