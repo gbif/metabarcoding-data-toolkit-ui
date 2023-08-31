@@ -94,11 +94,12 @@ const ProcessDataset = ({
     const validate = async (dataset) => {
         try {
             let errors = []
-            const { mapping, sampleHeaders, taxonHeaders } = dataset;
+            const { mapping, sampleHeaders, taxonHeaders, files } = dataset;
             const taxonIdMapping = mapping?.taxa?.id;
             const sampleIdMapping = mapping?.samples?.id;
-
-            if (mapping && !taxonIdMapping && !taxonHeaders?.includes('id')) {
+            const hasTaxonFile = files?.files.find(f => f?.type == "taxa") && files?.format === "TSV";
+           
+            if (hasTaxonFile && mapping && !taxonIdMapping && !taxonHeaders?.includes('id')) {
                 errors.push("There is no 'id' column in the taxon file and no other column has been marked as the identifier ('id')")
             }
             if (mapping && !sampleIdMapping && !sampleHeaders?.includes('id')) {

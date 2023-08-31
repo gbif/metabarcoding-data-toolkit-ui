@@ -154,6 +154,7 @@ const DataUpload = ({ user,
                         </Row>
                         {/* {dataset && <pre>{JSON.stringify(dataset, null, 2)}</pre>} */}
                         { <List
+                            loading={loading}
                             itemLayout="horizontal"
                             header={<Text>Files uploaded</Text>}
                             bordered
@@ -164,7 +165,7 @@ const DataUpload = ({ user,
                             renderItem={(file) => (
                                 <List.Item
                                     actions={[
-                                        <Button type="link" disabled={file.name.endsWith('fasta') || file.name.endsWith('.fa')} loading={loading} onClick={() => setSelectedFile(file)}><EyeOutlined /></Button>,
+                                        <Button type="link" disabled={file.name.endsWith('fasta') || file.name.endsWith('.fa')}  onClick={() => setSelectedFile(file)}><EyeOutlined /></Button>,
                                         <Button type="link"  download={file.name} href={`${config.backend}/dataset/${dataset?.id}/uploaded-file/${file.name}`}><DownloadOutlined /></Button>,
                                         <Popconfirm
                                             placement="leftTop"
