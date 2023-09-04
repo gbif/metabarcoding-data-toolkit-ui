@@ -196,7 +196,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
             <Button style={{marginLeft: "10px"}} type="primary"
                 onClick={async () => { 
                     await saveMapping()
-                    navigate(`/dataset/${dataset?.id}/process`)}}>Proceed to processing</Button></Col>
+                    navigate(`/dataset/${dataset?.id}/process`)}}>Proceed</Button></Col>
             </Row>
         <><Title level={5}>Sample</Title>
             <Table

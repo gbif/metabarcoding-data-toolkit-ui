@@ -29,12 +29,12 @@ const WorkBookView = ({ sheets, dismiss }) => {
         x: sheet?.headers.length * 250,
       }}
       columns={sheet?.headers?.map(h => ({
-        title: h,
-        key: h,
-        dataIndex: h,
+        title: h || "#",
+        key: h || "#",
+        dataIndex: h || "#",
         ellipsis: true
       }))}
-      dataSource={sheet?.rows?.slice(1).map(r => sheet?.headers?.reduce((acc, cur, idx) => { acc[cur] = r[idx]; return acc }, {}))}
+      dataSource={sheet?.rows?.slice(1).map(r => sheet?.headers?.reduce((acc, cur, idx) => { acc[cur || "#"] = r[idx]; return acc }, {}))}
       pagination={false}
     />
     </>

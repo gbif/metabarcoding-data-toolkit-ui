@@ -7,8 +7,8 @@ import {
 
 const Help = ({placement="rightTop", style= {}, title= "Help", content=""}) => {
 
-   return <Popover placement={placement} trigger="click" title={title} content={content}>
-                <InfoCircleOutlined style={style} /> </Popover>
+   return <Popover placement={placement} trigger="click" title={title} content={<div style={{maxWidth: "600px"}}>{content}</div>}>
+                <InfoCircleOutlined style={{cursor: "pointer", ...style}} /> </Popover>
 
 }
 

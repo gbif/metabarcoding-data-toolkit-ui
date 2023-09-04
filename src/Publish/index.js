@@ -4,7 +4,7 @@ import axios from "axios"
 import { useNavigate, useLocation, useMatch } from "react-router-dom";
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
-import { Row, Col, Alert, Button, Progress, Timeline, Typography, List, message } from "antd"
+import { Row, Col, Alert, Button, Progress, Timeline, Typography, Modal, message } from "antd"
 import { CheckCircleOutlined, ClockCircleOutlined, DownloadOutlined } from '@ant-design/icons';
 import config from "../config";
 import FilesAvailable from '../Components/FilesAvailable'
@@ -19,7 +19,8 @@ const Publish = ({ setDataset, dataset }) => {
   const [failed, setFailed] = useState(dataset?.dwc?.steps?.find(s => s.status === 'failed') || false);
   const [finished, setFinished] = useState(dataset?.dwc?.steps?.find(s => s.status === 'finished') || false);
   const [registering, setRegistering] = useState(false);
-  const [gbifKey, setGbifKey] = useState(dataset?.publishing?.gbifDatasetKey)
+  const [gbifKey, setGbifKey] = useState(dataset?.publishing?.gbifDatasetKey);
+  const [showRegisterModal, setShowRegisterModal] = useState(false)
   let hdl = useRef();
   let refreshUserHdl = useRef();
 
@@ -76,13 +77,14 @@ const Publish = ({ setDataset, dataset }) => {
 
     setRegistering(true)
     try {
-      message.info("Registering dataset in GBIF");
+      message.info("Registering dataset in GBIF-UAT");
 
       const registerRes = await axiosWithAuth.post(`${config.backend}/dataset/${key}/register-in-gbif`);
 
       if (registerRes?.data?.publishing?.gbifDatasetKey) {
         setGbifKey(registerRes?.data?.publishing?.gbifDatasetKey)
       }
+      setShowRegisterModal(true); 
       setDataset(registerRes?.data)
       setRegistering(false)
     } catch (error) {
@@ -113,7 +115,7 @@ const Publish = ({ setDataset, dataset }) => {
       {error && <Alert type="error" >{error}</Alert>}
       <Row>
         <Col span={6}>
-          <Button style={{ marginBottom: "24px" }} onClick={() => processData(dataset?.id)} >Create DWC archive</Button>
+          <Button style={{ marginBottom: "24px" }} onClick={() => processData(dataset?.id)} type="primary" >Create DWC archive</Button>
           {dataset?.dwc?.steps && dataset?.dwc?.steps?.length > 0 && <Timeline
             items={
               dataset?.dwc?.steps.map((s, idx) => ({
@@ -141,13 +143,16 @@ const Publish = ({ setDataset, dataset }) => {
                     </Col>}
         <Col flex="auto"></Col>
         <Col>
-          <Button loading={registering}  disabled={registering || !finished }  onClick={() => registerData(dataset?.id)} >Publish to GBIF</Button>
+          <Button loading={registering}  disabled={registering || !finished  } type="primary" onClick={() => registerData(dataset?.id) } >Publish to GBIF test environment (UAT)</Button>
         </Col>
         <Col>
-          {gbifKey && <Button type="link" href={`https://www.gbif-uat.org/dataset/${gbifKey}`}>Dataset at gbif.org</Button>}
+          {gbifKey && <Button type="link" href={`https://www.gbif-uat.org/dataset/${gbifKey}`}>Dataset at gbif-uat.org</Button>}
         </Col>
       </Row>
-
+      <Modal title="Info" open={showRegisterModal && gbifKey} onOk={() => setShowRegisterModal(false)} onCancel={() => setShowRegisterModal(false)}>
+        <p>Your data is being processed. Depending on the data volume, it may take from 15 minutes to a an hour before it is finished. This means that you may initally see "0 occurrences" on the new <a  href={`https://www.gbif-uat.org/dataset/${gbifKey}`}>dataset page</a> if it is accessed before the processing has finished.</p>
+        
+      </Modal>
 
     </PageContent></Layout>
   );

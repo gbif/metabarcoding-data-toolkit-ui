@@ -6,6 +6,7 @@ import PageContent from "../Layout/PageContent";
 import { Row, Col, Alert, Button, Timeline, Progress, Statistic, Space, Typography, List, Checkbox, message } from "antd"
 import { CheckCircleOutlined, ClockCircleOutlined, DownloadOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import FilesAvailable from '../Components/FilesAvailable'
+import Help from "../Components/Help";
 import config from "../config";
 import withContext from "../Components/hoc/withContext";
 import { axiosWithAuth } from "../Auth/userApi";
@@ -251,7 +252,24 @@ const ProcessDataset = ({
                             loading={!!dataset?.steps && !(failed || finished)}>
                                {!!dataset?.steps && (failed || finished) ? 'Re-process data':'Process data'} 
                                 </Button>
-                        {showAssignTaxonomyCheckbox && <Checkbox disabled={!!dataset?.steps && !(failed || finished)} style={{ marginLeft: "10px" }} checked={assignTaxonomy} onChange={(e) => setAssignTaxonomy(e?.target?.checked)}>Assign taxonomy </Checkbox>}
+                        {showAssignTaxonomyCheckbox && <>   
+                            <Checkbox disabled={!!dataset?.steps && !(failed || finished)} style={{ marginLeft: "10px" }} checked={assignTaxonomy} onChange={(e) => setAssignTaxonomy(e?.target?.checked)}>Assign taxonomy </Checkbox>
+                            <Help title="Taxonomic assigment" content={<>
+                            <p>
+                            This will blast the ASVs against <strong> {`${supportedMarkers.find(m => m?.name === dataset?.mapping?.defaultValues?.target_gene?.toLowerCase())?.database}`}</strong>
+                            </p>
+                            <ul>
+                                <li>{`If the best match based on bit score has identity >= 99, it is considered a an exact match and the scientificName field is filled`} </li>
+                                <li>{`For matches with 90-99% similarity, it is considered a an close match and upper ranks down to genus are filled`} </li>
+                                <li>{'Only results with query coverage > 80% are considered'}</li>
+                            </ul>
+                           <p>
+                                The taxonomic assignment process tries to match the taxon retrived from blast to the GBIF backbone taxonomy if possible. However, not all taxa in the reference databases exist in the GBIF taxonomy, and therefore some records will have taxon match issues when published to GBIF.
+                           </p>
+                           <p>
+                                Assigning taxonomy may take a while, depnding on the size of your dataset.
+                           </p>
+                            </>}/></>}
 
                         {dataset?.steps && dataset?.steps?.length > 0 && <Timeline
                             items={
@@ -292,7 +310,7 @@ const ProcessDataset = ({
 
                     </Col>
                     <Col flex="auto"></Col>
-                    <Col><Button type="primary" onClick={() => navigate(`/dataset/${dataset?.id}/review`)} disabled={!finished}>Proceed to review</Button></Col>
+                    <Col><Button type="primary" onClick={() => navigate(`/dataset/${dataset?.id}/review`)} disabled={!finished}>Proceed</Button></Col>
                 </Row>
 
             </PageContent>

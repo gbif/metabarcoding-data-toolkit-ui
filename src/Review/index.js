@@ -30,7 +30,7 @@ const Review = ({dataset}) => {
     <Layout><PageContent>
       <Row>
         <Col flex="auto"></Col>
-        <Col><Button onClick={() => navigate(`/dataset/${match?.params?.key}/metadata`)}>Done</Button></Col>
+        <Col><Button onClick={() => navigate(`/dataset/${match?.params?.key}/metadata`)} type="primary">Proceed</Button></Col>
       </Row>
        <DataBrowser />
 

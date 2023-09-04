@@ -59,6 +59,8 @@ const MetaDataForm = ({data, onSaveSuccess, saveButtonLabel, dataset, setDataset
     const match = useMatch('/dataset/:key/metadata')
     const [submissionError, setSubmissionError] = useState(null);
     const [showHelp, setShowHelp] = useState(false)
+    const navigate = useNavigate()
+
     const [form] = Form.useForm();
 
 
@@ -116,6 +118,10 @@ const MetaDataForm = ({data, onSaveSuccess, saveButtonLabel, dataset, setDataset
                     {saveButtonLabel || "Save metadata"}
                 </Button>
             </FormItem></Col>
+            
+            <Col> <Button style={{marginLeft: "10px"}} type="primary" onClick={() => navigate(`/dataset/${dataset?.id}/publish`)}>
+                    Proceed
+                </Button></Col>
             </Row>
             
            
