@@ -243,7 +243,7 @@ const ProcessDataset = ({
                                 </li>}
                         </ul>} />}
                 <Row>
-                    <Col span={6}>
+                    <Col span={8}>
                         <Button 
                             type="primary" 
                             style={{ marginBottom: "24px" }} 

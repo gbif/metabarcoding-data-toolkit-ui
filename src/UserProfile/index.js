@@ -12,18 +12,16 @@ import FilesAvailable from '../Components/FilesAvailable'
 import withContext from "../Components/hoc/withContext";
 import { refreshLogin } from "../Auth/userApi";
 import { axiosWithAuth } from "../Auth/userApi";
+import {dateFormatter, numberFormatter} from '../Util/formatters'
 const { useToken } = theme;
 
 const { Title } = Typography;
 const { Text } = Typography;
 
-const dataFormatter = new Intl.DateTimeFormat("en", {
-    dateStyle: 'short',
-    timeStyle: 'short'
-   
- })
+//const dateFormatter = new Intl.DateTimeFormat('en-GB')
+//const numberFormatter = new Intl.NumberFormat('en-GB');
 
-const UserProfile = ({ user }) => {
+const UserProfile = ({ user, setLoginFormVisible }) => {
 const {token} = useToken()
  const [datasets, setDatasets] = useState([])
  const [loading, setLoading] = useState(false)
@@ -64,7 +62,7 @@ const getDatasets = async (usr) => {
 
         {!!user &&        <> <Row>
             <Col flex="auto"></Col>
-            <Col span={12}>
+            <Col span={16}>
            <List
         itemLayout="horizontal"
         header={<Text>{`Datasets created by ${user?.userName}`}</Text>}
@@ -74,13 +72,16 @@ const getDatasets = async (usr) => {
         renderItem={(d) => (
             <List.Item
            
-                actions={[<Button type="link" onClick={() =>  navigate(`/dataset/${d.id}`)}><EyeOutlined /></Button>,<Button type="link" onClick={() =>  navigate(`/dataset/${d.id}/upload`)}><EditOutlined /></Button>]}
+                actions={[<Button type="link" onClick={() =>  navigate(`/dataset/${d.id}`)}><EyeOutlined /></Button>,<Button type="link" onClick={() =>  navigate(`/dataset/${d?.dataset_id}/upload`)}><EditOutlined /></Button>]}
             >
                 <List.Item.Meta
-                    title={d?.metadata?.title || d.id}
+                    title={d?.metadata?.title || d?.title || d.id}
                     description={<>
-                        {d?.summary && `Samples: ${d?.summary?.sampleCount} - Taxa/ASVs: ${d?.summary?.taxonCount}`}
-                        {d.createdAt && `Created ${dataFormatter.format(new Date(d.createdAt))}`}
+                    {d.created && <p style={{marginBottom: "0px"}}>{`Created: ${dateFormatter.format(new Date(d.created))}`}</p>}
+                        {d?.sample_count ? <p style={{marginBottom: "0px"}}>{`Samples: ${numberFormatter.format(d?.sample_count)}`}</p> : ""}
+                        {d?.taxon_count ? <p style={{marginBottom: "0px"}}>{`Taxa/ASVs: ${numberFormatter.format(d?.taxon_count)}`}</p> : ""}
+                        {d?.occurrence_count ? <p >{`Occurrences: ${numberFormatter.format(d?.occurrence_count)}`}</p> : ""}
+
                     </>}
                 />
             </List.Item>
@@ -97,9 +98,9 @@ const getDatasets = async (usr) => {
 
         {!user &&  <Result
     status="403"
-    title="403"
-    subTitle="Sorry, you are not authorized to access this page."
-    extra={<Button type="primary">Back Home</Button>}
+    title=""
+    subTitle="Please login to see your datasets"
+    extra={<Button type="primary" onClick={() => setLoginFormVisible(true)}>Login</Button>}
   />}
       
 
@@ -109,10 +110,11 @@ const getDatasets = async (usr) => {
 }
 
 
-const mapContextToProps = ({ user, login, logout }) => ({
+const mapContextToProps = ({ user, login, logout, setLoginFormVisible }) => ({
   user,
   login,
-  logout
+  logout,
+  setLoginFormVisible
 });
 
 export default withContext(mapContextToProps)(UserProfile);

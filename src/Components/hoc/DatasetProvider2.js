@@ -18,7 +18,7 @@ const reducer = (state, action) => {
 
 const initialState = {key: null, route: null};
 
-const DatasetProvider = ({setDataset}) => {
+const DatasetProvider = ({setDataset, user, setLoginFormVisible }) => {
 
    // const [key, setKey] = useState(null)
     const datasetMatch = useMatch('/dataset/:key');
@@ -35,6 +35,9 @@ const DatasetProvider = ({setDataset}) => {
         const datasetRouteChange = processMatch || reviewMatch || metadataMatch || publishMatch || uploadMatch || mappingMatch || datasetMatch;
         if(datasetRouteChange && datasetRouteChange.params.key !== "new"){
             dispatch({ type: 'routeChange', payload: {route: datasetRouteChange.pathname, key: datasetRouteChange.params.key} })
+        } else if(!user && datasetRouteChange.params.key === "new") {
+            dispatch({ type: 'resetDataset', payload: null })
+            setLoginFormVisible(true)
         } else {
             dispatch({ type: 'resetDataset', payload: null })
         }
@@ -69,8 +72,8 @@ const DatasetProvider = ({setDataset}) => {
 }
 
 
-const mapContextToProps = ({ dataset, setDataset }) => ({
-    dataset, setDataset
+const mapContextToProps = ({ dataset, setDataset, user, setLoginFormVisible }) => ({
+    dataset, setDataset, user, setLoginFormVisible 
   });
   
 export default withContext(mapContextToProps)(DatasetProvider);

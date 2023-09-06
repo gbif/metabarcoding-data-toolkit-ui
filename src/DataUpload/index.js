@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useNavigate, useLocation, useMatch } from "react-router-dom";
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
@@ -29,7 +29,7 @@ const DataUpload = ({ user,
     logout,
     format,
     dataset,
-    setDataset }) => {
+    setDataset, setLoginFormVisible }) => {
     const { token } = useToken();
 
     const match = useMatch('/dataset/:key/upload');
@@ -39,6 +39,8 @@ const DataUpload = ({ user,
     const [valid, setValid] = useState(false);
     const [dataFormat, setDataFormat] = useState(null)
     const [selectedFile, setSelectedFile] = useState(null)
+
+   
 
     useEffect(() => {
         const key = match?.params?.key;
@@ -89,7 +91,13 @@ const DataUpload = ({ user,
 
             setLoading(false)
         } catch (error) {
-            setError(error)
+            if(error?.response?.status > 399 && error?.response?.status < 500){
+                setLoginFormVisible(true)
+            } else {
+                console.log(error)
+            setError(error?.message)
+            }
+            
             setLoading(false)
 
         }
@@ -115,13 +123,14 @@ const DataUpload = ({ user,
                     <Col span={12}>
 
                         <Button style={{ marginBottom: "10px" }} href="/templates/edna_template.xlsx">Download template <FileExcelOutlined /></Button> 
-                        <Help style={{marginLeft: '8px'}} content={<><span>The template is an Excel workbook with 4 sheets:
+                        <Help style={{marginLeft: '8px'}} title="About the data template" content={<><span>The template is an Excel workbook with 4 sheets:
                                 <ul>
                                     <li>OTU_table: a matrix with Sample IDs as column headers and OTU IDs as Row identifiers</li>
                                     <li>Taxa: This should include the DNA sequence and taxonomic information about the sequence if available</li>
                                     <li>Sample: Any metadata about the samples, i.e. event date (collection date), decimal latitude and longitude</li>
-                                    <li>Study: This sheet may contain defaults for the whole study such as target gene, primers, standard operating procedures etc.</li>
+                                    <li>DefaultValues (Optional): This sheet may contain defaults for the whole study such as target gene, primers, standard operating procedures etc. </li>
                                 </ul>
+                                 See <a href="https://rs.gbif.org/core/dwc_occurrence_2022-02-02.xml" target="_blank">Darwin Core Occurrence</a> and <a href="https://rs.gbif.org/extension/gbif/1.0/dna_derived_data_2022-02-23.xml" target="_blank">DNA dervied data Darwin Core extension</a> for available fields.
                             </span></>}/>
 
                         <Uploader datasetKey={match?.params?.key}
@@ -193,11 +202,11 @@ const DataUpload = ({ user,
     );
 }
 
-const mapContextToProps = ({ user, login, logout, dataset, setDataset, format }) => ({
+const mapContextToProps = ({ user, login, logout, dataset, setDataset, format, loginFormVisible, setLoginFormVisible }) => ({
     user,
     login,
     logout,
-    dataset, setDataset, format
+    dataset, setDataset, format, loginFormVisible, setLoginFormVisible 
 });
 
 export default withContext(mapContextToProps)(DataUpload);

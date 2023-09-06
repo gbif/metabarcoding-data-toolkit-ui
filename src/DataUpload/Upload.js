@@ -1,21 +1,25 @@
 import { UploadOutlined } from '@ant-design/icons';
-import { Button, message, Upload, Alert, Row, Col, Progress, Typography } from 'antd';
+import { Button, message, Upload, Alert, Row, Col, Progress, Typography, Input,  } from 'antd';
 import { useState, useEffect } from 'react';
 import {axiosWithAuth} from "../Auth/userApi";
+import withContext from "../Components/hoc/withContext";
+
 import config from "../config";
 const { Dragger } = Upload;
 const {Text} = Typography;
-const Uploader = ({onSuccess, onError, datasetKey}) => {
+
+
+const Uploader = ({onSuccess, onError, datasetKey, dataset}) => {
     const [fileList, setFileList] = useState([]);
     const [uploading, setUploading] = useState(false);
     const [submissionError, setSubmissionError] = useState(null)
     const [progress, setProgress] = useState(null)
-
+    const [datasetTitle, setDatasetTitle] = useState( dataset?.metadata?.title || "")
     useEffect(() => {}, [progress, uploading])
     const handleUpload = () => {
 
         const formData = new FormData();
-
+        formData.append('datasetTitle', datasetTitle)
         fileList.forEach((file) => {
             formData.append('tables', file);
         });
@@ -102,7 +106,10 @@ const Uploader = ({onSuccess, onError, datasetKey}) => {
                     type="error"
                 />
             )}
-            
+             <div style={{marginBottom: "10px"}}>
+            <Input disabled={dataset}  placeholder="Dataset title or nickname (You can change this later)" value={datasetTitle} onChange={(e) => setDatasetTitle(e?.target?.value) } allowClear/> 
+                <Text type="secondary" style={{marginBottom: "10px"}}>The title can be changed later in the "Edit Metadata" form in step 5</Text>
+                </div>
             <Dragger {...props} style={{minWidth: "400px", padding: "10px"}} disabled={uploading}>
             
                 <p className="ant-upload-drag-icon">
@@ -140,4 +147,8 @@ const Uploader = ({onSuccess, onError, datasetKey}) => {
         </div>
     );
 };
-export default Uploader;
+
+const mapContextToProps = ({ dataset}) => ({
+    dataset
+});
+export default withContext(mapContextToProps)(Uploader);

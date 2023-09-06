@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, createContext, useContext } from "react";
 //import injectSheet from "react-jss";
 import { useNavigate } from "react-router-dom";
 import { LogoutOutlined, BarsOutlined } from "@ant-design/icons";
@@ -7,6 +7,7 @@ import withContext from "../Components/hoc/withContext";
 import LoginForm from "./LoginForm"
 import {refreshLogin} from './userApi'
 const { useToken } = theme;
+ 
 
 const hashCode = function (str) {
   let hash = 0,
@@ -56,7 +57,7 @@ const MenuContent = ({logout}) => {
 </Menu>
 } 
 
-const UserMenu = ({login, user, logout, setUser}) => {
+const UserMenu = ({login, user, logout, setUser, loginFormVisible, setLoginFormVisible}) => {
   
   const [visible, setVisible] = useState(false)
   const [invalid, setInvalid] = useState(false)
@@ -95,20 +96,16 @@ const UserMenu = ({login, user, logout, setUser}) => {
     };
   }, [user])
   const showLogin = () => {
-    setVisible(true)
+    setLoginFormVisible(true)
     
   };
-  const reset = () => {
-    setInvalid(false)
-    setVisible(false)
-    window.location.reload()
-  }
+  
 
   const handleLogin = (values) => {
     login(values)
       .then((user)=>{
         setInvalid(false)
-    setVisible(false)
+        setLoginFormVisible(false)
       })
       .catch((err) => {
         setInvalid(err.message)
@@ -118,7 +115,7 @@ const UserMenu = ({login, user, logout, setUser}) => {
 
   const handleCancel = () => {
     setInvalid(false)
-    setVisible(false)
+    setLoginFormVisible(false)
   };
 
     
@@ -148,9 +145,10 @@ const UserMenu = ({login, user, logout, setUser}) => {
             </span>
           </Dropdown>
         )}
+        
         <Modal
           title="Login with your GBIF account"
-          open={visible}
+          open={loginFormVisible}
           onOk={handleLogin}
           onCancel={handleCancel}
           footer={null}
@@ -169,11 +167,11 @@ const UserMenu = ({login, user, logout, setUser}) => {
   
 }
 
-const mapContextToProps = ({ user, login, logout, setUser}) => ({
+const mapContextToProps = ({ user, login, logout, setUser, loginFormVisible, setLoginFormVisible}) => ({
   user,
   login,
   logout,
-  setUser
+  setUser,loginFormVisible, setLoginFormVisible
 });
 
 export default withContext(mapContextToProps)(UserMenu);

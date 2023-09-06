@@ -62,7 +62,7 @@ const MetaDataForm = ({data, onSaveSuccess, saveButtonLabel, dataset, setDataset
     const navigate = useNavigate()
 
     const [form] = Form.useForm();
-
+    const values = Form.useWatch([], form);
 
     const onFinishFailed = ({ errorFields }) => {
         form.scrollToField(errorFields[0].name);
@@ -71,7 +71,7 @@ const MetaDataForm = ({data, onSaveSuccess, saveButtonLabel, dataset, setDataset
     const submitData = (values) => {
         const key = match?.params?.key;
 
-        axiosWithAuth.post(`${config.backend}/dataset/${key}/metadata`, {
+       return axiosWithAuth.post(`${config.backend}/dataset/${key}/metadata`, {
                 ...values
             })
             .then((res) => {
@@ -117,9 +117,13 @@ const MetaDataForm = ({data, onSaveSuccess, saveButtonLabel, dataset, setDataset
                 <Button htmlType="submit">
                     {saveButtonLabel || "Save metadata"}
                 </Button>
-            </FormItem></Col>
+            </FormItem>
+            </Col>
             
-            <Col> <Button style={{marginLeft: "10px"}} type="primary" onClick={() => navigate(`/dataset/${dataset?.id}/publish`)}>
+            <Col> <Button style={{marginLeft: "10px"}} type="primary" onClick={async () => {
+                     await submitData(values)
+                    navigate(`/dataset/${dataset?.id}/publish`)
+            } }>
                     Proceed
                 </Button></Col>
             </Row>
