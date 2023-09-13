@@ -70,7 +70,7 @@ const sparseToJaccardMatrix = (data) => {
     return matrix;
 }
 
-const sparseToDense = (data) => {
+const sparseToDense = (data, transformValue = (val) => val) => {
     try {
     const maxSampleIndex = _.max(data.map(d => d[1]))
     const maxTaxonIndex =_.max(data.map(d => d[0]))
@@ -78,7 +78,8 @@ const sparseToDense = (data) => {
 
      data.forEach((elm, idx) => {
         const [taxonIdx, sampleIdx, abundance] = elm;      
-        denseData[sampleIdx][taxonIdx] = abundance;
+       // console.log(`abundance ${abundance}  ${transformValue(abundance)}`)
+        denseData[sampleIdx][taxonIdx] = transformValue(abundance);
        
     }) 
 
@@ -90,10 +91,11 @@ const sparseToDense = (data) => {
 
 export const getBrayCurtisDistanceMatrix = (sparseMatrix, samples) => {
     
-   // let samples = Object.keys(sampleLabels)
-    
+    // Scale abundances, see https://github.com/gbif/edna-tool-ui/issues/2#issuecomment-1717637957 
+    const transformAbundance = (val) => Math.pow(val, 1/4)
+   
     // create a dataframe
-    const vectors =  sparseToDense(sparseMatrix)// samples.map(s => data[s])// [...samples.map(() => new Array(samples.length))];
+    const vectors =  sparseToDense(sparseMatrix, transformAbundance)
     const matrix = [...vectors.map(() => new Array(vectors.length))];
 
     try {
