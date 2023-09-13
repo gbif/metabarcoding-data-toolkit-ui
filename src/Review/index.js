@@ -5,7 +5,7 @@ import axios from "axios"
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
 import { Button, Row, Col, Typography, Descriptions, Tabs } from "antd";
-import TaxonomyChart from "./TaxonomyChart";
+import TaxonomyBarplot from "./TaxonomyBarplot";
 import { useNavigate, useLocation, useMatch } from "react-router-dom";
 import LeafletMap from "./Map";
 import TaxonomicSimilarity from "./TaxonomicSimilarity"
@@ -28,6 +28,7 @@ const Review = ({dataset}) => {
 
   return (
     <Layout><PageContent>
+        
       <Row>
         <Col flex="auto"></Col>
         <Col><Button onClick={() => navigate(`/dataset/${match?.params?.key}/metadata`)} type="primary">Proceed</Button></Col>

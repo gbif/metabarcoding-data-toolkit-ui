@@ -9,7 +9,8 @@ import TaxonomyChart from "./TaxonomyChart";
 import { useNavigate, useLocation, useMatch } from "react-router-dom";
 import LeafletMap from "./Map";
 import TaxonomicSimilarity from "./TaxonomicSimilarity"
-import { getDataForDissimilarityPlot } from "../Util/ordination"
+import TaxonomyBarplot from "./TaxonomyBarplot";
+import { getDataForDissimilarityPlot , getBrayCurtisDistanceMatrix} from "../Util/ordination"
 import _ from "lodash"
 import { getPromiseState } from "../Util/promises"
 import withContext from "../Components/hoc/withContext";
@@ -17,13 +18,13 @@ const ORDINATION_MAX_CARDINALITY = 2500000;
 const { Title } = Typography;
 
 const DataBrowser = ({ dataset }) => {
-   
+
     const [geoJson, setGeoJson] = useState(null)
     const [gsPromise, setGsPromise] = useState(Promise.resolve())
     const [samplIdToArrayIndex, setSamplIdToArrayIndex] = useState(new Map())
     const [samples, setSamples] = useState({});
     const [samplePromise, setSamplePromise] = useState(Promise.resolve())
-
+    const [sparseMatrixPromise, setSparseMatrixPromise]  = useState(Promise.resolve());
     const [selectedSample, setSelectedSample] = useState(null)
     const [ordination, setOrdination] = useState(null)
     const [ordinationPromise, setOrdinationPromise] = useState(Promise.resolve())
@@ -34,16 +35,19 @@ const DataBrowser = ({ dataset }) => {
     useEffect(() => {
 
         if (dataset?.id && dataset?.id !== datasetId) {
-                setDatasetId(dataset?.id )
-                setGeoJson(null)
-                    getGeoJson(dataset?.id)
-                setSamples({})
-              
-                    getSampleData(dataset?.id)
-                setOrdination(null)
-                if (((dataset?.summary?.sampleCount * dataset?.summary?.taxonCount) < ORDINATION_MAX_CARDINALITY)) {
-                    getOrdination(dataset?.id)
-                }
+            setDatasetId(dataset?.id)
+            setGeoJson(null)
+            getGeoJson(dataset?.id)
+            setSamples({})
+
+            getSampleData(dataset?.id)
+            setOrdination(null)
+            /* if (((dataset?.summary?.sampleCount * dataset?.summary?.taxonCount) < ORDINATION_MAX_CARDINALITY)) {
+                getOrdination(dataset?.id)
+            } */
+            /* if (((dataset?.summary?.sampleCount * dataset?.summary?.taxonCount) < ORDINATION_MAX_CARDINALITY)) {
+                getSparseMatrix(dataset?.id)
+            } */
             /* if (!geoJson) {
                 getGeoJson(dataset?.id)
             }
@@ -59,8 +63,8 @@ const DataBrowser = ({ dataset }) => {
     }, [dataset?.id])
 
     useEffect(() => {
-      //  console.log(selectedSample)
-      //  console.log(`the array index is ${samplIdToArrayIndex.get(selectedSample)}`)
+        //  console.log(selectedSample)
+        //  console.log(`the array index is ${samplIdToArrayIndex.get(selectedSample)}`)
     }, [selectedSample])
 
     const getGeoJson = async (key) => {
@@ -108,7 +112,7 @@ const DataBrowser = ({ dataset }) => {
         }
     }
 
-    const getOrdination = async (key) => {
+/*     const getOrdination = async (key) => {
         try {
             const status = await getPromiseState(ordinationPromise)
             if (status === "pending") {
@@ -119,6 +123,7 @@ const DataBrowser = ({ dataset }) => {
             setOrdinationPromise(p)
             const res = await p;
             const plotData = getDataForDissimilarityPlot(res?.data);
+          //  getBrayCurtisDistanceMatrix(res?.data)
             setOrdination(plotData)
             setLoading(false)
 
@@ -126,12 +131,29 @@ const DataBrowser = ({ dataset }) => {
             setLoading(false)
 
         }
-    }
+    } */
+
+ 
     return (
 
         <Row>
             <Col span={12}> {geoJson && <LeafletMap geoJson={geoJson} onFeatureClick={setSelectedSample} selectedSample={selectedSample} />}
-                {ordination && <TaxonomicSimilarity onSampleClick={setSelectedSample} selectedSample={selectedSample} />}
+                <Tabs defaultActiveKey="1" items={[
+                    {
+                        key: '1',
+                        label: `Taxonomy barplot`,
+                        children: <TaxonomyBarplot onSampleClick={setSelectedSample} selectedSample={selectedSample} />,
+                    },
+
+                    {
+                        key: '2',
+                        label: `PCoA/MDS plot`,
+                        children: <TaxonomicSimilarity sampleLabels={samples?.id} onSampleClick={setSelectedSample} selectedSample={selectedSample} />,
+                    },
+
+                ]} />
+
+                {/* {ordination && <TaxonomicSimilarity onSampleClick={setSelectedSample} selectedSample={selectedSample} />} */}
             </Col>
             <Col span={12} style={{ paddingLeft: "16px" }}>
                 {!isNaN(samplIdToArrayIndex.get(selectedSample)) && <Tabs defaultActiveKey="1" items={[
@@ -145,7 +167,7 @@ const DataBrowser = ({ dataset }) => {
                         key: '2',
                         label: `Sample metadata`,
                         children: <Descriptions column={2} title={`Sample: ${selectedSample}`}>
-                            {Object.keys(samples).map(key => <Descriptions.Item label={key}>{samples[key][samplIdToArrayIndex.get(selectedSample)]}</Descriptions.Item>)}
+                            {Object.keys(samples).map(key => <Descriptions.Item key={key} label={key}>{samples[key][samplIdToArrayIndex.get(selectedSample)]}</Descriptions.Item>)}
 
                         </Descriptions>,
                     },
