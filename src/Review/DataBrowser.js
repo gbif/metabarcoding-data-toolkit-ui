@@ -24,11 +24,15 @@ const DataBrowser = ({ dataset }) => {
     const [samplIdToArrayIndex, setSamplIdToArrayIndex] = useState(new Map())
     const [samples, setSamples] = useState({});
     const [samplePromise, setSamplePromise] = useState(Promise.resolve())
-    const [sparseMatrixPromise, setSparseMatrixPromise]  = useState(Promise.resolve());
+   // const [sparseMatrixPromise, setSparseMatrixPromise]  = useState(Promise.resolve());
     const [selectedSample, setSelectedSample] = useState(null)
-    const [ordination, setOrdination] = useState(null)
-    const [ordinationPromise, setOrdinationPromise] = useState(Promise.resolve())
-
+   // const [ordination, setOrdination] = useState(null)
+  //  const [ordinationPromise, setOrdinationPromise] = useState(Promise.resolve())
+    const [taxonomyData, setTaxonomyData] = useState(null)
+    const [taxonomyBySampleDataMap, setTaxonomyBySampleDataMap] = useState(null)
+    const [taxonomyDataMap, setTaxonomyDataMap] = useState(null)
+    const [taxonomyLoading, setTaxonomyLoading] = useState(false)
+    const [topTaxa, setTopTaxa] = useState(null)
     const [loading, setLoading] = useState(false)
     const [datasetId, setDatasetId] = useState(null)
 
@@ -41,7 +45,7 @@ const DataBrowser = ({ dataset }) => {
             setSamples({})
 
             getSampleData(dataset?.id)
-            setOrdination(null)
+            getTaxonomyData(dataset?.id)
             /* if (((dataset?.summary?.sampleCount * dataset?.summary?.taxonCount) < ORDINATION_MAX_CARDINALITY)) {
                 getOrdination(dataset?.id)
             } */
@@ -66,6 +70,12 @@ const DataBrowser = ({ dataset }) => {
         //  console.log(selectedSample)
         //  console.log(`the array index is ${samplIdToArrayIndex.get(selectedSample)}`)
     }, [selectedSample])
+
+    useEffect(()=>{
+        if(taxonomyDataMap){
+            getDatasetToptaxa()
+        }
+    },[taxonomyDataMap])
 
     const getGeoJson = async (key) => {
         try {
@@ -112,26 +122,92 @@ const DataBrowser = ({ dataset }) => {
         }
     }
 
-/*     const getOrdination = async (key) => {
+    const getTaxonomyData = async (key) => {
         try {
-            const status = await getPromiseState(ordinationPromise)
-            if (status === "pending") {
-                return;
-            }
-            setLoading(true)
-            const p = axios.get(`${config.backend}/dataset/${key}/data/ordination`);
-            setOrdinationPromise(p)
-            const res = await p;
-            const plotData = getDataForDissimilarityPlot(res?.data);
-          //  getBrayCurtisDistanceMatrix(res?.data)
-            setOrdination(plotData)
-            setLoading(false)
+            setTaxonomyLoading(true)
+            const res = await axios.get(`${config.backend}/dataset/${key}/data/taxonomy`)
+            setTaxonomyData(res?.data)
+            prepareTaxonomyData(res?.data)
+            setTaxonomyLoading(false)
 
         } catch (error) {
-            setLoading(false)
+            setTaxonomyLoading(false)
 
         }
-    } */
+    }
+
+    const prepareTaxonomyData = (samples) => {
+        // We may want to use a web worker here:
+        try {
+            const dataMap = {
+                'kingdom':{},
+                 'phylum': {},
+                  'class': {},
+                   'order': {},
+                    'family': {},
+                     'genus' : {}
+            };
+            const dataBySampleMap = {};
+            samples.forEach(sample => {
+                sample.taxonomy.forEach(row => {
+                    ['kingdom', 'phylum', 'class', 'order', 'family', 'genus'].forEach(rank => {
+                        if (row?.[rank] && dataMap[rank][row?.[rank]]) {
+                            dataMap[rank][row?.[rank]].value += row.value
+                            dataMap[rank][row?.[rank]].readCount += row.readCount
+                        } else {
+                            dataMap[rank][row?.[rank]] = {}
+                            dataMap[rank][row?.[rank]].value =  row.value
+                            dataMap[rank][row?.[rank]].readCount =  row.readCount
+                        }
+                        if (!dataBySampleMap[sample?.id]) {
+                            dataBySampleMap[sample?.id] = {
+                                'kingdom':{},
+                                 'phylum': {},
+                                  'class': {},
+                                   'order': {},
+                                    'family': {},
+                                     'genus' : {}
+                            }
+                        }
+                        if (row?.[rank] && dataBySampleMap?.[sample?.id]?.[rank]?.[row?.[rank]]) {
+                            dataBySampleMap[sample?.id][rank][row?.[rank]].value += row.value
+                            dataBySampleMap[sample?.id][rank][row?.[rank]].readCount += row.readCount
+                            
+                        } else if (row?.[rank] && !dataBySampleMap[sample?.id]?.[rank]?.[row?.[rank]]) {
+                            dataBySampleMap[sample?.id][rank][row?.[rank]] = {}
+                            dataBySampleMap[sample?.id][rank][row?.[rank]].value = row.value
+                            dataBySampleMap[sample?.id][rank][row?.[rank]].readCount = row.readCount
+                        }
+                    })
+                    
+                })
+            });
+            setTaxonomyDataMap(dataMap)
+            setTaxonomyBySampleDataMap(dataBySampleMap)
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const getDatasetToptaxa = () => {
+       const topTenTaxaInHigherRanks = ['kingdom', 'phylum', 'class', 'order'].map(rank => {
+            const dataMap = taxonomyDataMap[rank]
+           
+            if(rank === "kingdom"){
+                console.log(Object.keys(dataMap))
+            }
+            const sortedData = Object.keys(dataMap).filter(key => !!key).map(key => {
+               return { name: key, value: dataMap[key].value}
+            }).sort((a, b) => b.value - a.value);
+            const topTaxa = sortedData.slice(0, 10).map(e => e.name);
+            return topTaxa;
+        })
+        
+        setTopTaxa(topTenTaxaInHigherRanks)
+
+    }
+
 
  
     return (
@@ -142,7 +218,7 @@ const DataBrowser = ({ dataset }) => {
                     {
                         key: '1',
                         label: `Taxonomy barplot`,
-                        children: <TaxonomyBarplot onSampleClick={setSelectedSample} selectedSample={selectedSample} />,
+                        children: <TaxonomyBarplot onSampleClick={setSelectedSample} selectedSample={selectedSample} taxonomyBySampleDataMap={taxonomyBySampleDataMap} taxonomyDataMap={taxonomyDataMap} /* taxonomyData={taxonomyData} */ taxonomyLoading={taxonomyLoading}/>,
                     },
 
                     {
@@ -153,7 +229,6 @@ const DataBrowser = ({ dataset }) => {
 
                 ]} />
 
-                {/* {ordination && <TaxonomicSimilarity onSampleClick={setSelectedSample} selectedSample={selectedSample} />} */}
             </Col>
             <Col span={12} style={{ paddingLeft: "16px" }}>
                 {!isNaN(samplIdToArrayIndex.get(selectedSample)) && <Tabs defaultActiveKey="1" items={[
@@ -161,7 +236,7 @@ const DataBrowser = ({ dataset }) => {
                     {
                         key: '1',
                         label: `Taxonomic composition`,
-                        children: <TaxonomyChart sampleIndex={samplIdToArrayIndex.get(selectedSample)} selectedSample={selectedSample} />,
+                        children: <TaxonomyChart topTaxa={topTaxa} sampleIndex={samplIdToArrayIndex.get(selectedSample)} selectedSample={selectedSample} />,
                     },
                     {
                         key: '2',

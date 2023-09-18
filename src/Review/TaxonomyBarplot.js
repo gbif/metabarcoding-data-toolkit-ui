@@ -18,33 +18,27 @@ const configOptions = [
     { byAbundance: false, stacking: 'percent', label: 'Relative, by ASV count' },
     { byAbundance: false, stacking: 'normal', label: 'Constant, by ASV count' }];
 
-const TaxonomyBarplot = ({ dataset, onSampleClick, selectedSample }) => {
+const TaxonomyBarplot = ({ dataset, onSampleClick, selectedSample, taxonomyDataMap, taxonomyBySampleDataMap, taxonomyLoading: loading }) => {
     const [data, setData] = useState(null)
     const [options, setOptions] = useState(null)
-    const [loading, setLoading] = useState(false)
+  //  const [loading, setLoading] = useState(false)
     const [rank, setRank] = useState('class')
-    const [byAbundance, setByAbundance] = useState(false)
     const [chartConfig, setChartConfig] = useState(configOptions[0])
     const [hoverPoint, setHoverPoint] = useState(null);
     const chartRef = useRef()
 
     useEffect(() => {
-        if (dataset?.id) {
-            getData()
+        if (dataset?.id && taxonomyDataMap && taxonomyBySampleDataMap) {
+            initChart()
         }
-    }, [dataset?.id])
+    }, [dataset?.id, taxonomyDataMap, taxonomyBySampleDataMap])
 
     useEffect(() => {
-        if (data) {
-            initChart(data, rank)
+        if (taxonomyDataMap && taxonomyBySampleDataMap) {
+            initChart(rank)
         }
-    }, [rank, chartConfig.byAbundance, chartConfig.stacking])
+    }, [rank, chartConfig.byAbundance, chartConfig.stacking, taxonomyDataMap, taxonomyBySampleDataMap])
 
-    /* useEffect(() => {
-        if (data) {
-            initChart(data, rank)
-        }
-    }, [chartConfig]) */
 
     useEffect(() => {
         const chart = chartRef.current?.chart;
@@ -64,50 +58,26 @@ const TaxonomyBarplot = ({ dataset, onSampleClick, selectedSample }) => {
         }
     }, [selectedSample])
 
-    const getData = async () => {
+
+    const getChartData = (rank,  byAbundance) => {
         try {
-            setLoading(true)
-            const res = await axios.get(`${config.backend}/dataset/${dataset.id}/data/taxonomy`)
-            setData(res?.data)
-            initChart(res?.data)
-            setLoading(false)
-
-        } catch (error) {
-            setLoading(false)
-
-        }
-    }
-
-    const getChartData = (samples, rank, byAbundance) => {
-        try {
-            const dataMap = {};
-            const dataBySampleMap = {};
-            samples.forEach(sample => {
-                sample.taxonomy.forEach(row => {
-                    if (row?.[rank] && dataMap[row?.[rank]]) {
-                        dataMap[row?.[rank]] += (byAbundance ? row.readCount : row.value)
-                    } else {
-                        dataMap[row?.[rank]] = (byAbundance ? row.readCount : row.value)
-                    }
-                    if (!dataBySampleMap[sample?.id]) {
-                        dataBySampleMap[sample?.id] = {}
-                    }
-                    if (row?.[rank] && dataBySampleMap[sample?.id][row?.[rank]]) {
-                        dataBySampleMap[sample?.id][row?.[rank]] += (byAbundance ? row.readCount : row.value)
-                    } else if (row?.[rank] && !dataBySampleMap[row?.id]?.[row?.[rank]]) {
-                        dataBySampleMap[sample?.id][row?.[rank]] = (byAbundance ? row.readCount : row.value)
-                    }
-                })
-
-
-            });
-            const sortedData = Object.keys(dataMap).map(key => ({ name: key, value: dataMap[key] })).sort((a, b) => b.value - a.value);
+            const dataMap = taxonomyDataMap[rank]
+           
+            const sortedData = Object.keys(dataMap).map(key => {
+               return { name: key, value: byAbundance ? dataMap[key].readCount :  dataMap[key].value}
+            }).sort((a, b) => b.value - a.value);
             const topTaxa = sortedData.slice(0, 10).map(e => e.name);
             const topTaxaSet = new Set(topTaxa);
-            const categories = Object.keys(dataBySampleMap);
+            const categories = Object.keys(taxonomyBySampleDataMap);
+            console.log(topTaxa)
             const series = [...topTaxa, 'Other taxa'].map(taxon => ({
                 name: taxon,
-                data: categories.map(sampleID => taxon !== 'Other taxa' ? (dataBySampleMap[sampleID][taxon] || 0) : Object.keys(dataBySampleMap[sampleID]).reduce((acc, cur) => (topTaxaSet.has(cur) ? acc : acc + dataBySampleMap[sampleID][cur]), 0)),
+                data: categories.map(sampleID => {
+                    const sample = taxonomyBySampleDataMap[sampleID][rank];
+                    return taxon !== 'Other taxa' ? 
+                    ((byAbundance ? sample?.[taxon]?.readCount : sample?.[taxon]?.value )|| 0) 
+                    : Object.keys(sample).reduce((acc, cur) => (topTaxaSet.has(cur) ? acc : acc + (byAbundance ? sample?.[taxon]?.readCount : sample?.[taxon]?.value )), 0)
+                }),
                 point: {
                     events: {
                         click: (e) => {
@@ -132,10 +102,10 @@ const TaxonomyBarplot = ({ dataset, onSampleClick, selectedSample }) => {
 
     }
 
-    const initChart = (data, rank = "class") => {
+    const initChart = ( rank = "class") => {
         console.log("INIT")
         const { byAbundance, stacking } = chartConfig;
-        const { series, categories } = getChartData(data, rank, byAbundance);
+        const { series, categories } = getChartData( rank, byAbundance);
         const options = {
             chart: {
                 type: 'column',

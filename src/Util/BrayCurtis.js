@@ -1,7 +1,5 @@
 var _ = require('lodash');
 
-//const debug = console.log;
-
 
 function BrayCurtis(vectors, opts){
   if (!(this instanceof BrayCurtis)) return new BrayCurtis(vectors, opts);
@@ -61,7 +59,7 @@ function BrayCurtis(vectors, opts){
 
 
 
-function findIndex(vectors, subject) {
+/* function findIndex(vectors, subject) {
   var i;
   for (i = vectors.length - 1; i >= 0; i--) {
     if (_.isEqual(vectors[i], subject)) break;
@@ -71,7 +69,7 @@ function findIndex(vectors, subject) {
     throw new Error('subject not found in vectors');
   }
   return i;
-}
+} */
 
 
 function assertVectorShape(vectors) {

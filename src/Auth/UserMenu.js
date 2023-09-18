@@ -3,13 +3,14 @@ import React, { useState, useEffect, useRef, createContext, useContext } from "r
 import { useNavigate } from "react-router-dom";
 import { LogoutOutlined, BarsOutlined } from "@ant-design/icons";
 import { Menu, Dropdown, Avatar, Modal, Button, theme } from "antd";
+import hashCode from "../Util/hashCode"
 import withContext from "../Components/hoc/withContext";
 import LoginForm from "./LoginForm"
 import {refreshLogin} from './userApi'
 const { useToken } = theme;
  
 
-const hashCode = function (str) {
+/* const hashCode = function (str) {
   let hash = 0,
     i,
     chr;
@@ -20,7 +21,7 @@ const hashCode = function (str) {
     hash |= 0; // Convert to 32bit integer
   }
   return hash;
-};
+}; */
 
 const styles = {
   avatar: {

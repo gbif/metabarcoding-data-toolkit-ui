@@ -2,10 +2,9 @@ import Jaccard from "jaccard-index";
 import BrayCurtis from "./BrayCurtis";
 import numeric from "numeric"
 import _ from 'lodash'
-import testData from "./testData";
 const jaccard = Jaccard();
 
-export const getJaccardDistanceMatrix2 = (data) => {
+/* export const getJaccardDistanceMatrix2 = (data) => {
     
     let samples = Object.keys(data)
     
@@ -18,7 +17,7 @@ export const getJaccardDistanceMatrix2 = (data) => {
         const sample1 = samples[i]
         for(let j= i+1; j < samples.length; j++){
             const sample2 = samples[j]
-            let idx = (jaccard.index(data[sample1], data[sample2]) /* || 0 */)  // * 10000;
+            let idx = (jaccard.index(data[sample1], data[sample2])) 
             
             res[j] = idx;
             matrix[j][i] = idx;
@@ -29,7 +28,7 @@ export const getJaccardDistanceMatrix2 = (data) => {
         matrix,
         samples
     }
-}
+} */
 
 export const getJaccardDistanceMatrix = (sparseMatrix, samples) => {
     
@@ -124,7 +123,7 @@ export const getBrayCurtisDistanceMatrix = (sparseMatrix, samples) => {
    
 } 
 
- /// given a matrix of distances between some points, returns the
+/// given a matrix of distances between some points, returns the
 /// point coordinates that best approximate the distances using
 /// classic multidimensional scaling
 export const classicMDS = (distances, dimensions) => {

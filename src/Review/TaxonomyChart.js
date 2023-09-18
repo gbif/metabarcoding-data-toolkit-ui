@@ -9,11 +9,13 @@ import HC_sunburst from "highcharts/modules/sunburst";
 import HighchartsReact from "highcharts-react-official";
 import _ from 'lodash'
 import withContext from "../Components/hoc/withContext";
+import hashCode from "../Util/hashCode"
 
 HC_exporting(Highcharts);
 HC_sunburst(Highcharts);
+const ranks = ['kingdom', 'phylum', 'class', 'order', 'family', 'genus'];
 
-const TaxonomyChart = ({dataset, sampleIndex, selectedSample}) => {
+const TaxonomyChart = ({dataset, sampleIndex, selectedSample, topTaxa}) => {
     const [options, setOptions] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -48,8 +50,19 @@ const TaxonomyChart = ({dataset, sampleIndex, selectedSample}) => {
     
       const initChart = (data, selectedSample) => {
        // const DOI = dataset.doi ? "https://doi.org/" + dataset.doi : null;
-       
-       
+      // const groupedData = _.groupBy(data, 'rank');
+      let firstIndexRankWithMultipleTaxa
+        if(topTaxa){
+           firstIndexRankWithMultipleTaxa = topTaxa.findIndex(elm => elm.length > 2);
+        }
+
+
+    //   
+
+        
+
+
+       const colors = Highcharts.getOptions().colors;
         let options = {
 
             chart: {
@@ -57,8 +70,8 @@ const TaxonomyChart = ({dataset, sampleIndex, selectedSample}) => {
             },
            
             // Let the center circle be transparent
-            colors: ['transparent'].concat(Highcharts.getOptions().colors),
-          
+           // colors: ['transparent'].concat(Highcharts.getOptions().colors),
+           colorAxis: {},
             title: {
               text: selectedSample
             },
@@ -69,7 +82,7 @@ const TaxonomyChart = ({dataset, sampleIndex, selectedSample}) => {
           
             series: [{
               type: 'sunburst',
-              data: data,
+              data: data.map(d => { return d.rank === ranks[firstIndexRankWithMultipleTaxa] || d.rank === "phylum" ? {...d, color: colors[Math.abs(hashCode(d.id)) % 10]} : d}),
               name: 'Root',
               turboThreshold: 2500,
               allowDrillToNode: true,
