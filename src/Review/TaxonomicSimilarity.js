@@ -68,6 +68,7 @@ const getChartOptions = (data, indexType, onSampleClick) => {
          // color: 'rgba(152,0,67,0.1)',
           name: "Sample",
           data: data,
+          turboThreshold: 2500,
          /*  marker: {
             radius: 0.5
           }, */
@@ -97,7 +98,7 @@ const TaxonomyChart = ({dataset, onSampleClick, selectedSample, sampleLabels}) =
   const [invalid, setInvalid] = useState(false);
   const [hoverPoint, setHoverPoint] = useState(null);
   const [indexType, setIndexType] = useState('jaccard');
- // const [jaccardOptions, setJaccardOptions] = useState(null);
+  // const [jaccardOptions, setJaccardOptions] = useState(null);
  // const [brayCurtisOptions, setBrayCurtisOptions] = useState(null)
   const [sparseMatrix, setSparseMatrix] = useState(null)
   const [datasetID, setDatasetID] = useState(null)
@@ -140,7 +141,7 @@ const TaxonomyChart = ({dataset, onSampleClick, selectedSample, sampleLabels}) =
   }, [selectedSample])
 
     useEffect(()=> {
-   // const chart = chartRef.current?.chart;
+    const chart = chartRef.current?.chart;
   /*     if(sparseMatrix && indexType === "jaccard" && !jaccardOptions) {
         setLoading(true)
         const opts = getChartOptions(getDataForDissimilarityPlot(sparseMatrix, indexType, sampleLabels) ,indexType, onSampleClick)
@@ -155,10 +156,20 @@ const TaxonomyChart = ({dataset, onSampleClick, selectedSample, sampleLabels}) =
         setOptions(indexType === "jaccard" ? jaccardOptions : brayCurtisOptions)
       } */
     
-    /* if(chart){
-      chart.update(indexType === "jaccard" ? jaccardOptions : brayCurtisOptions)
-    } */
-    setOptions(indexType === "jaccard" ? jaccardOptions : brayCurtisOptions)
+     if(chart && indexType === "jaccard" && jaccardOptions){
+      chart.update(jaccardOptions)
+      
+    } else if(chart && indexType === "bray-curtis" && brayCurtisOptions){
+      chart.update(brayCurtisOptions)
+    }
+    if(indexType === "jaccard" && jaccardOptions){
+      setOptions(jaccardOptions)
+    } else if(indexType === "bray-curtis" && brayCurtisOptions){
+      setOptions(brayCurtisOptions)
+    }
+
+    
+    
     
   }, [indexType, jaccardOptions, brayCurtisOptions/* , sparseMatrix, sampleLabels */])
 

@@ -152,7 +152,7 @@ const DataUpload = ({ user,
                                     {dataFormat?.name}
                                 </Tag>}
                                 {dataFormat?.name && dataFormat?.name === "Invalid format" && <Tag icon={<CloseCircleOutlined />} color="error">
-                                    {dataFormat?.name}
+                                    {dataFormat?.name}{dataset?.files?.invalidMessage ? ` - ${dataset?.files?.invalidMessage}`:""}
                                 </Tag>}
                             </Col>
                             <Col>

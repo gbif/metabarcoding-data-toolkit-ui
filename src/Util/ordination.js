@@ -31,7 +31,7 @@ const jaccard = Jaccard();
 } */
 
 export const getJaccardDistanceMatrix = (sparseMatrix, samples) => {
-    
+    console.log('getJaccardDistanceMatrix')
     // let samples = Object.keys(data)
     
     // create a dataframe
@@ -39,10 +39,13 @@ export const getJaccardDistanceMatrix = (sparseMatrix, samples) => {
     const matrix = [...data.map(() => new Array(data.length))];
     
     for(let i =0; i < data.length; i++){
+        if(i % 100 === 0){
+            console.log(`Processed ${i} records`)
+        }
         const res = matrix[i]
         res[i] = 0; // dist to self always 0
        // const sample1 = samples[i]
-        for(let j= i+1; j < samples.length; j++){
+        for(let j= i+1; j < data.length; j++){
          //   const sample2 = samples[j]
             let idx = (jaccard.index(data[i], data[j]) /* || 0 */)  // * 10000;
             
