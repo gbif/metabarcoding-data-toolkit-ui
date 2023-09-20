@@ -8,6 +8,7 @@ import withContext from "./hoc/withContext"
 import config from "../config";
 import { axiosWithAuth } from "../Auth/userApi";
 import {useNavigate, useMatch} from 'react-router-dom'
+import _ from 'lodash'
 const { useToken } = theme;
 const { Title } = Typography
 
@@ -15,11 +16,11 @@ const { Title } = Typography
 const reducer = (state, action) => {
     switch (action.type) {
         case 'mapTaxonTerm':
-            return { ...state, taxa: {...state.taxa, [action.payload.term]: action.payload.value}};
+            return { ...state, taxa: action.payload.value ? {...state.taxa, [action.payload.term]: action.payload.value} : _.omit(state.taxa, action.payload.term)};
         case 'mapSampleTerm':
-            return { ...state, samples: {...state.samples, [action.payload.term]: action.payload.value}};
+            return { ...state, samples: action.payload.value ? {...state.samples, [action.payload.term]: action.payload.value} : _.omit(state.samples, action.payload.term)};
         case 'createDefaultValue':
-            return {...state, defaultValues: {...state.defaultValues, [action.payload.term]: action.payload.value}}
+            return {...state, defaultValues:  action.payload.value ? {...state.defaultValues, [action.payload.term]: action.payload.value} : _.omit(state.defaultValues, action.payload.term)}
         case 'loadStoredMapping':
             return action.payload
         default:
@@ -183,6 +184,15 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
                     setTaxonTerms(taxonTerms.filter(t => t?.name !== term?.name))
                 } else if(type === 'sample'){
                     setSampleTerms(sampleTerms.filter(t => t?.name !== term?.name))
+                }
+                if(state.taxa[term?.name]){
+                    dispatch({ type: 'mapTaxonTerm', payload: {term: term.name, value: null} })
+                }
+                if(state.samples[term?.name]){
+                    dispatch({ type: 'mapSampleTerm', payload: {term: term.name, value: null} })
+                }
+                if(state.defaultValues[term?.name]){
+                    dispatch({ type: 'createDefaultValue', payload: {term: term.name, value: null} })
                 }
             }}>Delete</Button>,
           }
