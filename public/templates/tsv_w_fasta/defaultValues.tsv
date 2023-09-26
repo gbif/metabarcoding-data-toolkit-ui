@@ -1,0 +1,10 @@
+term	value
+env_medium	soil [ENVO:00001998]
+target_gene	ITS2
+pcr_primer_forward	GTGARTCATCGARTCTTTG
+pcr_primer_name_forward	gITS7
+pcr_primer_reverse	TCCTCCGCTTATTGATATGC
+pcr_primer_name_reverse	ITS4
+sop	https://www.protocols.io/view/emp-its-illumina-amplicon-protocol-14egnqypg5dy/v1
+seq_meth	Illumina MiSeq
+otu_db	UNITE v9.3

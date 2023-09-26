@@ -1,0 +1,5 @@
+id	scientificName	kingdom	phylum	class	order	family	genus
+OTU_A	Hygrocybe acutoconica	Fungi	Basidiomycota	Agaricomycetes	Agaricales	Hygrophoraceae	Hygrocybe
+OTU_B	Cryptococcus_aerius	Fungi	Basidiomycota	Tremellomycetes	Tremellales		Cryptococcus
+OTU_C	Stagonospora pseudovitensis		Ascomycota	Dothideomycetes	Pleosporales	Phaeosphaeriaceae	Stagonospora
+OTU_D	Incertae sedis						

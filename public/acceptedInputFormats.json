@@ -1,0 +1,23 @@
+[
+    {
+        "title": "Excel workbook",
+        "description": "A workbook with three sheets; OTUtable, taxa, samples and optionally defaultValues. The latter may contain study-wide defaults. The OTU table must have samples as columns, taxa/OTUs as rows.",
+        "template": "/templates/xlsx/edna_template.xlsx"
+    },
+    {
+        "title": "Excel workbook with fasta file",
+        "description": "A workbook with three sheets; OTUtable, taxa, samples and optionally defaultValues. The latter may contain study-wide defaults. Instead of having the sequences in the taxa sheet, a fasta file is provided. The OTU table must have samples as columns, taxa/OTUs as rows.",
+        "template": "/templates/xlsx_w_fasta/edna_template_w_fasta.zip"
+    },
+    {
+        "title": "TSV format",
+        "description": "Three tsv/csv files OTUtable.tsv, taxa.tsv, samples.tsv. An optional defaultValues.tsv containing study-wide defaults. The OTU table can have samples as either columns or rows.",
+        "template": "/templates/tsv/edna_template_tsv.zip"
+    }
+    ,
+    {
+        "title": "TSV format with fasta file",
+        "description": "Three tsv/csv files OTUtable.tsv, taxa.tsv, samples.tsv. An optional defaultValues.tsv containing study-wide defaults. Instead of having the sequences in the taxa.tsv file, a fasta file is provided. The OTU table can have samples as either columns or rows.",
+        "template": "/templates/tsv_w_fasta/edna_template_tsv_w_fasta.zip"
+    }
+]

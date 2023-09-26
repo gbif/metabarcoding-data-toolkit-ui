@@ -49,8 +49,8 @@ export const getJaccardDistanceMatrix = (sparseMatrix, samples) => {
          //   const sample2 = samples[j]
             let idx = (jaccard.index(data[i], data[j]) /* || 0 */)  // * 10000;
             
-            res[j] = idx;
-            matrix[j][i] = idx;
+            res[j] = idx || 0;
+            matrix[j][i] = idx || 0;
             
         }
     }
