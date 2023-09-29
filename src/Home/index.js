@@ -37,7 +37,7 @@ function App() {
           </Row>
           <Row>
             <Title level={5} italic>
-              bridging genomics and biodiversity
+              bridging metabarcoding and biodiversity
             </Title>
           </Row>
         </Col>
