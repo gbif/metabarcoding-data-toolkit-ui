@@ -127,8 +127,8 @@ const UserMenu = ({login, user, logout, setUser, loginFormVisible, setLoginFormV
       <React.Fragment>
         {!user && (
           <span style={{ padding: "0 10px" }}>
-            <Button htmlType="button"  onClick={showLogin}>
-            <span style={{ color: token.colorPrimary }}>Login</span>
+            <Button type="link"  onClick={showLogin}>
+            <span style={{ color: "white" }}> Login</span>
             </Button>
           </span>
         )}

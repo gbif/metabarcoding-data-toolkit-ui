@@ -28,32 +28,31 @@ const AppLayout = ({ children, setDataset, user }) => {
     <Layout className="layout">
       <Header>
         <Row>
-          <Col span={1} style={{ padding: "4px" }} >
+          <Col  onClick={() => navigate("/")} span={1} style={{ padding: "4px" , cursor: "pointer"}} >
             <Logo />
           </Col>
-          <Col>  <Title level={4} style={{color: "tomato",  padding: "20px"}}>TEST VERSION</Title>
-</Col>
+          <Col><Button onClick={() => navigate("/")} type={"link"}><Title level={4} style={{color: "white"}}>eDNA Tool - Test environment</Title> </Button> </Col> 
           <Col flex="auto">
            
           </Col>
           <Col>
-          <Title style={{color: "white",  padding: "8px"}}>GBIF eDNA Tool</Title>
+          
           </Col>
           <Col flex="auto"></Col>
           <Col>
             <Button
               style={{ marginRight: "8px" }}
 /*               disabled={(location?.pathname !== "/dataset/new" ) || !user}
- */              type={"default"}
+ */              type={"link"}
               onClick={() => {
                 setDataset(null)
                 navigate("/dataset/new");
               }}
+              
             >
-             <span style={{ color: token.colorPrimary }}> New dataset</span>
+             <span style={{ color: "white" }}> New dataset</span>
             </Button>
-            <Button style={{ marginRight: "8px" }} onClick={() => navigate("/")}> <span style={{ color: token.colorPrimary }}>About </span></Button>
-            <Button onClick={() => navigate("/faq")}> <span style={{ color: token.colorPrimary }}>FAQ </span></Button>
+            <Button type={"link"} onClick={() => navigate("/faq")}> <span style={{  color: "white"  }}>FAQ </span></Button>
             <UserMenu />
           </Col>
         </Row>
