@@ -4,7 +4,7 @@ import { useNavigate, useLocation, useMatch } from "react-router-dom";
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
 import _ from "lodash"
-import { Row, Col, Alert, Button, List, Typography, Popconfirm, Tag, theme, message } from "antd"
+import { Row, Col, Alert, Button, List, Typography, Popconfirm, Tag, theme, message, notification } from "antd"
 import {
     CheckCircleOutlined,
     CloseCircleOutlined,
@@ -134,7 +134,17 @@ const DataUpload = ({ user,
                             </span></>}/>
 
                         <Uploader datasetKey={match?.params?.key}
-                            onError={(e) => { message.error(e?.message) }}
+                            onError={(e) => { 
+                                if(e?.response?.status > 399 && e?.response?.status < 500){
+                                    setLoginFormVisible(true)
+                                    notification.warning({
+                                        description: "You must login to upload data."
+                                    })
+                                } else {
+                                    message.error(e?.message) }
+                                }
+                                 
+                                }
                             onSuccess={(id) => {
                                 if (!match?.params?.key) {
                                     navigate(`/dataset/${id}/upload`)

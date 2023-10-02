@@ -48,9 +48,11 @@ const Uploader = ({onSuccess, onError, datasetKey, dataset}) => {
                
             })
             .catch((err) => {
-                message.error('upload failed.');
+                
                 if(typeof onError === 'function'){
                     onError(err)
+                } else {
+                    message.error('upload failed.');
                 }
             })
             .finally(() => {

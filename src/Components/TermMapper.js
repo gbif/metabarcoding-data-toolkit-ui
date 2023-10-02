@@ -1,5 +1,5 @@
 import { useEffect, useState, useReducer } from "react";
-import { Table, Popover, Typography, Row, Col, theme, Button, message } from "antd"
+import { Table, Popover, Typography, Row, Col, theme, Button, message, notification } from "antd"
 import HeaderSelect from "./HeaderSelect";
 import DefaultValueSelect from "./DefaultValueSelect";
 import DwcTermSelect from "./DwcTermSelect";
@@ -86,7 +86,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
     const saveMapping = async () => {
 
        // console.log(state)
-       
+       checkImportantTermsExist()
             try {
                 setLoading(true)
                 const taxaMapping = Object.keys(state.taxa).reduce((acc, key) => {
@@ -119,6 +119,25 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
     
             }
         
+
+    }
+
+    const checkImportantTermsExist = () => {
+        const hasLatLon = (dataset?.sampleHeaders.includes('decimalLatitude') || Object.keys(state.samples).includes('decimalLatitude')) && (dataset?.sampleHeaders.includes('decimalLongitude') || Object.keys(state.samples).includes('decimalLongitude'));
+        const hasEventDate = dataset?.sampleHeaders.includes('eventDate') || Object.keys(state.samples).includes('eventDate');
+        const hasSequence = dataset?.files?.format.endsWith('_FASTA') || dataset?.taxonHeaders.includes('DNA_sequence') || Object.keys(state.taxa).includes('DNA_sequence');
+
+        if(!hasSequence || !hasLatLon || !hasEventDate){
+            notification.warning({
+                duration: 0,
+                message: 'Attention',
+                description: <ul>
+                    {!hasLatLon && <li>You have no fields named 'decimalLatitude' and 'decimalLongitude' and you have not provided mappings for those fields.</li>}
+                    {!hasEventDate && <li>You have no field named 'eventDate' and you have not provided a mapping for that field.</li>}
+                    {!hasSequence && <li>You have no field named 'DNA_sequence' and you have not provided a mapping for that field.</li>}
+                    </ul>,
+              })
+        }
 
     }
 
