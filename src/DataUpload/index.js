@@ -195,10 +195,10 @@ const DataUpload = ({ user,
                                             cancelText="No"><Button type="link"><DeleteOutlined /></Button></Popconfirm>]}
                                 >
                                     <List.Item.Meta
-                                        title={<span style={file?.errors?.length >0 ? { color: token.colorError } : null}>{file.name}</span>}
+                                        title={<span style={file?.errors?.length >0 ? { color: token.colorWarning } : null}>{file.name}</span>}
                                         description={<>
                                             {`${file?.mimeType} - ${Math.round(file.size * 10) / 10} mb`}
-                                            {file?.errors && file?.errors.map(e => <Alert message={e?.message} type="error" showIcon style={{marginBottom: "8px"}} />)}
+                                            {file?.errors && file?.errors.map(e => <Alert message={e?.message} type="warning" showIcon style={{marginBottom: "8px"}} />)}
                                         </>}
                                     />
                                 </List.Item>

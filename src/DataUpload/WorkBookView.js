@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from "react";
-import { Tabs, Table, Button, Row, Col, Typography } from "antd";
+import { Tabs, Table, Button, Row, Col, Typography , Alert} from "antd";
 const { Text, Link } = Typography;
 
 
@@ -20,8 +20,9 @@ const WorkBookView = ({ sheets, dismiss }) => {
         key: sheet?.name,
         label: sheet?.name,
         children: <>
-        {sheet?.numColumns > sheet?.columnLimit && <Row><Text type="warning">{`This preview shows the first ${sheet?.columnLimit} of ${sheet?.numColumns} columns.`}</Text></Row>
-    }
+        {sheet?.numColumns > sheet?.columnLimit && <Row><Text type="warning">{`This preview shows the first ${sheet?.columnLimit} of ${sheet?.numColumns} columns.`}</Text></Row>}
+        {(sheet?.errors || []).map(e => <Alert message={e} type="warning" showIcon style={{marginBottom: "8px"}} />) }
+
     <Table
       size="small"
       scroll={{

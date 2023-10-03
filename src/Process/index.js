@@ -282,7 +282,7 @@ const ProcessDataset = ({
                                     dot: s.status === "finished" ? <CheckCircleOutlined /> : s.status === "failed" ? <ExclamationCircleOutlined /> : s.status === "pending" ? <ClockCircleOutlined /> : null,
                                     color: getStatusColor(s.status),
                                     children: (s.status === "finished" && idx === dataset?.steps?.length - 1) ? "Finished" :
-                                        (s.status === "failed") ? `${s.messagePending} - Failed${s?.message ? ": " + s.message : ""}` :
+                                        (s.status === "failed") ? `${s.messagePending} - Failed${s?.message ? ": " + s.message + (s.message.includes('This data matrix has out of bounds value') ? ' - Check that column names in the OTU table corresponds to the IDs in the sample file.':'') : ""}` :
                                             <>
                                                 {`${s.status === "processing" ? s.message : s.messagePending}${(s.subTask && idx === dataset?.steps.length - 1) ? " - " + s.subTask : ""}`}
                                                 {s.status === "processing" && (!isNaN(s.total) && s.total !== 0 && s.progress) &&
