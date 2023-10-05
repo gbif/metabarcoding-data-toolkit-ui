@@ -72,7 +72,7 @@ const getDatasets = async (usr) => {
         renderItem={(d) => (
             <List.Item
            
-                actions={[<Button type="link" onClick={() =>  navigate(`/dataset/${d.id}`)}><EyeOutlined /></Button>,<Button type="link" onClick={() =>  navigate(`/dataset/${d?.dataset_id}/upload`)}><EditOutlined /></Button>]}
+                actions={[<Button type="link" onClick={() =>  navigate(`/dataset/${d.dataset_id}`)}><EyeOutlined /></Button>,<Button type="link" onClick={() =>  navigate(`/dataset/${d?.dataset_id}/upload`)}><EditOutlined /></Button>]}
             >
                 <List.Item.Meta
                     title={d?.metadata?.title || d?.title || d.id}

@@ -194,7 +194,7 @@ const TaxonomyBarplot = ({ dataset, onSampleClick, selectedSample, taxonomyDataM
                 <Col flex="auto"></Col>
 
                 <Col>
-                    <Text>Select taxon rank:</Text>
+                    <Text>Taxon rank:</Text>
                     <Select style={{ marginLeft: '8px', width: "200px" }} value={rank} onChange={setRank}>
                         {['phylum', 'class', 'order', 'family', 'genus'].map(r => <Select.Option value={r} key={r}>{r}</Select.Option>)}
 
