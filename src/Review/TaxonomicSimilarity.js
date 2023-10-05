@@ -142,19 +142,6 @@ const TaxonomyChart = ({dataset, onSampleClick, selectedSample, sampleLabels}) =
 
     useEffect(()=> {
     const chart = chartRef.current?.chart;
-  /*     if(sparseMatrix && indexType === "jaccard" && !jaccardOptions) {
-        setLoading(true)
-        const opts = getChartOptions(getDataForDissimilarityPlot(sparseMatrix, indexType, sampleLabels) ,indexType, onSampleClick)
-        setJaccardOptions(opts)
-        setLoading(false)
-      } else if(sparseMatrix && indexType === "bray-curtis" && !brayCurtisOptions){
-        setLoading(true)
-        const opts = getChartOptions(getDataForDissimilarityPlot(sparseMatrix, indexType, sampleLabels) ,indexType, onSampleClick)
-        setBrayCurtisOptions(opts)
-        setLoading(false)
-      } else {
-        setOptions(indexType === "jaccard" ? jaccardOptions : brayCurtisOptions)
-      } */
     
      if(chart && indexType === "jaccard" && jaccardOptions){
       chart.update(jaccardOptions)

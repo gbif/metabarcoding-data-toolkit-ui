@@ -84,7 +84,7 @@ const TaxonomyChart = ({dataset, sampleIndex, selectedSample, topTaxa}) => {
               type: 'sunburst',
               data: data.map(d => { return d.rank === ranks[firstIndexRankWithMultipleTaxa] || d.rank === "phylum" ? {...d, color: colors[Math.abs(hashCode(d.id)) % 10]} : d}),
               name: 'Root',
-              turboThreshold: 2500,
+              turboThreshold: 0,
               allowDrillToNode: true,
               cursor: 'pointer',
               dataLabels: {
