@@ -3,15 +3,15 @@ It helps format a DNA metabarcoding dataset (OTU table style) to be published on
 
 
 # Who can use the tool?
-Currently, GBIF is deveopling and testing the tool internally, but it will be opened to a wider audience later. Anybody can provide datasets for the test phase, and these datasets may be published to GBIF.org if the data holder wishes. See more [here](https://tinyurl.com/eDNA2023).
+Currently, GBIF is developing and testing the tool, but it will be opened to a wider audience later. Anybody can provide datasets for the test phase, and these datasets may be published to GBIF.org if the data holder wishes. See more [here](https://tinyurl.com/eDNA2023).
 
 
 # Is there a template?
-Yes, there is a template with a small dummy dataset [here](https://edna-tool.gbif-uat.org/templates/edna_template.xlsx). The template is rather basic. Further acceptable and relevant DwC fields (including MiXS terms) may be added manually. Eventually a set of templates will be available. The tool also accepts data as separate csv or tsv files.  
+Yes, there is a template with a small dummy dataset [here](https://edna-tool.gbif-uat.org/templates/edna_template.xlsx). The template is rather basic. Further DwC fields (including MiXS terms) may be added manually. Eventually a set of templates will be available. The tool also accepts data as separate csv or tsv files, and sequences as a separate fasta file. 
 
     
 # What kind of data can be published/submitted using this tool?
-This tool processes an OTU table so the data can be published to GBIF.org. With an OTU table we think if a table containing some sequences (ASVs/OTUs) and their sequence abundance in a set of samples. Each sample would normally be the result of the PCR amplification of DNA extracted from a sample and sequenced on a high throughput seqeuncing platform like Illumina MiSeq.
+This tool processes an OTU table so the data can be published to GBIF.org. With an OTU table we think of a table containing some sequences (ASVs/OTUs) and their sequence abundance in a set of samples. Each sample would normally be the result of the PCR amplification of DNA extracted from a sample and sequenced on a high throughput seqeuncing platform like Illumina MiSeq.
 
     
 # What kind of samples are acceptable to publish on GBIF.org?
@@ -31,7 +31,7 @@ Identical sequences should be collapsed (dereplicated), and futher clustering, d
     
     
 # Should sequence abundances be converted to relative abundances?
-No. GBIF recommends to share detected absolute abundances (number of reads of the ASV/OTU in you sample). The tool will automatically calculate total number of reads per sample and relative abundances, so that future users have the option to filter on both absolute and relative abundances.
+No. GBIF recommends to share detected absolute abundances (detected number of reads of each ASV/OTU in each sample). The tool will automatically calculate total number of reads per sample and relative abundances, so that future users have the option to filter on both absolute and relative abundances.
     
     
 # Should samples be resampled/rarefied to even sequencing depth?
@@ -39,7 +39,7 @@ No. When doing metabarcoding, researchers are often resampling the OTU tables to
     
     
 # Should negative controls, positive controls, blanks and failed samples be removed from the dataset?
-Yes. Only share data from real environmental samples producing data that seems trustworthy should be shared. NB: The tool only includes samples that are present in both the sample data AND the OTU table - i.e. it automatically discards samples that are absent from either table. So, removing controls from the sample-list is an easy way to do that.  
+Yes. Only share data from real environmental samples producing data that seems trustworthy should be shared. NB: The tool only includes samples that are present in both the sample data AND the OTU table - i.e. it automatically discards samples that are absent from either table. So, removing controls from the sample-list is an easy way to do that. Future developments may allow the inclusion of control samples, but the handling of such samples is not yet in place. 
     
     
 # Should I remove singletons, infrequent or low abundant sequences?
@@ -59,7 +59,7 @@ Yes. Some sequences/OTUs may be sustepcted contamination as e.g. DNA from human 
     
     
 # Should non-target sequences be removed?
-No, but it is ok if it has been done. Some sequences/OTUs are perceived as non-target sequences - e.g. if mammals are detected in a study using fish-specific primers. However, most of those non-target sequences may still be biodiversity relevant data seen in a larger perspective. Also, such custom filterings of data may actually make the data less compatible with similar datasets produced with the same primers. So, GBIF  generally encourages not to remove non-target sequences, unless they are obviously contaminations or otherwise untrustworthy.
+No, but it is ok if it has been done. Some sequences/OTUs are perceived as non-target sequences - e.g. if mammals are detected in a study using fish-specific primers. However, most of those non-target sequences may still be biodiversity relevant data seen in a larger perspective. Also, such custom filterings of data may actually make the data less compatible with similar datasets produced with the same primers, and it makes the calculation of relative read abundances flawed. So, GBIF  generally encourages not to remove non-target sequences, unless they are obviously contaminations or otherwise untrustworthy.
     
     
 # Should taxonomy be assigned to sequences?
@@ -67,7 +67,7 @@ Not necessarily. Currently GBIF identifies/indexes data based on the taxonomy yo
     
     
 # How should taxonomy be assigned to sequences?
-There exist many reference databases and tools for assigning taxonomy to sequences, and reference databases are continuously improved and changed. GBIF does not recommend any particular tool or pipeline. Use what is appropriate for the data. GBIF provides a [sequence annotation tool](https://www.gbif.org/tools/sequence-id) for some markers. You can use that if you wish. In the long term GBIF aims to continuously reannotate sequence based data to ensure consistency across datasets and time. GBIF will however keep original taxonomic identifications provided by the user to ensure traceability.
+There exist many reference databases and tools for assigning taxonomy to sequences, and reference databases are continuously improved and changed. GBIF does not recommend any particular tool or pipeline. Use what is appropriate for the data. GBIF provides a [sequence annotation tool](https://www.gbif.org/tools/sequence-id) for some markers. You can use that if you wish. The sequence ID is also built into this eDNA data converter tool as an optional add-on during the processing step, but as this step takes time you may want to use the Seq ID tool alone before using using this conveter. We are working on making the sequence ID tool produce an output that is maximally compatible with the GBIF taxonomic backbone (work in progress). In the long term GBIF aims to continuously reannotate sequence based data to ensure consistency across datasets and time. GBIF will however keep original taxonomic identifications provided by the user to ensure traceability.
     
     
 # How should I provide the taxonomic information when I submit my OTU data to GBIF?
@@ -95,25 +95,4 @@ Yes. The tool may be used to construct a standardised BIOM file of data, that ca
     
     
 # Should/can data from several primers/markers be combined in one table?
-No. DNA from the same set of samples may have amplified and sequenced with several different primer sets (e.g. COI, ITS, 16S). These should be treated as different datasets (one dataset per marker / primer-set), and each dataset should be published separately. The same sample data file may of course be (re-)used together with the different OTU tables.
-    
-    
-# How can I update my dataset?
-xxxxxx
-    
-    
-# How can I correct errors in my dataset?
-xxxxxx
-    
-    
-# I have already submitted my raw sequences to INSDC (ENA, SRA, ...). Why should I also submit my data to GBIF.org?
-
-xxxxxx
-    
-    
-# Why should I use this tool?
-xxxxxx
-    
-    
-# Who should/can use this tool?
-xxxxxx
+Preferably, uou shouldn't, but you can. DNA from the same set of samples may have amplified and sequenced with several different primer sets (e.g. COI, ITS, 16S). These should be treated as different datasets (one dataset per marker / primer-set), and each dataset should be published separately, as this makes the data maximally interoperable and reusable, and allows for calculation of relative read abundance per sample. The same sample data file may of course be (re-)used together with the different OTU tables. NB: If you have to use the tool to convert a table where data from different markers have been merged/mixed, you will need to supply the corresponding primer information etc for every single entry (OTU/ASV) in the taxon table. But the calculations of relative read abundances will be erroneous and misleading. We may look into developing a solution for this depending on wishes from the user community.
