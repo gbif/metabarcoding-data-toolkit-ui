@@ -42,7 +42,7 @@ function App() {
           </Row>
         </Col>
         <Col>
-          <img style={{ width: "400px" }} src="/images/gntAsset_1gnt.png" />
+          <img style={{ width: "400px" }} src="/images/gntAsset_1gnt_scaled.png" />
         </Col>
         <Col flex="auto"></Col>
       </Row>
@@ -59,7 +59,7 @@ function App() {
                 cursor: "pointer",
                 transition: "box-shadow .3s"
               }}
-              cover={<img alt="example" src="/images/dnatool-05.png" />}
+              cover={<img alt="example" src="/images/dnatool-05_scaled.png" />}
             >
               <Meta title="How to use it?" />
             </Card>
@@ -74,7 +74,7 @@ function App() {
                 cursor: "pointer",
                 transition: "box-shadow .3s"
               }}
-              cover={<img alt="example" src="/images/dnatool-06.png" />}
+              cover={<img alt="example" src="/images/dnatool-06_scaled.png" />}
             >
               <Meta title="Got feedback?" />
             </Card>
@@ -89,7 +89,7 @@ function App() {
                 cursor: "pointer",
                 transition: "box-shadow .3s"
               }}
-              cover={<img alt="example" src="/images/dnatool-07.png" />}
+              cover={<img alt="example" src="/images/dnatool-07_scaled.png" />}
             >
               <Meta title="FAQ" />
             </Card>
