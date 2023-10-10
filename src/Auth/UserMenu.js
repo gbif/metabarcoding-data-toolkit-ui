@@ -148,7 +148,7 @@ const UserMenu = ({login, user, logout, setUser, loginFormVisible, setLoginFormV
         )}
         
         <Modal
-          title="Login with your GBIF account"
+          title="Login with your GBIF-UAT account"
           open={loginFormVisible}
           onOk={handleLogin}
           onCancel={handleCancel}
