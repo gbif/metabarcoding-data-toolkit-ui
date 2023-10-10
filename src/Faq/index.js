@@ -19,7 +19,7 @@ const Faq =  () => {
 
         const getFaq = async () => {
           try {
-              const res = await  axios(`/faq.md`)
+              const res = await  axios(`/faq.md?cachebust=${Math.random()}`)
 
               setMarkdown(res.data)
              // console.log(md2json.parse(res.data))
