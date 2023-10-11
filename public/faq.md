@@ -1,4 +1,9 @@
-# What does this tool do?
+# EARLY TEST VERSION !!
+
+# What is the state of this tool?
+This is an EARLY TEST VERSION of a tool in development. This means, that you may encounter bugs and problems that we have not yet addressed, and that we may have to make changes that will result in data in the respository of the tool being deleted or needing to be reprocessed. It is thus not to be perceived as a stable repository yet. You will be able to make a Darwin Core archive and download it, but you will not be able to publish it directly to GBIF.org through this tool. If you encounter bugs, inconveniences, have concrete input or want to request a feature, please make a github issue using the links on the tool website. This FAQ is also work-in-progress.
+
+# What does the tool do?
 It helps format a DNA metabarcoding dataset (OTU table style) to be published on GBIF.org without the user having to learn Darwin Core terms and know a lot about data standardisation and reformating.
 
 
@@ -7,15 +12,15 @@ Currently, GBIF is developing and testing the tool, but it will be opened to a w
 
 
 # Is there a template?
-Yes, there is a template with a small dummy dataset [here](https://edna-tool.gbif-uat.org/templates/edna_template.xlsx). The template is rather basic. Further DwC fields (including MiXS terms) may be added manually. Eventually a set of templates will be available. The tool also accepts data as separate csv or tsv files, and sequences as a separate fasta file. 
+Yes, there are a few templates with a dummy dataset [here](https://edna-tool.gbif-uat.org/how-to-use-the-tool). These template are rather basic. Further DwC fields (including MiXS terms from the dna-derived darwin core extension) may be added manually. Eventually a larger set of dedicated templates will be available. 
 
     
 # What kind of data can be published/submitted using this tool?
 This tool processes an OTU table so the data can be published to GBIF.org. With an OTU table we think of a table containing some sequences (ASVs/OTUs) and their sequence abundance in a set of samples. Each sample would normally be the result of the PCR amplification of DNA extracted from a sample and sequenced on a high throughput seqeuncing platform like Illumina MiSeq.
 
     
-# What kind of samples are acceptable to publish on GBIF.org?
-All environmental samples (soil, air, water, dust, etc) as well as bulk samples of small organisms (e.g. from malaise trap) are acceptable. Heavily manipulated/treated environmental samples may not reflect real biodiversity and deemed as irrelevant from a biodiversity perspective. Use your judgement.
+# What kind of eDNA samples are acceptable to publish on GBIF.org?
+eDNA metabarcoding based data from all environmental samples (soil, air, water, dust, etc) as well as bulk samples of small organisms (e.g. from malaise trap) are acceptable. Heavily manipulated/treated environmental samples may not reflect real biodiversity and deemed as irrelevant from a biodiversity perspective. Use your judgement.
 
     
 # Which markers/barcodes (COI, ITS, 16S,..) does GBIF and the tool support?
