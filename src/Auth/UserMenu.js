@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, createContext, useContext } from "react";
 //import injectSheet from "react-jss";
 import { useNavigate } from "react-router-dom";
-import { LogoutOutlined, BarsOutlined } from "@ant-design/icons";
+import { LogoutOutlined, BarsOutlined, SettingOutlined } from "@ant-design/icons";
 import { Menu, Dropdown, Avatar, Modal, Button, theme } from "antd";
 import hashCode from "../Util/hashCode"
 import withContext from "../Components/hoc/withContext";
@@ -9,7 +9,8 @@ import LoginForm from "./LoginForm"
 import {refreshLogin} from './userApi'
 const { useToken } = theme;
  
-
+// we should have a role in the registry for this, however this is not sensitive information. Maybe all users should just have the link?
+const admins = ['tobiasgf', 'thomasgbif']
 /* const hashCode = function (str) {
   let hash = 0,
     i,
@@ -55,6 +56,7 @@ const MenuContent = ({logout}) => {
   >
     <BarsOutlined /> Datasets
   </Menu.Item>
+  
 </Menu>
 } 
 
@@ -63,9 +65,28 @@ const UserMenu = ({login, user, logout, setUser, loginFormVisible, setLoginFormV
   const [visible, setVisible] = useState(false)
   const [invalid, setInvalid] = useState(false)
   const [currentUser, setCurrentUser] = useState(null)
+  const [menuItems, setMenuItems] = useState([])
   const { token } = useToken();
-  let refreshUserHdl = useRef();
+  const navigate = useNavigate()
 
+  let refreshUserHdl = useRef();
+const defaultMenuItems = [
+  {
+    key: 'logout',
+    label: 'Logout',
+    icon: <LogoutOutlined />,
+    onClick: () => {
+      logout();
+      window.location.reload();
+    }
+  },
+  {
+    key: 'user-profile',
+    label: 'Datasets',
+    icon: <BarsOutlined />,
+    onClick: () => navigate('/user-profile')
+  }
+]
   useEffect(()=>{
     if (user) {
       const imgNr = Math.abs(hashCode(user.userName)) % 10;
@@ -89,12 +110,23 @@ const UserMenu = ({login, user, logout, setUser, loginFormVisible, setLoginFormV
     }
     }
 
+    if(user && admins.includes(user?.userName)){
+      setMenuItems([...defaultMenuItems, {
+        key: 'admin',
+        label: 'Admin',
+        icon: <SettingOutlined />,
+        onClick: () => navigate('/admin')
+      }])
+    } else if(user){
+      setMenuItems([...defaultMenuItems])
+    }
    
     return () => {
       if (refreshUserHdl.current) {
         clearInterval(refreshUserHdl.current);
     }
     };
+    
   }, [user])
   const showLogin = () => {
     setLoginFormVisible(true)
@@ -133,7 +165,7 @@ const UserMenu = ({login, user, logout, setUser, loginFormVisible, setLoginFormV
           </span>
         )}
         {user && (
-          <Dropdown overlay={<MenuContent logout={logout}/>} trigger={["click"]}>
+          <Dropdown menu={{items: menuItems}}/* overlay={<MenuContent logout={logout}/>}  */trigger={["click"]}>
             <span style={{ padding: "0 10px", cursor: "pointer" }}>
               <Avatar
                 style={{ marginRight: 8 }}

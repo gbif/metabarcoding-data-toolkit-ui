@@ -3,8 +3,8 @@ import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
-import { Row, Col, Alert, Button, Timeline, Progress, Statistic, Space, Typography, List, Checkbox, message } from "antd"
-import { CheckCircleOutlined, ClockCircleOutlined, DownloadOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { Row, Col, Alert, Button, Timeline, Progress, Statistic, Space, Typography, Tooltip, Checkbox, message, theme } from "antd"
+import { CheckCircleOutlined, ClockCircleOutlined, WarningOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import FilesAvailable from '../Components/FilesAvailable'
 import Help from "../Components/Help";
 import config from "../config";
@@ -13,6 +13,7 @@ import { axiosWithAuth } from "../Auth/userApi";
 const POLLING_INTERVAL = 1000;
 const MAX_POLLING_INTERVAL = 10000;
 const { Title } = Typography;
+const { useToken } = theme;
 
 const truncateMissingIdError = (strings, ...values) => ((values[0].length > 10 ? values[0].slice(0, 10).join(', ') + ` and ${values[0].length - 10} more ids` : values[0].join(', ')) + ` ${strings[1]}`);
 
@@ -37,6 +38,7 @@ const ProcessDataset = ({
     const [showProcessingErrors, setShowProcessingErrors] = useState(false)
     const [assignTaxonomy, setAssignTaxonomy] = useState(dataset?.assignTaxonomy || false)
     const [showAssignTaxonomyCheckbox, setShowAssignTaxonomyCheckbox] = useState(false)
+    const { token } = useToken();
     //    let hdl = useRef();
     //  let refreshUserHdl = useRef();
 
@@ -181,12 +183,12 @@ const ProcessDataset = ({
                     await subscribe(getPollingInterval(res?.data));
                 }
 
-                if ((isFailed || isFinished) && res?.data?.processingErrors?.consistencyCheck) {
+                if ((isFailed || isFinished) && (res?.data?.processingErrors?.consistencyCheck || res?.data?.processingErrors?.blast)) {
 
                     const { consistencyCheck } = res?.data?.processingErrors;
                     // Sum the length of the arrarys of missed IDs
                     const numberOfMissedIDs = Object.keys(consistencyCheck).reduce((acc, curr) => acc + consistencyCheck[curr].length, 0);
-                    if (numberOfMissedIDs > 0) {
+                    if (numberOfMissedIDs > 0 || res?.data?.processingErrors?.blast?.length > 0) {
                         setShowProcessingErrors(true)
                     }
 
@@ -212,6 +214,18 @@ const ProcessDataset = ({
         }
     }
 
+    const getStepDot = (s) => {
+        if(s.name === "assignTaxonomy" && dataset?.processingErrors?.blast?.length > 0){
+            return <Tooltip placement="right" title={dataset?.processingErrors?.blast[0]}><WarningOutlined style={{ color: token.colorWarning}} /></Tooltip>
+        }
+        else if(s.status === "finished"){
+            return <CheckCircleOutlined />
+        } else if(s.status === "failed" ){
+            return <ExclamationCircleOutlined /> 
+        } else {
+            return null
+        }
+    }
 
     return (
         <Layout>
@@ -225,21 +239,25 @@ const ProcessDataset = ({
                         style={{ marginBottom: "10px" }} type="warning" showIcon
 
                         message={<ul>
+                            {dataset?.processingErrors?.blast?.length > 0
+                                && dataset?.processingErrors?.blast.map(e => <li>{e}</li> )
+                                } 
+
                             {dataset?.processingErrors?.consistencyCheck?.taxonIdsWithNoRecordInTaxonFile?.length > 0
                                 && <li>
-                                    {truncateMissingIdError`${dataset?.processingErrors?.consistencyCheck?.taxonIdsWithNoRecordInTaxonFile} in the OTUTABLE is not present in the TAXONOMY`}
+                                    {truncateMissingIdError`${dataset?.processingErrors?.consistencyCheck?.taxonIdsWithNoRecordInTaxonFile} in the OTUTABLE are not present in the TAXONOMY`}
                                 </li>}
                             {dataset?.processingErrors?.consistencyCheck?.taxonIdsWithNoRecordInOtuTable?.length > 0
                                 && <li>
-                                    {truncateMissingIdError`${dataset?.processingErrors?.consistencyCheck?.taxonIdsWithNoRecordInOtuTable} in the TAXONOMY is not present in the OTUTABLE`}
+                                    {truncateMissingIdError`${dataset?.processingErrors?.consistencyCheck?.taxonIdsWithNoRecordInOtuTable} in the TAXONOMY are not present in the OTUTABLE`}
                                 </li>}
                                 {dataset?.processingErrors?.consistencyCheck?.sampleIdsWithNoRecordInSampleFile?.length > 0
                                 && <li>
-                                    {truncateMissingIdError`${dataset?.processingErrors?.consistencyCheck?.sampleIdsWithNoRecordInSampleFile} in the OTUTABLE is not present in the SAMPLETABLE`}
+                                    {truncateMissingIdError`${dataset?.processingErrors?.consistencyCheck?.sampleIdsWithNoRecordInSampleFile} in the OTUTABLE are not present in the SAMPLETABLE`}
                                 </li>}
                                 {dataset?.processingErrors?.consistencyCheck?.sampleIdsWithNoRecordInOtuTable?.length > 0
                                 && <li>
-                                    {truncateMissingIdError`${dataset?.processingErrors?.consistencyCheck?.sampleIdsWithNoRecordInOtuTable} in the SAMPLETABLE is not present in the OTUTABLE`}
+                                    {truncateMissingIdError`${dataset?.processingErrors?.consistencyCheck?.sampleIdsWithNoRecordInOtuTable} in the SAMPLETABLE are not present in the OTUTABLE`}
                                 </li>}
                         </ul>} />}
                 <Row>
@@ -279,7 +297,7 @@ const ProcessDataset = ({
                         {dataset?.steps && dataset?.steps?.length > 0 && <Timeline
                             items={
                                 dataset?.steps.map((s, idx) => ({
-                                    dot: s.status === "finished" ? <CheckCircleOutlined /> : s.status === "failed" ? <ExclamationCircleOutlined /> : s.status === "pending" ? <ClockCircleOutlined /> : null,
+                                    dot:  getStepDot(s),//s.status === "finished" ? <CheckCircleOutlined /> : s.status === "failed" ? <ExclamationCircleOutlined /> : s.status === "pending" ? <ClockCircleOutlined /> : null,
                                     color: getStatusColor(s.status),
                                     children: (s.status === "finished" && idx === dataset?.steps?.length - 1) ? "Finished" :
                                         (s.status === "failed") ? `${s.messagePending} - Failed${s?.message ? ": " + s.message + (s.message.includes('This data matrix has out of bounds value') ? ' - Check that column names in the OTU table corresponds to the IDs in the sample file.':'') : ""}` :

@@ -12,7 +12,7 @@ const Dataset = ({dataset}) => {
 
   return (
     <Layout><PageContent>
-        {dataset?.metadata?.title && <Title>{dataset?.metadata?.title}</Title>}
+        {dataset?.metadata?.title && <Title level={4}>{dataset?.metadata?.title}</Title>}
         <Tabs defaultActiveKey="1" items={[
 
 {
