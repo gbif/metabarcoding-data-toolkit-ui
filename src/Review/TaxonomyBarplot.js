@@ -13,10 +13,10 @@ const { Text } = Typography;
 HC_exporting(Highcharts);
 
 const configOptions = [
-    { byAbundance: true, stacking: 'percent', label: 'Relative, by abundance (Read count)' },
-    { byAbundance: true, stacking: 'normal', label: 'Constant, by abundance (Read count)' },
-    { byAbundance: false, stacking: 'percent', label: 'Relative, by ASV count' },
-    { byAbundance: false, stacking: 'normal', label: 'Constant, by ASV count' }];
+    { byAbundance: true, stacking: 'percent', label: 'Relative read abundance' },
+    { byAbundance: true, stacking: 'normal', label: 'Absolute read abundance' },
+    { byAbundance: false, stacking: 'percent', label: 'Relative OTU/ASV abundance' },
+    { byAbundance: false, stacking: 'normal', label: 'Absolute OTU/ASV abundance' }];
 
 const TaxonomyBarplot = ({ dataset, onSampleClick, selectedSample, taxonomyDataMap, taxonomyBySampleDataMap, taxonomyLoading: loading }) => {
     const [data, setData] = useState(null)
