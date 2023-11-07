@@ -4,7 +4,7 @@ import config from "../config";
 import axios from "axios"
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
-import { Button, Row, Col, Typography, Descriptions, Tabs } from "antd";
+import { Button, Row, Col, Typography, Descriptions, Tabs, Select } from "antd";
 import TaxonomyChart from "./TaxonomyChart";
 import { useNavigate, useLocation, useMatch } from "react-router-dom";
 import LeafletMap from "./Map";
@@ -231,7 +231,8 @@ const DataBrowser = ({ dataset }) => {
 
             </Col>
             <Col span={12} style={{ paddingLeft: "16px" }}>
-                {!isNaN(samplIdToArrayIndex.get(selectedSample)) && <Tabs defaultActiveKey="1" items={[
+                {!isNaN(samplIdToArrayIndex.get(selectedSample)) && <Tabs 
+                    tabBarExtraContent={<Select options={Object.keys(taxonomyBySampleDataMap).map(s => ({value: s, label: s}))} value={selectedSample} onChange={setSelectedSample} />} defaultActiveKey="1" items={[
 
                     {
                         key: '1',
