@@ -81,6 +81,7 @@ const getDatasets = async (usr) => {
                         {d?.sample_count ? <p style={{marginBottom: "0px"}}>{`Samples: ${numberFormatter.format(d?.sample_count)}`}</p> : ""}
                         {d?.taxon_count ? <p style={{marginBottom: "0px"}}>{`Taxa/ASVs: ${numberFormatter.format(d?.taxon_count)}`}</p> : ""}
                         {d?.occurrence_count ? <p >{`Occurrences: ${numberFormatter.format(d?.occurrence_count)}`}</p> : ""}
+                        {d?.gbif_uat_key ? <a href={`https://www.gbif-uat.org/dataset/${d.gbif_uat_key}`} target="_blank" rel="noreferrer" >{`https://www.gbif-uat.org/dataset/${d.gbif_uat_key}`}</a> : ""}
 
                     </>}
                 />
