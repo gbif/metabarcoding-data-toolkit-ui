@@ -91,11 +91,18 @@ const DataUpload = ({ user,
 
             setLoading(false)
         } catch (error) {
-            if(error?.response?.status > 399 && error?.response?.status < 500){
+            if(error?.response?.status > 399 && error?.response?.status < 404){
                 setLoginFormVisible(true)
+            }
+            else if(error?.response?.status === 422){
+                // Refresh dataset if validation was unsuccessful
+                 const res = await axiosWithAuth.get(`${config.backend}/dataset/${key}/process`)
+                 setValid(false)
+                 setDataset(res?.data)
             } else {
+                setValid(false)
                 console.log(error)
-            setError(error?.message)
+            setError(error?.response?.data)
             }
             
             setLoading(false)
