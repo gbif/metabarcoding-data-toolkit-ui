@@ -185,7 +185,7 @@ const DataUpload = ({ user,
                             header={<Text>Files uploaded</Text>}
                             bordered
                             dataSource={_.isArray(dataset?.files?.invalidErrors) ? dataset?.files?.files.map(f => {
-                                f.errors = dataset?.files?.invalidErrors?.filter(e => e.file === f?.name)
+                                f.errors = [...(f.errors || []), ...dataset?.files?.invalidErrors?.filter(e => e.file === f?.name)]
                                 return f;
                             }) : dataset?.files?.files}
                             renderItem={(file) => (
