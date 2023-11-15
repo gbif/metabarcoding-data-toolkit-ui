@@ -38,7 +38,7 @@ const getDatasets = async (usr) => {
     try {
         setLoading(true)
         const response = await axiosWithAuth.get(`${config.backend}/user/datasets`);
-        setDatasets(response?.data?.reverse())
+        setDatasets(response?.data)
         setLoading(false)
     } catch (error) {
         setDatasets([])

@@ -176,7 +176,7 @@ const TaxonomyBarplot = ({ dataset, onSampleClick, selectedSample, taxonomyDataM
         <>
             <Row>
             <Col >
-                    <Select style={{ marginLeft: "8px" }}  value={chartConfig} onChange={val => {
+                    <Select style={{ marginLeft: '8px', width: "250px" }}  value={chartConfig} onChange={val => {
                         const option = configOptions.find(o => o.label === val)
                         if (option) {
                             setChartConfig(option)
@@ -195,7 +195,7 @@ const TaxonomyBarplot = ({ dataset, onSampleClick, selectedSample, taxonomyDataM
 
                 <Col>
                     <Text>Taxon rank:</Text>
-                    <Select style={{ marginLeft: '8px', width: "200px" }} value={rank} onChange={setRank}>
+                    <Select style={{ marginLeft: '8px', width: "100px" }}   value={rank} onChange={setRank}>
                         {['phylum', 'class', 'order', 'family', 'genus'].map(r => <Select.Option value={r} key={r}>{r}</Select.Option>)}
 
                     </Select>
