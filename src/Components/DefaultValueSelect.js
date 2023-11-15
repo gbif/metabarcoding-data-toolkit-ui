@@ -10,6 +10,12 @@ const DefaultValueSelect = ({style = { width: 300 }, onChange, term, vocabulary 
     }, [vocabulary, term])
 
     useEffect(() => {
+        if(initialValue){
+            setValue(initialValue)
+        }
+    }, [initialValue])
+
+    useEffect(() => {
         if (typeof onChange === 'function') {
             onChange(value)
         }
@@ -18,7 +24,7 @@ const DefaultValueSelect = ({style = { width: 300 }, onChange, term, vocabulary 
 
     return <Row>
         <Col>
-    {vocabulary ? <Select placeholder="Add default value" style={style} value={value} onChange={val => {
+    {vocabulary ? <Select placeholder="Add default value" style={style} value={value} defaultValue={initialValue} onChange={val => {
         setValue(val)
     }}>
         {vocabulary?.map(h => <Select.Option key={h} value={h}>{h}</Select.Option>)}
