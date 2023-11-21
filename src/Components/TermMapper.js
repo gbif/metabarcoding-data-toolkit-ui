@@ -1,16 +1,16 @@
-import { useEffect, useState, useReducer } from "react";
-import { Table, Popover, Typography, Row, Col, theme, Button, message, notification } from "antd"
+import { useEffect, useState, useReducer, useRef } from "react";
+import { Table, Popover, Typography, Row, Col, theme, Button, Tour, message, notification } from "antd"
 import HeaderSelect from "./HeaderSelect";
 import DefaultValueSelect from "./DefaultValueSelect";
 import DwcTermSelect from "./DwcTermSelect";
-import { InfoCircleOutlined } from '@ant-design/icons';
+import { InfoCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import withContext from "./hoc/withContext"
 import config from "../config";
 import { axiosWithAuth } from "../Auth/userApi";
 import {useNavigate, useMatch} from 'react-router-dom'
 import _ from 'lodash'
 const { useToken } = theme;
-const { Title } = Typography
+const { Title, Text } = Typography
 
 
 const reducer = (state, action) => {
@@ -41,6 +41,42 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
     const [state, dispatch] = useReducer(reducer, (dataset?.mapping || initialState));
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
+    const [open, setOpen] = useState(false);
+
+
+  const ref1 = useRef(null);
+  const ref2 = useRef(null);
+  const ref3 = useRef(null);
+  const ref4 = useRef(null);
+  const ref5 = useRef(null);
+
+  const steps = [
+    {
+      title: 'Field name in Darwin Core',
+      description: <>The <a href="http://rs.tdwg.org/dwc">Darwin Core Standard (DwC)</a> offers a stable, straightforward and flexible framework for compiling biodiversity data from varied and variable sources. In order to make your data interpretable for GBIF, you will have to map the columns in your data onto these standard fields. Full lists of available fieldnames can be found here <a href="https://rs.gbif.org/core/dwc_occurrence_2022-02-02.xml">Occurrence</a> and here <a href="https://rs.gbif.org/extension/gbif/1.0/dna_derived_data_2022-02-23.xml">DNA derived data</a></>,
+      target: () => ref1.current,
+    },
+    {
+        title: 'Adding more fields to your mapping',
+        description: 'If you want to add more DWC fields to your mapping than present in the table by defualt, you can search and add them here.',
+        target: () => ref5.current,
+      },
+    {
+      title: 'Your field name',
+      description: <>Select the field in your data that you want to map to the Darwin Core field. For example, you might want to map your field <Text code>lat</Text> to the Darwin Core term <Text code>decimalLatitude</Text></>,
+      target: () => ref2.current,
+    },
+    {
+      title: 'Default values',
+      description: <>You may also set/select a default value that applies to the entire dataset. Examples of good candidates for defualt values are <Text code>target_gene</Text> (ITS, COI, 16S, etc), <Text code>pcr_primer_forward</Text>,  <Text code>pcr_primer_reverse</Text>, <Text code>otu_db</Text> (the reference database used for taxonomic annotation) </>,
+      target: () => ref3.current,
+    },
+    {
+        title: 'Proceed to the data processing',
+        description: 'Once you have mapped the fields in your data to the equivalent Darwin core fields, you can proceed to the data processing step',
+        target: () => ref4.current,
+      },
+  ];
 
     useEffect(() => {
         setTermMap(new Map(Object.keys(dwcTerms).map(t => [t, dwcTerms[t]])))
@@ -141,20 +177,22 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
 
     }
 
-    const columns = [{
-        width: 300,
-        title: 'Standardised field name (DwC term)',
-        dataIndex: 'name',
-        key: 'name',
-        render: (text, term) => <>
-            <Popover placement="rightTop" trigger="click" title={text} content={term?.['dc:description'] || term?.description}>
-                <InfoCircleOutlined /> </Popover> {text} {!!term.isRequired ? <span style={{ color: token.colorError }}>*</span> : ""}
-        </>
-    }
-    ]
-    const getMappingColumn = (headers,type) => (
+   
+    const getDwcColumn = (ref) => (
         {
-            title: 'Map to field in your data',
+            width: 300,
+            title:  <span ref={ref}>Standardised field name (DwC term)</span>,
+            dataIndex: 'name',
+            key: 'name',
+            render: (text, term) => <>
+                <Popover placement="rightTop" trigger="click" title={text} content={term?.['dc:description'] || term?.description}>
+                    <InfoCircleOutlined /> </Popover> {text} {!!term.isRequired ? <span style={{ color: token.colorError }}>*</span> : ""}
+            </>
+        }
+    )
+    const getMappingColumn = (headers,type, ref) => (
+        {
+            title: <span ref={ref}>Map to field in your data</span>,
             dataIndex: 'mapping',
             key: 'mapping',
             width: "30%",
@@ -180,9 +218,9 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
         }
     )
 
-    const getDefaultValueColumn = () => (
+    const getDefaultValueColumn = (ref) => (
         {
-            title: 'or select/enter a Default value',
+            title: <span ref={ref}>or select/enter a Default value</span>,
             dataIndex: 'defaultValue',
             key: 'defaultValue',
             render: (text, term) =>  defaultTermMap.has(term?.name)  ? <DefaultValueSelect initialValue={state?.defaultValues?.[term?.name]} vocabulary={defaultTermMap.get(term?.name)?.vocabulary} ontology={defaultTermMap.get(term?.name)?.ontology} term={term} onChange={ val => {
@@ -218,23 +256,27 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
     )
 
     return <>
+    <Tour open={open} onClose={() => setOpen(false)} steps={steps} />
         <Row>
+            <Col><Button style={{marginLeft: "-18px"}} type="link" onClick={() => setOpen(true)}><QuestionCircleOutlined /> How to use this form</Button></Col>
             <Col flex="auto"></Col>
             <Col>
             <Button onClick={saveMapping}>Save mapping</Button>
-            <Button style={{marginLeft: "10px"}} type="primary"
+            <Button ref={ref4} style={{marginLeft: "10px"}} type="primary"
                 onClick={async () => { 
                     await saveMapping()
                     navigate(`/dataset/${dataset?.id}/process`)}}>Proceed</Button></Col>
             </Row>
         <><Title level={5}>Sample</Title>
             <Table
-                dataSource={sampleTerms} columns={[...columns, getMappingColumn(dataset?.sampleHeaders, 'sample'), getDefaultValueColumn(), getDeleteRowColumn('sample')]}
+                dataSource={sampleTerms} columns={[getDwcColumn(ref1), getMappingColumn(dataset?.sampleHeaders, 'sample', ref2), getDefaultValueColumn(ref3), getDeleteRowColumn('sample')]}
                 size="small"
                 pagination={false}
+                
             />
             
             <DwcTermSelect 
+               ref={ref5}
                 style={{width: 500, marginTop: "10px"}} 
                 placeholder={"Add mapping for another sample field"} 
                 dwcTerms={dwcTerms} 
@@ -250,9 +292,10 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
         <><Title level={5} style={{ marginTop: '10px' }}>Taxon</Title>
 
             <Table
-                dataSource={taxonTerms} columns={[...columns, getMappingColumn(dataset?.taxonHeaders, 'taxon'), getDefaultValueColumn(), getDeleteRowColumn('taxon')]}
+                dataSource={taxonTerms} columns={[getDwcColumn(), getMappingColumn(dataset?.taxonHeaders, 'taxon'), getDefaultValueColumn(), getDeleteRowColumn('taxon')]}
                 size="small"
                 pagination={false}
+               
             />
             
             <DwcTermSelect style={{width: 500, marginTop: "10px"}} placeholder={"Add mapping for another Taxon/ASV field"} dwcTerms={dwcTerms} filterToGroups={['Taxon']}  onSelect={val => setTaxonTerms([...taxonTerms, termMap.get(val)])}/>
