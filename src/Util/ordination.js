@@ -92,7 +92,8 @@ const sparseToDense = (data, transformValue = (val) => val) => {
 }
 
 export const getBrayCurtisDistanceMatrix = (sparseMatrix, samples) => {
-    
+    console.log('getBrayCurtisDistanceMatrix')
+
     // Scale abundances, see https://github.com/gbif/edna-tool-ui/issues/2#issuecomment-1717637957 
     const transformAbundance = (val) => Math.pow(val, 1/4)
    

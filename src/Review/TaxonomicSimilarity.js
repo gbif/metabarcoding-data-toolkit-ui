@@ -14,7 +14,7 @@ import Help from "../Components/Help"
 HC_exporting(Highcharts);
 HC_sunburst(Highcharts);
 
-const getChartOptions = (data, indexType, onSampleClick) => {
+const getChartOptions = (data, type, onSampleClick) => {
          
   let options = {
       
@@ -104,8 +104,8 @@ const TaxonomyChart = ({dataset, onSampleClick, selectedSample, sampleLabels}) =
   const [datasetID, setDatasetID] = useState(null)
 
   // const options = useMemo(() => !(sparseMatrix && sampleLabels) ? null : getChartOptions(getDataForDissimilarityPlot(sparseMatrix, indexType, sampleLabels) ,indexType, onSampleClick), [sparseMatrix, indexType, sampleLabels]);
-  const jaccardOptions = useMemo(() => !(sparseMatrix && sampleLabels) ? null : getChartOptions(getDataForDissimilarityPlot(sparseMatrix, "jaccard", sampleLabels) ,indexType, onSampleClick), [sparseMatrix, sampleLabels]);
-  const brayCurtisOptions = useMemo(() => !(sparseMatrix && sampleLabels) ? null : getChartOptions(getDataForDissimilarityPlot(sparseMatrix, "bray-curtis", sampleLabels) ,indexType, onSampleClick), [sparseMatrix, sampleLabels]);
+  const jaccardOptions = useMemo(() => !(sparseMatrix && sampleLabels) ? null : getChartOptions(getDataForDissimilarityPlot(sparseMatrix, "jaccard", sampleLabels), "jaccard" , onSampleClick), [sparseMatrix, sampleLabels]);
+  const brayCurtisOptions = useMemo(() => !(sparseMatrix && sampleLabels) ? null : getChartOptions(getDataForDissimilarityPlot(sparseMatrix, "bray-curtis", sampleLabels), "bray-curtis" , onSampleClick), [sparseMatrix, sampleLabels]);
 
    const chartRef = useRef()
   useEffect(() => {
@@ -139,26 +139,26 @@ const TaxonomyChart = ({dataset, onSampleClick, selectedSample, sampleLabels}) =
         }
     }
   }, [selectedSample])
-
+/* 
     useEffect(()=> {
     const chart = chartRef.current?.chart;
     
      if(chart && indexType === "jaccard" && jaccardOptions){
-      chart.update(jaccardOptions)
+      // chart.update(jaccardOptions)
       
     } else if(chart && indexType === "bray-curtis" && brayCurtisOptions){
-      chart.update(brayCurtisOptions)
+      // chart.update(brayCurtisOptions)
     }
     if(indexType === "jaccard" && jaccardOptions){
-      setOptions(jaccardOptions)
+      setOptions({...jaccardOptions})
     } else if(indexType === "bray-curtis" && brayCurtisOptions){
-      setOptions(brayCurtisOptions)
+      setOptions({...brayCurtisOptions})
     }
 
     
     
     
-  }, [indexType, jaccardOptions, brayCurtisOptions/* , sparseMatrix, sampleLabels */])
+  }, [indexType, jaccardOptions, brayCurtisOptions]) */
 
   const getSparseMatrix = async () => {
     try {
@@ -211,7 +211,7 @@ const TaxonomyChart = ({dataset, onSampleClick, selectedSample, sampleLabels}) =
     
 
 
-      return invalid ? null : (loading || !options) ? (
+      return invalid ? null : (loading ) ? (
         <Row style={{ padding: "48px" }}>
           <Col flex="auto"></Col>
           <Col>
@@ -234,8 +234,10 @@ const TaxonomyChart = ({dataset, onSampleClick, selectedSample, sampleLabels}) =
             </ul>}/>
           </Col>
         </Row>
-        <HighchartsReact ref={chartRef} highcharts={Highcharts} options={options} />
-        </>
+       {indexType === "jaccard" && <HighchartsReact ref={chartRef} highcharts={Highcharts} options={jaccardOptions} />} 
+       {indexType === "bray-curtis" && <HighchartsReact ref={chartRef} highcharts={Highcharts} options={brayCurtisOptions} />} 
+{/*         <HighchartsReact ref={chartRef} highcharts={Highcharts} options={brayCurtisOptions} />
+ */}        </>
       );
 }
 
