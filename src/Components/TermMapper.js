@@ -258,6 +258,15 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
             <DwcTermSelect style={{width: 500, marginTop: "10px"}} placeholder={"Add mapping for another Taxon/ASV field"} dwcTerms={dwcTerms} filterToGroups={['Taxon']}  onSelect={val => setTaxonTerms([...taxonTerms, termMap.get(val)])}/>
 
         </>
+        <Row>
+            <Col flex="auto"></Col>
+            <Col>
+            <Button onClick={saveMapping}>Save mapping</Button>
+            <Button style={{marginLeft: "10px"}} type="primary"
+                onClick={async () => { 
+                    await saveMapping()
+                    navigate(`/dataset/${dataset?.id}/process`)}}>Proceed</Button></Col>
+            </Row>
     </>
 
 }
