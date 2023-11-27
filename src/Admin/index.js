@@ -118,7 +118,7 @@ function Admin() {
             onFilter: (value, record) => value ? true : !record?.deleted,
 
 
-              sorter: (a,b) => (a.created < b.created) ? 1 : ((b.deleted < a.deleted) ? -1 : 0),
+              sorter: (a,b) => (a.deleted < b.deleted) ? 1 : ((b?.deleted < a?.deleted) ? -1 : 0),
               render: (text, record) => !!record.deleted ? <Text type="danger">{dateFormatter.format(new Date(record.deleted))}</Text> : null
 
           }
