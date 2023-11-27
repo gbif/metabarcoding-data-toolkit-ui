@@ -10,9 +10,7 @@ import {dateFormatter, numberFormatter} from '../Util/formatters'
 import _ from "lodash";
 
 import config from "../config";
-
-import { marked } from "marked";
-const { Title } = Typography;
+const { Title, Text } = Typography;
 const { Meta } = Card;
 
 function Admin() {
@@ -46,7 +44,7 @@ function Admin() {
         <Table 
         dataSource={datasets}
         rowKey="dataset_id"
-        
+        rowClassName={(record => !!record?.deleted ? 'deleted-record-row' : '')} 
         columns={[
             {
                 title: "Title",
@@ -109,6 +107,21 @@ function Admin() {
                 render: (text, record) => !!text ? <a href={`https://www.gbif-uat.org/dataset/${text}`} target="_blank" rel="noreferrer" >{text}</a> : ""
 
             },
+            {
+              title: "Deleted",
+              dataIndex: "deleted",
+              key: "deleted",
+              filters: [
+                {text: "Include deleted", value: true},
+            ],
+            defaultFilteredValue: [false],
+            onFilter: (value, record) => value ? true : !record?.deleted,
+
+
+              sorter: (a,b) => (a.created < b.created) ? 1 : ((b.deleted < a.deleted) ? -1 : 0),
+              render: (text, record) => !!record.deleted ? <Text type="danger">{dateFormatter.format(new Date(record.deleted))}</Text> : null
+
+          }
         ]}
         />
       </PageContent>

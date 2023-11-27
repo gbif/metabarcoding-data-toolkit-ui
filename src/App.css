@@ -9,3 +9,8 @@
 .home-card:hover {
   box-shadow: 0 0 11px rgba(33,33,33,.2)
 }
+
+.deleted-record-row {
+  color: rgba(0,0,0,.25);
+  font-style: unset;
+}

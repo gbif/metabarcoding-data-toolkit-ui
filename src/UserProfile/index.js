@@ -4,8 +4,8 @@ import axios from "axios"
 import { useNavigate, useLocation, useMatch } from "react-router-dom";
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
-import { Row, Col, Button, Result, Typography, List,theme, Skeleton, message } from "antd"
-import { EditOutlined, EyeOutlined } from '@ant-design/icons';
+import { Row, Col, Button, Result, Typography, List,theme, Popconfirm, message } from "antd"
+import { EditOutlined, EyeOutlined, DeleteOutlined } from '@ant-design/icons';
 import config from "../config";
 import FilesAvailable from '../Components/FilesAvailable'
 
@@ -25,7 +25,7 @@ const UserProfile = ({ user, setLoginFormVisible }) => {
 const {token} = useToken()
  const [datasets, setDatasets] = useState([])
  const [loading, setLoading] = useState(false)
-  let refreshUserHdl = useRef();
+ const [deleteInrogress, setDeleteInProgress] = useState(false)
   const navigate = useNavigate();
 
 useEffect(() => {
@@ -34,11 +34,12 @@ useEffect(() => {
     }
 }, [user])
 
+
 const getDatasets = async (usr) => {
     try {
         setLoading(true)
         const response = await axiosWithAuth.get(`${config.backend}/user/datasets`);
-        setDatasets(response?.data)
+        setDatasets(response?.data?.filter(d => !d?.deleted))
         setLoading(false)
     } catch (error) {
         setDatasets([])
@@ -46,6 +47,19 @@ const getDatasets = async (usr) => {
 
     }
 
+}
+
+const deleteDataset = async (id) => {
+    try {
+        setDeleteInProgress(true)
+        await axiosWithAuth.delete(`${config.backend}/dataset/${id}`);
+        setDeleteInProgress(false)
+        setDatasets(datasets.filter(d => d.dataset_id !== id))
+    } catch (error) {
+        setDeleteInProgress(false)
+        setDatasets(datasets.filter(d => d.dataset_id !== id))
+
+    }
 }
 
 
@@ -72,7 +86,15 @@ const getDatasets = async (usr) => {
         renderItem={(d) => (
             <List.Item
            
-                actions={[<Button type="link" onClick={() =>  navigate(`/dataset/${d.dataset_id}`)}><EyeOutlined /></Button>,<Button type="link" onClick={() =>  navigate(`/dataset/${d?.dataset_id}/upload`)}><EditOutlined /></Button>]}
+                actions={[
+                <Button type="link" onClick={() =>  navigate(`/dataset/${d.dataset_id}`)}><EyeOutlined /></Button>,
+                <Button type="link" onClick={() =>  navigate(`/dataset/${d?.dataset_id}/upload`)}><EditOutlined /></Button>,
+                <Popconfirm 
+                    onConfirm={() => deleteDataset(d.dataset_id)}
+                    description={`Delete dataset: ${d?.metadata?.title || d?.title || d.id}`}>
+                    <Button type="link" ><DeleteOutlined /></Button>
+                </Popconfirm>
+                ]}
             >
                 <List.Item.Meta
                     title={d?.metadata?.title || d?.title || d.id}
