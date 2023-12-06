@@ -231,19 +231,19 @@ const DataBrowser = ({ dataset }) => {
 
             </Col>
             <Col span={12} style={{ paddingLeft: "16px" }}>
-                {!isNaN(samplIdToArrayIndex.get(selectedSample)) && <Tabs 
+                {!isNaN(samplIdToArrayIndex.get(selectedSample.toString())) && <Tabs 
                     tabBarExtraContent={<Select options={Object.keys(taxonomyBySampleDataMap).map(s => ({value: s, label: s}))} value={selectedSample} onChange={setSelectedSample} />} defaultActiveKey="1" items={[
 
                     {
                         key: '1',
                         label: `Taxonomic composition`,
-                        children: <TaxonomyChart topTaxa={topTaxa} sampleIndex={samplIdToArrayIndex.get(selectedSample)} selectedSample={selectedSample} />,
+                        children: <TaxonomyChart topTaxa={topTaxa} sampleIndex={samplIdToArrayIndex.get(selectedSample.toString())} selectedSample={selectedSample} />,
                     },
                     {
                         key: '2',
                         label: `Sample metadata`,
                         children: <Descriptions column={2} title={`Sample: ${selectedSample}`}>
-                            {Object.keys(samples).map(key => <Descriptions.Item key={key} label={key}>{samples[key][samplIdToArrayIndex.get(selectedSample)]}</Descriptions.Item>)}
+                            {Object.keys(samples).map(key => <Descriptions.Item key={key} label={key}>{samples[key][samplIdToArrayIndex.get(selectedSample.toString())]}</Descriptions.Item>)}
 
                         </Descriptions>,
                     },
