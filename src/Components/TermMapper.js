@@ -1,5 +1,5 @@
 import { useEffect, useState, useReducer, useRef } from "react";
-import { Table, Popover, Typography, Row, Col, theme, Button, Tour, message, notification } from "antd"
+import { Table, Popover, Typography, Row, Col, theme, Button, Tour, Tag, message, notification } from "antd"
 import HeaderSelect from "./HeaderSelect";
 import DefaultValueSelect from "./DefaultValueSelect";
 import DwcTermSelect from "./DwcTermSelect";
@@ -42,7 +42,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
     const [open, setOpen] = useState(false);
-
+    const [unMapped, setUnMapped] = useState([])
 
   const ref1 = useRef(null);
   const ref2 = useRef(null);
@@ -117,8 +117,12 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
     }, [dwcTerms, requiredTerms, defaultTerms, dataset])
 
     useEffect(() => {
-    }, [dataset])
+        if(dataset){
+            setUnMapped(getUnMappedFields())
+        }
+    }, [dataset, state])
 
+   
     const saveMapping = async () => {
 
        // console.log(state)
@@ -175,6 +179,17 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
               })
         }
 
+    }
+
+    const getUnMappedFields = () => {
+        try {
+            const mapped = new Set([...Object.keys(state?.samples).map(s => state?.samples?.[s]), ...Object.keys(state?.taxa).map(s => state?.taxa?.[s]) ])
+            const unMappedSampleTerms = dataset?.sampleHeaders.filter(t => !termMap.has(t) && !mapped.has(t) && !state?.defaultValues?.[t] ) 
+            const unMappedTaxonTerms = dataset?.taxonHeaders.filter(t => !termMap.has(t) && !mapped.has(t) && !state?.defaultValues?.[t] );
+            return [...unMappedSampleTerms, ...unMappedTaxonTerms]
+        } catch (error) {
+            console.log(error)
+        }
     }
 
    
@@ -301,6 +316,13 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
             <DwcTermSelect style={{width: 500, marginTop: "10px"}} placeholder={"Add mapping for another Taxon/ASV field"} dwcTerms={dwcTerms} filterToGroups={['Taxon']}  onSelect={val => setTaxonTerms([...taxonTerms, termMap.get(val)])}/>
 
         </>
+        <Title level={5} style={{ marginTop: '10px' }}>Unmappped fields <Popover placement="rightTop" trigger="click" title={"Unmapped fields"} content={<><p>Here is a list of the fields in your data that has not yet been mapped to a standard field name. </p><p>
+        Not all fields does neccessarily map to standard fields in a logical sense.</p><p> Unmapped fields will stil be available in the BIOM files created in the next step, but they will not be in the Darwin Core achive.</p></>}>
+                    <InfoCircleOutlined /> </Popover></Title> 
+        <Row>
+
+            <p>{unMapped.map(t => <Tag style={{marginBottom: "8px"}}>{t}</Tag>)}</p>
+        </Row>
         <Row>
             <Col flex="auto"></Col>
             <Col>
