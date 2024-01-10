@@ -200,7 +200,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
             dataIndex: 'name',
             key: 'name',
             render: (text, term) => <>
-                <Popover placement="rightTop" trigger="click" title={text} content={term?.['dc:description'] || term?.description}>
+                <Popover placement="rightTop" trigger="click" title={text} content={term?.description || term?.['dc:description'] }>
                     <InfoCircleOutlined /> </Popover> {text} {!!term.isRequired ? <span style={{ color: token.colorError }}>*</span> : ""}
             </>
         }
