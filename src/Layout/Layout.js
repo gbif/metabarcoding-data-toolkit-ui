@@ -81,9 +81,9 @@ const AppLayout = ({ children, setDataset, user }) => {
         </Row>
         <Row>
         <Space split={<Divider type="vertical" />}>
-        <Button style={{paddingLeft: 8}} type="link" onClick={() => navigate("/faq")}>FAQ</Button>
-    <Button style={{paddingLeft: 8}} type="link" href="https://github.com/gbif/edna-tool-ui/issues/new">Report a bug</Button>
-    <Button style={{paddingLeft: 8}} type="link" href="https://github.com/gbif/edna-tool-ui/issues/new">Request a feauture</Button>
+        <Button style={{paddingLeft: 8}} type="link" target="_blank" href="/faq" /* onClick={() => navigate("/faq")} */>FAQ</Button>
+    <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://github.com/gbif/edna-tool-ui/issues/new">Report a bug</Button>
+    <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://github.com/gbif/edna-tool-ui/issues/new">Request a feauture</Button>
   </Space>
         </Row>
           
