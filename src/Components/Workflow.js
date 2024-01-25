@@ -63,7 +63,7 @@ const Workflow = ({ dataset, format }) => {
                 }
 
                 if(!isNaN(currentStep?.total) && Number(currentStep?.total) > 0 && !isNaN(currentStep?.progress) &&  Number(currentStep?.progress)){
-                    console.log((Number(currentStep?.progress)/Number(currentStep?.total) * 100))
+                   // console.log((Number(currentStep?.progress)/Number(currentStep?.total) * 100))
                     setPercent(Number(currentStep?.progress)/Number(currentStep?.total) * 100)
                 } else {
                     setPercent(null)

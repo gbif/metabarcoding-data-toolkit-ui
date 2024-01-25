@@ -120,6 +120,8 @@ const ProcessDataset = ({
 
     const processData = async () => {
         if (isValidForProcessing()) {
+            setDataset({steps: [], processingErrors: null})
+            setShowProcessingErrors(false)
             setFailed(false)
             setFinished(false)
             try {
@@ -162,7 +164,7 @@ const ProcessDataset = ({
                 await subscribe();
             } else if (res.status !== 200) {
                 // An error - let's show it
-                console.log(res)
+               // console.log(res)
                 // showMessage(response.statusText);
                 // Reconnect in one second
                 await new Promise(resolve => setTimeout(resolve, interval));

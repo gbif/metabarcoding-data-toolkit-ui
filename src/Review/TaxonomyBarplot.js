@@ -103,7 +103,7 @@ const TaxonomyBarplot = ({ dataset, onSampleClick, selectedSample, taxonomyDataM
     }
 
     const initChart = ( rank = "class") => {
-        console.log("INIT")
+       // console.log("INIT")
         const { byAbundance, stacking } = chartConfig;
         const { series, categories } = getChartData( rank, byAbundance);
         const options = {

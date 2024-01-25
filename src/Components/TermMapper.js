@@ -1,5 +1,5 @@
 import { useEffect, useState, useReducer, useRef } from "react";
-import { Table, Popover, Typography, Row, Col, theme, Button, Tour, Tag, message, notification } from "antd"
+import { Table, Popover, Typography, Row, Col,Skeleton, theme, Button, Tour, Tag, message, notification } from "antd"
 import HeaderSelect from "./HeaderSelect";
 import DefaultValueSelect from "./DefaultValueSelect";
 import DwcTermSelect from "./DwcTermSelect";
@@ -14,6 +14,7 @@ const { Title, Text } = Typography
 
 
 const reducer = (state, action) => {
+   
     switch (action.type) {
         case 'mapTaxonTerm':
             return { ...state, taxa: action.payload.value ? {...state.taxa, [action.payload.term]: action.payload.value} : _.omit(state.taxa, action.payload.term)};
@@ -22,7 +23,7 @@ const reducer = (state, action) => {
         case 'createDefaultValue':
             return {...state, defaultValues:  action.payload.value ? {...state.defaultValues, [action.payload.term]: action.payload.value} : _.omit(state.defaultValues, action.payload.term)}
         case 'loadStoredMapping':
-            return action.payload
+            return {taxa: {...action.payload.taxa, ...state.taxa}, samples: {...action.payload.samples, ...state.samples}, defaultValues: {...action.payload.defaultValues, ...state.defaultValues}}
         default:
           throw new Error(`Unknown action type: ${action.type}`);
       }
@@ -38,7 +39,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
     const [defaultTermMap, setDefaultTermMap ] = useState(new Map())
     const [sampleTerms, setSampleTerms] = useState([]);
     const [taxonTerms, setTaxonTerms] = useState([]);
-    const [state, dispatch] = useReducer(reducer, (dataset?.mapping || initialState));
+    const [state, dispatch] = useReducer(reducer, (dataset?.mapping ? {...dataset?.mapping}: {...initialState}));
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
     const [open, setOpen] = useState(false);
@@ -49,6 +50,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
   const ref3 = useRef(null);
   const ref4 = useRef(null);
   const ref5 = useRef(null);
+
 
   const steps = [
     {
@@ -109,10 +111,10 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
             setDefaultTermMap(new Map([...additionalDefaults, ...defaultTerms.map(t => [t.name, t])]))
         }
 
-        if(dataset?.mapping){
+         if(dataset?.mapping){
             dispatch({ type: 'loadStoredMapping', payload: dataset?.mapping })
 
-        }
+        } 
 
     }, [dwcTerms, requiredTerms, defaultTerms, dataset])
 
@@ -125,7 +127,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
    
     const saveMapping = async () => {
 
-       // console.log(state)
+       
        checkImportantTermsExist()
             try {
                 setLoading(true)
@@ -162,16 +164,35 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
 
     }
 
+    const idsExistsOrHaveMapping = () => {
+        const hasSampleID = dataset?.sampleHeaders.includes('id') || Object.keys(state.samples).includes('id');
+        const hasTaxonID = dataset?.taxonHeaders.includes('id') || Object.keys(state.taxa).includes('id');
+        if(!hasSampleID || !hasTaxonID ){
+            notification.error({
+                duration: 0,
+                message: 'Attention',
+                description: <ul>
+                   
+                   {!hasSampleID && <li>You have no 'id' field in your sample file and you have not provided a mapping for that field. PLease pick the id in your sample file before proceeding.</li>}
+            {!hasTaxonID && <li>You have no 'id' field in your taxon file and you have not provided a mapping for that field. PLease pick the id in your taxon file before proceeding.</li>}
+                    </ul>,
+              })
+        }
+        return hasSampleID && hasTaxonID    
+    }
+
     const checkImportantTermsExist = () => {
         const hasLatLon = (dataset?.sampleHeaders.includes('decimalLatitude') || Object.keys(state.samples).includes('decimalLatitude')) && (dataset?.sampleHeaders.includes('decimalLongitude') || Object.keys(state.samples).includes('decimalLongitude'));
         const hasEventDate = dataset?.sampleHeaders.includes('eventDate') || Object.keys(state.samples).includes('eventDate');
+        
         const hasSequence = dataset?.files?.format.endsWith('_FASTA') || dataset?.taxonHeaders.includes('DNA_sequence') || Object.keys(state.taxa).includes('DNA_sequence');
 
-        if(!hasSequence || !hasLatLon || !hasEventDate){
+        if(!hasSequence || !hasLatLon || !hasEventDate ){
             notification.warning({
                 duration: 0,
                 message: 'Attention',
                 description: <ul>
+                   
                     {!hasLatLon && <li>You have no fields named 'decimalLatitude' and 'decimalLongitude' and you have not provided mappings for those fields.</li>}
                     {!hasEventDate && <li>You have no field named 'eventDate' and you have not provided a mapping for that field.</li>}
                     {!hasSequence && <li>You have no field named 'DNA_sequence' and you have not provided a mapping for that field.</li>}
@@ -184,8 +205,8 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
     const getUnMappedFields = () => {
         try {
             const mapped = new Set([...Object.keys(state?.samples).map(s => state?.samples?.[s]), ...Object.keys(state?.taxa).map(s => state?.taxa?.[s]) ])
-            const unMappedSampleTerms = dataset?.sampleHeaders.filter(t => !termMap.has(t) && !mapped.has(t) && !state?.defaultValues?.[t] && t.toLowerCase() !== 'id' ) 
-            const unMappedTaxonTerms = dataset?.taxonHeaders.filter(t => !termMap.has(t) && !mapped.has(t) && !state?.defaultValues?.[t] && t.toLowerCase() !== 'id'  );
+            const unMappedSampleTerms = (dataset?.sampleHeaders || []).filter(t => !termMap.has(t) && !mapped.has(t) && !state?.defaultValues?.[t] && t.toLowerCase() !== 'id' ) 
+            const unMappedTaxonTerms = (dataset?.taxonHeaders || []).filter(t => !termMap.has(t) && !mapped.has(t) && !state?.defaultValues?.[t] && t.toLowerCase() !== 'id'  );
             return [...unMappedSampleTerms, ...unMappedTaxonTerms]
         } catch (error) {
             console.log(error)
@@ -205,27 +226,30 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
             </>
         }
     )
+
     const getMappingColumn = (headers,type, ref) => (
         {
-            title: <span ref={ref}>Map to field in your data</span>,
+            title: (<span ref={ref}>Map to field in your data</span>),
             dataIndex: 'mapping',
             key: 'mapping',
             width: "30%",
             render: (text, term) => {
-                let val;
-                if(type === 'taxon' && state?.taxa?.[term.name]){
+                let val = null;
+                if(type === 'taxon' && !!state?.taxa?.[term.name]){
                     val =  state?.taxa?.[term.name]
-                } else if(type === 'sample' && state?.samples?.[term.name]){
+                } else if(type === 'sample' && !!state?.samples?.[term.name]){
                     val =  state?.samples?.[term.name]
                 }
+
                 // first check special case when a fasta file is given
-                return dataset?.files?.format.endsWith('_FASTA') && term.name === 'DNA_sequence' ? "Retrieved from fasta file" : (<HeaderSelect term={term} headers={headers} val={val} onChange={ val => {
+                return dataset?.files?.format.endsWith('_FASTA') && term.name === 'DNA_sequence' ? "Retrieved from fasta file" : (<HeaderSelect term={term} headers={headers} value={val} onChange={ value => {
                     /*  console.log('update '+term.name)
                     console.log('Value '+val) */
+                   
                     if(type === 'taxon'){
-                        dispatch({ type: 'mapTaxonTerm', payload: {term: term.name, value: val} })
+                        dispatch({ type: 'mapTaxonTerm', payload: {term: term.name, value: value} })
                     } else if(type === 'sample'){
-                        dispatch({ type: 'mapSampleTerm', payload: {term: term.name, value: val} })
+                        dispatch({ type: 'mapSampleTerm', payload: {term: term.name, value: value} })
                     }
                 }
                 } />)
@@ -270,17 +294,23 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
           }
     )
 
-    return <>
+    return !!dataset ? <>
     <Tour open={open} onClose={() => setOpen(false)} steps={steps} />
         <Row>
             <Col><Button style={{marginLeft: "-18px"}} type="link" onClick={() => setOpen(true)}><QuestionCircleOutlined /> How to use this form</Button></Col>
             <Col flex="auto"></Col>
             <Col>
-            <Button onClick={saveMapping}>Save mapping</Button>
+            <Button onClick={() => { 
+                if(idsExistsOrHaveMapping() ){ 
+                    saveMapping() }}}>
+                        Save mapping
+                        </Button>
             <Button ref={ref4} style={{marginLeft: "10px"}} type="primary"
                 onClick={async () => { 
+                    if(idsExistsOrHaveMapping()){ 
                     await saveMapping()
-                    navigate(`/dataset/${dataset?.id}/process`)}}>Proceed</Button></Col>
+                    navigate(`/dataset/${dataset?.id}/process`)
+                }}}>Proceed</Button></Col>
             </Row>
         <><Title level={5}>Sample</Title>
             <Table
@@ -332,7 +362,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
                     await saveMapping()
                     navigate(`/dataset/${dataset?.id}/process`)}}>Proceed</Button></Col>
             </Row>
-    </>
+    </> : <Skeleton />
 
 }
 
