@@ -37,12 +37,12 @@ const DatasetProvider = ({setDataset, user, setLoginFormVisible }) => {
             dispatch({ type: 'routeChange', payload: {route: datasetRouteChange.pathname, key: datasetRouteChange.params.key} })
         } else if(!user && datasetRouteChange.params.key === "new") {
             dispatch({ type: 'resetDataset', payload: null })
-            setLoginFormVisible(true)
+            // setLoginFormVisible(true)
         } else {
             dispatch({ type: 'resetDataset', payload: null })
         }
        
-    }, [datasetMatch, mappingMatch, metadataMatch, processMatch, publishMatch, reviewMatch, uploadMatch])
+    }, [datasetMatch, mappingMatch, metadataMatch, processMatch, publishMatch, reviewMatch, uploadMatch, user])
    
     useEffect(()=>{
     console.log(`Dataset ${state?.key}`)
