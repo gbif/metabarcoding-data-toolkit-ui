@@ -60,6 +60,10 @@ const DataUpload = ({ user,
         }
     }, [dataset, match?.params?.key]);
 
+    useEffect(() => {
+        setSelectedFile(null)
+    },[dataset?.id])
+
     useEffect(() => { }, [dataFormat])
 
     useEffect(() => {
