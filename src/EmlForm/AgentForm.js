@@ -56,6 +56,7 @@ const AgentForm = (props) => {
       },
     },
   };
+  const {requiredFields} = props;
   return (
     <Form
       form={form}
@@ -65,44 +66,72 @@ const AgentForm = (props) => {
       onFinishFailed={onFinishFailed}
       style={props.style}
     >
-      <FormItem {...formItemLayout} label="Given name" name="givenName">
+      <FormItem rules={[ {
+          required: (requiredFields || [] ).includes('givenName')
+        }]} {...formItemLayout} label="Given name" name="givenName">
         <Input />
       </FormItem>
-      <FormItem {...formItemLayout} label="Family name" name="surName">
+      <FormItem rules={[ {
+          required: (requiredFields || [] ).includes('surName')
+        }]} {...formItemLayout} label="Family name" name="surName">
         <Input />
       </FormItem>
-      <FormItem {...formItemLayout} label="Organisation" name="organizationName">
+      <FormItem rules={[ {
+          required: (requiredFields || [] ).includes('organizationName')
+        }]} {...formItemLayout} label="Organisation" name="organizationName">
         <Input />
       </FormItem>
-      <FormItem {...formItemLayout} label="Position" name="positionName">
+      <FormItem rules={[ {
+          required: (requiredFields || [] ).includes('positionName')
+        }]} {...formItemLayout} label="Position" name="positionName">
         <Input />
       </FormItem>
 
 
-      <FormItem {...formItemLayout} label="Email" name="electronicMailAddress">
+      <FormItem rules={[
+        {
+          required: (requiredFields || [] ).includes('electronicMailAddress')
+        },{
+          type: 'email',
+        }]}{...formItemLayout} label="Email" name="electronicMailAddress">
         <Input />
       </FormItem>
 
-      <FormItem {...formItemLayout} label="Phone" name="phone">
+      <FormItem rules={[ {
+          required: (requiredFields || [] ).includes('phone')
+        }]} {...formItemLayout} label="Phone" name="phone">
         <Input />
       </FormItem>
 
 
-      <FormItem {...formItemLayout} label="ORCID" name="userId">
+      <FormItem rules={[
+        {
+          required: (requiredFields || [] ).includes('userId')
+        },
+        {pattern: /^(\d{4}-){3}\d{3}(\d|X)$/, message: "Please input a valid orcid (XXXX-XXXX-XXXX-XXXX)"}
+      ]} {...formItemLayout} label="ORCID" name="userId" >
         <Input />
       </FormItem>
       
-      <FormItem {...formItemLayout} label="Address" name="deliveryPoint">
+      <FormItem  rules={[ {
+          required: (requiredFields || [] ).includes('deliveryPoint')
+        }]} {...formItemLayout} label="Address" name="deliveryPoint">
         <Input />
       </FormItem>
-      <FormItem {...formItemLayout} label="City" name="city">
+      <FormItem rules={[ {
+          required: (requiredFields || [] ).includes('city')
+        }]} {...formItemLayout} label="City" name="city">
         <Input />
       </FormItem>
-      <FormItem {...formItemLayout} label="State/Province" name="administrativeArea">
+      <FormItem rules={[ {
+          required: (requiredFields || [] ).includes('administrativeArea')
+        }]} {...formItemLayout} label="State/Province" name="administrativeArea">
         <Input />
       </FormItem>
 
-      <FormItem {...formItemLayout} label="Country" name="country">
+      <FormItem rules={[ {
+          required: (requiredFields || [] ).includes('country')
+        }]} {...formItemLayout} label="Country" name="country">
         <Select
           style={{ width: 300 }}
           filterOption={(input, option) => {
@@ -125,7 +154,9 @@ const AgentForm = (props) => {
         </Select>
       </FormItem>
 
-      <FormItem {...formItemLayout} label="Url (webpage)" name="onlineUrl">
+      <FormItem rules={[ {
+          required: (requiredFields || [] ).includes('onlineUrl')
+        }]} {...formItemLayout} label="Url (webpage)" name="onlineUrl">
         <Input />
       </FormItem>
       <FormItem {...tailFormItemLayout}>

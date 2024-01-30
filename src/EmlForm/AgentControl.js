@@ -37,7 +37,7 @@ class AgentControl extends React.Component {
     if ("value" in nextProps) {
       let value = stringToArray(nextProps.value);
 
-      return { agents: value };
+      return { agents: value, required: nextProps?.["aria-required"] === "true", invalid: nextProps?.["aria-invalid"] === "true"};
     }
     return null;
   }
@@ -46,6 +46,8 @@ class AgentControl extends React.Component {
     super(props);
 
     this.state = {
+      required: false,
+      invalid: false,
       agents: stringToArray(props.value),
       formVisible: false,
       agentForEdit: null,
@@ -119,12 +121,13 @@ class AgentControl extends React.Component {
   };
 
   render() {
-    const { agents, formVisible, agentForEdit } = this.state;
+    const { agents, formVisible, agentForEdit, required, invalid } = this.state;
     const {
       label,
       removeAll,
       agentType = "contact",
       array = true,
+      requiredFields
     } = this.props;
 
     const dragProps = {
@@ -135,7 +138,7 @@ class AgentControl extends React.Component {
 
     return (
       <React.Fragment>
-        <div>
+        <div style={required && invalid ? {borderBottom: "1px solid #ff4d4f"} :null}>
           <DragColumn {...dragProps}>
             <ol
               style={{
@@ -214,6 +217,7 @@ class AgentControl extends React.Component {
           }
         >
           <AgentForm
+            requiredFields={requiredFields}
             data={agentForEdit}
             style={{ marginTop: "10px" }}
             onSubmit={this.onFormSubmit}

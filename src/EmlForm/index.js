@@ -183,7 +183,7 @@ const MetaDataForm = ({data, onSaveSuccess, saveButtonLabel, dataset, setDataset
                 </Select>
             </FormItem>
 
-            {true && (
+            
                 <FormItem
                     {...formItemLayout}
                     label="DOI"
@@ -194,7 +194,7 @@ const MetaDataForm = ({data, onSaveSuccess, saveButtonLabel, dataset, setDataset
                 >
                     <Input />
                 </FormItem>
-            )}
+            
             {true && (
                 <FormItem
                     {...formItemLayout}
@@ -223,9 +223,18 @@ const MetaDataForm = ({data, onSaveSuccess, saveButtonLabel, dataset, setDataset
                     label="Contact"
                     name="contact"
                     help={ showHelp && (help?.contact || null)}
+                    rules={
+                        [
+                            {
+                                required: true,
+                                message: "You mush enter a contact person for the dataset",
+                            },
+                        ]
+                    }
 
                 >
                     <AgentControl
+                        requiredFields={['electronicMailAddress', 'userId']}
                         agentType="contact"
                         label="New contact"
                         removeAll={true}
