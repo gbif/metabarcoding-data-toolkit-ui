@@ -55,7 +55,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
   const steps = [
     {
       title: 'Field name in Darwin Core',
-      description: <>The <a href="http://rs.tdwg.org/dwc">Darwin Core Standard (DwC)</a> offers a stable, straightforward and flexible framework for compiling biodiversity data from varied and variable sources. In order to make your data interpretable for GBIF, you will have to map the columns in your data onto these standard fields. Full lists of available fieldnames can be found here <a href="https://rs.gbif.org/core/dwc_occurrence_2022-02-02.xml">Occurrence</a> and here <a href="https://rs.gbif.org/extension/gbif/1.0/dna_derived_data_2022-02-23.xml">DNA derived data</a></>,
+      description: <>The <a href="http://rs.tdwg.org/dwc" target="_blank" rel="noreferrer">Darwin Core Standard (DwC)</a> offers a stable, straightforward and flexible framework for compiling biodiversity data from varied and variable sources. In order to make your data interpretable for GBIF, you will have to map the columns in your data onto these standard fields. Full lists of available fieldnames can be found here <a target="_blank" rel="noreferrer" href="https://rs.gbif.org/core/dwc_occurrence_2022-02-02.xml">Occurrence</a> and here <a target="_blank" rel="noreferrer" href="https://rs.gbif.org/extension/gbif/1.0/dna_derived_data_2022-02-23.xml">DNA derived data</a></>,
       target: () => ref1.current,
     },
     {
