@@ -346,7 +346,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
             <DwcTermSelect style={{width: 500, marginTop: "10px"}} placeholder={"Add mapping for another Taxon/ASV field"} dwcTerms={dwcTerms} filterToGroups={['Taxon']}  onSelect={val => setTaxonTerms([...taxonTerms, termMap.get(val)])}/>
 
         </>
-        <Title level={5} style={{ marginTop: '10px' }}>Unmappped fields <Popover placement="rightTop" trigger="click" title={"Unmapped fields"} content={<><p>Here is a list of the fields in your data that has not yet been mapped to a standard field name. </p><p>
+        <Title level={5} style={{ marginTop: '10px' }}>{unMapped.length > 0 ? `Unmappped fields`:`No unmappped fields`} <Popover placement="rightTop" trigger="click" title={"Unmapped fields"} content={<><p>Here is a list of the fields in your data that has not yet been mapped to a standard field name. </p><p>
         Not all fields does neccessarily map to standard fields in a logical sense.</p><p> Unmapped fields will stil be available in the BIOM files created in the next step, but they will not be in the Darwin Core achive.</p></>}>
                     <InfoCircleOutlined /> </Popover></Title> 
         <Row>
