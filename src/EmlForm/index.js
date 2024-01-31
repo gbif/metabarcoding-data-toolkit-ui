@@ -59,6 +59,7 @@ const MetaDataForm = ({data, onSaveSuccess, saveButtonLabel, dataset, setDataset
     const match = useMatch('/dataset/:key/metadata')
     const [submissionError, setSubmissionError] = useState(null);
     const [showHelp, setShowHelp] = useState(false)
+    const [isTouched, setIsTouched] = useState(false);
     const navigate = useNavigate()
 
     const [form] = Form.useForm();
@@ -75,13 +76,11 @@ const MetaDataForm = ({data, onSaveSuccess, saveButtonLabel, dataset, setDataset
                 ...values
             })
             .then((res) => {
-               
+               setIsTouched(false)
                 if (onSaveSuccess && typeof onSaveSuccess === "function") {
-                    if (key) {
+                    
                         onSaveSuccess(res);
-                    } else {
-                        onSaveSuccess(res);
-                    }
+                    
                 }
                 message.success('Metada saved')
                 setDataset({...dataset, metadata: values})
@@ -108,12 +107,40 @@ const MetaDataForm = ({data, onSaveSuccess, saveButtonLabel, dataset, setDataset
             onFinishFailed={onFinishFailed}
             style={{ paddingTop: "12px" }}
             form={form}
+            onFieldsChange={(changedFields, allFields) => {
+                // add your additionaly logic here
+               const touchedFields = allFields.filter(field => {
+                const name = field?.name?.[0]
+                    if(!field.touched){
+                        return false
+                    }
+                    
+                   else if(typeof field?.value === "object" && typeof dataset?.metadata?.[name]  === "object" && JSON.stringify(field?.value) !== JSON.stringify(dataset?.metadata?.[name])){
+                        
+                            return true
+                        
+                    }
+                   else if(!field?.value && !!dataset?.metadata?.[name]){
+                    return true
+                    }
+                    else if(!!field?.value && !dataset?.metadata?.[name]){
+                        return true
+                    }
+                    else if(field?.value && field?.value != dataset?.metadata?.[name]){
+                        return true
+                    } else /* if(!field?.value && !dataset?.metadata?.[name]) */{
+                        return false
+                    }
+                })
+                setIsTouched(touchedFields.length > 0);
+              }}
         >
             <Row>
-            <Col>Show help <Switch onChange={setShowHelp} checked={showHelp}/></Col>
+            <Col span={4}>Show help <Switch onChange={setShowHelp} checked={showHelp}/></Col>
+            {isTouched &&<Col><Text type="warning">You have unsaved changes</Text></Col>}
                 <Col flex="auto"></Col>
             
-            <Col> <FormItem >
+            <Col> <FormItem   >
                 <Button htmlType="submit">
                     {saveButtonLabel || "Save metadata"}
                 </Button>
@@ -127,7 +154,7 @@ const MetaDataForm = ({data, onSaveSuccess, saveButtonLabel, dataset, setDataset
                     Proceed
                 </Button></Col>
             </Row>
-            
+           
            
             {submissionError && (
                 <FormItem>
