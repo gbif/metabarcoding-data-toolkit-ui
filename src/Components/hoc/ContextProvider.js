@@ -26,6 +26,7 @@ class ContextProvider extends React.Component {
     format: {},
      country,
      user: null, //getTokenUser(),
+     tokenUser: () => getTokenUser(),
     dataset: null,
     loginFormVisible: false,
     setLoginFormVisible: (val) => this.setState({loginFormVisible: val}),

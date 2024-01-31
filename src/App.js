@@ -1,7 +1,7 @@
 import * as React from "react";
 import ContextProvider from "./Components/hoc/ContextProvider";
 import { ConfigProvider } from 'antd';
-
+import LoginManager from "./Components/LoginManager";
 import { BrowserRouter as Router, useRoutes } from "react-router-dom";
 import DatasetProvider from "./Components/hoc/DatasetProvider2"
 import Home from "./Home";
@@ -52,6 +52,7 @@ const AppWrapper = () => {
       }}
     >
       <ContextProvider>
+        <LoginManager />
         <Router history={history}>
           <App />
         </Router>
