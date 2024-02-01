@@ -94,7 +94,7 @@ const defaultMenuItems = [
         name: user.userName,
         avatar: `/_palettes/${imgNr}.png`,
       });
-      refreshUserHdl.current = setInterval(
+      /* refreshUserHdl.current = setInterval(
         () => {
           refreshLogin()
             .then(usr => setUser(usr))
@@ -103,11 +103,11 @@ const defaultMenuItems = [
               setUser(null)
             })
         }
-        ,  900000 );
+        ,  900000 ); */
     } else {
-      if (refreshUserHdl.current) {
+      /* if (refreshUserHdl.current) {
         clearInterval(refreshUserHdl.current);
-    }
+    } */
     }
 
     if(user && admins.includes(user?.userName)){
@@ -121,11 +121,11 @@ const defaultMenuItems = [
       setMenuItems([...defaultMenuItems])
     }
    
-    return () => {
+   /*  return () => {
       if (refreshUserHdl.current) {
         clearInterval(refreshUserHdl.current);
     }
-    };
+    }; */
     
   }, [user])
   const showLogin = () => {
