@@ -67,6 +67,8 @@ const LoginManager = ({user, logout}) => {
              
         } else if(minutesRemaing < (bufferInSeconds / 60)){
             logout()
+            stop()
+            api.destroy("open")
         }
       //  console.log(`Minutes remaing: ${minutesRemaing}`)
         }
