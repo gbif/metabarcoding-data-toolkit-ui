@@ -60,7 +60,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
     },
     {
         title: 'Adding more fields to your mapping',
-        description: 'If you want to add more DWC fields to your mapping than present in the table by defualt, you can search and add them here.',
+        description: 'If you want to add more DWC fields to your mapping than present in the table by default, you can search and add them here.',
         target: () => ref5.current,
       },
     {
@@ -70,7 +70,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
     },
     {
       title: 'Default values',
-      description: <>You may also set/select a default value that applies to the entire dataset. Examples of good candidates for defualt values are <Text code>target_gene</Text> (ITS, COI, 16S, etc), <Text code>pcr_primer_forward</Text>,  <Text code>pcr_primer_reverse</Text>, <Text code>otu_db</Text> (the reference database used for taxonomic annotation) </>,
+      description: <>You may also set/select a default value that applies to the entire dataset. Examples of good candidates for default values are <Text code>target_gene</Text> (ITS, COI, 16S, etc), <Text code>pcr_primer_forward</Text>,  <Text code>pcr_primer_reverse</Text>, <Text code>otu_db</Text> (the reference database used for taxonomic annotation) </>,
       target: () => ref3.current,
     },
     {
