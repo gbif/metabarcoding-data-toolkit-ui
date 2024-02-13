@@ -221,10 +221,11 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
             const mapped = new Set([...Object.keys(state?.samples).map(s => state?.samples?.[s]), ...Object.keys(state?.taxa).map(s => state?.taxa?.[s]) ])
             const unMappedSampleTerms = (dataset?.sampleHeaders || []).filter(t => !termMap.has(t) && !mapped.has(t) && !state?.defaultValues?.[t] && t.toLowerCase() !== 'id' ) 
             const unMappedTaxonTerms = (dataset?.taxonHeaders || []).filter(t => !termMap.has(t) && !mapped.has(t) && !state?.defaultValues?.[t] && t.toLowerCase() !== 'id'  );
-            const measurementSet = new Set(Object.keys(state?.measurements))
+            const measurementSet = new Set(Object.keys(state?.measurements || {}))
             return [...unMappedSampleTerms, ...unMappedTaxonTerms].filter(t => !measurementSet.has(t))
         } catch (error) {
             console.log(error)
+            return []
         }
     }
 
