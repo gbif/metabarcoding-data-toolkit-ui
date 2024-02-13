@@ -52,6 +52,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
   const ref3 = useRef(null);
   const ref4 = useRef(null);
   const ref5 = useRef(null);
+  const ref6 = useRef(null);
 
 
   const steps = [
@@ -75,6 +76,11 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
       description: <>You may also set/select a default value that applies to the entire dataset. Examples of good candidates for default values are <Text code>target_gene</Text> (ITS, COI, 16S, etc), <Text code>pcr_primer_forward</Text>,  <Text code>pcr_primer_reverse</Text>, <Text code>otu_db</Text> (the reference database used for taxonomic annotation) </>,
       target: () => ref3.current,
     },
+    {
+        title: 'Adding measurements',
+        description: <>You may have fields that do not fit into the standard set of Darwin Core fields (often various measurements). These can be added to the <a href="https://rs.gbif.org/extension/obis/extended_measurement_or_fact_2023-08-28.xml" target="_blank">Extended Measurement Or Facts</a> extension which is a key/value based extension that allows any Measurement type. This is where you can add information about pH, salinity, sample biomass etc.</>,
+        target: () => ref6.current,
+      },
     {
         title: 'Proceed to the data processing',
         description: 'Once you have mapped the fields in your data to the equivalent Darwin core fields, you can proceed to the data processing step',
@@ -358,7 +364,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
         <Title level={5} style={{ marginTop: '10px' }}>{unMapped.length > 0 ? `Unmapped fields`:`No unmapped fields`} <Popover placement="rightTop" trigger="click" title={"Unmapped fields"} content={<><p>Here is a list of the fields in your data that has not yet been mapped to a standard field name. </p><p>
         Not all fields does neccessarily map to standard fields in a logical sense.</p><p> Unmapped fields will stil be available in the BIOM files created in the next step, but they will not be in the Darwin Core achive unless you include them as a measurement.</p></>}>
                     <InfoCircleOutlined /> </Popover></Title> 
-                    <Text>Click a field to include as a measurement. Fields selected as measurements will be included in the <a href="https://rs.gbif.org/extension/obis/extended_measurement_or_fact_2023-08-28.xml" target="_blank">Extended Measurement Or Facts</a> extension for Darwin core</Text>
+                    <Text ref={ref6}>Click a field to include as a measurement. Fields selected as measurements will be included in the <a href="https://rs.gbif.org/extension/obis/extended_measurement_or_fact_2023-08-28.xml" target="_blank">Extended Measurement Or Facts</a> extension for Darwin core</Text>
         <Row>
 
             <p>{unMapped.map(t => <Tag style={{marginBottom: "8px", cursor: "pointer"}} onClick={() => dispatch({ type: 'createMeasurement', payload: {term: t, value: {measurementType:t}} })}>{t}</Tag>)}</p>
