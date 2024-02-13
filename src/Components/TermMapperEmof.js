@@ -23,7 +23,7 @@ const reducer = (state, action) => {
         case 'createDefaultValue':
             return {...state, defaultValues:  action.payload.value ? {...state.defaultValues, [action.payload.term]: action.payload.value} : _.omit(state.defaultValues, action.payload.term)}
         case 'createMeasurement':
-            return {...state, measurements:  action.payload.value ? {...state.measurements, [action.payload.term]: action.payload.value} : _.omit(state.measurements, action.payload.term)}
+            return {...state, measurements:  action.payload.value ? {...(state.measurements || {}), [action.payload.term]: action.payload.value} : _.omit(state.measurements, action.payload.term)}
         case 'loadStoredMapping':
             return {taxa: {...action.payload.taxa, ...state.taxa}, samples: {...action.payload.samples, ...state.samples}, defaultValues: {...action.payload.defaultValues, ...state.defaultValues}, measurements: {...action.payload.measurements, ...state.measurements}}
         default:
@@ -372,7 +372,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
         <Title level={5} style={{ marginTop: '10px' }}>Fields for inclusion in the <a href="https://rs.gbif.org/extension/obis/extended_measurement_or_fact_2023-08-28.xml" target="_blank">Extended Measurement Or Facts</a> extension:  </Title> 
     
         <Table
-                dataSource={Object.keys(state?.measurements).map(t => state?.measurements[t])} 
+                dataSource={state?.measurements ? Object.keys(state?.measurements).map(t => state?.measurements[t]) : []} 
                 columns={[{
                     title: "Measurement Type",
                     dataIndex: "measurementType",
