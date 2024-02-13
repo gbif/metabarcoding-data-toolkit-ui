@@ -411,7 +411,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
             />
 {/*             {Object.keys(state?.measurements).map(t => <Tag style={{marginBottom: "8px"}} onClick={() => dispatch({ type: 'createMeasurement', payload: {term: t, value: null} })}>{t}</Tag>)}
  */}            
-        <Row>
+        <Row style={{marginTop: "10px"}}>
             <Col flex="auto"></Col>
             <Col>
             <Button onClick={saveMapping}>Save mapping</Button>
