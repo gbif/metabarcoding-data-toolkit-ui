@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Row, Col, Typography, Modal, Button, Table, Input, theme } from "antd"
+import { Row, Col, Typography, Modal, Button, Table, Input, Tag, theme } from "antd"
 import {
     EditOutlined,
     LinkOutlined
@@ -16,8 +16,10 @@ const OntologySelect = ({ onChange, term, ontology = null, initialValue }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [loading, setLoading] = useState(false)
     const [data, setData] = useState({})
+    const [selectedItems, setSelectedItems] = useState(initialValue ? initialValue.split("|"): [])
+    
     useEffect(() => {
-
+       
     }, [ontology, term])
 
    
@@ -26,6 +28,7 @@ const OntologySelect = ({ onChange, term, ontology = null, initialValue }) => {
         setIsModalOpen(true);
     };
     const handleOk = () => {
+        onChange([...new Set(selectedItems)].join("|"))
         setIsModalOpen(false);
     };
     const handleCancel = () => {
@@ -47,17 +50,28 @@ const OntologySelect = ({ onChange, term, ontology = null, initialValue }) => {
     }
     return (
         <>
-           {initialValue ? <>{initialValue} <Button type="link" onClick={showModal}><EditOutlined /></Button></> : <Button  onClick={showModal}>
+           {initialValue ? <>{initialValue.split("|").map(v => <Tag>{v}</Tag>)} <Button type="link" onClick={showModal}><EditOutlined /></Button></> : <Button  onClick={showModal}>
                 Browse {ontology.toUpperCase()} ontology
             </Button>} 
-            <Modal width={"90%"} title={`${ontology.toUpperCase()} ontology`} open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
-                <Search 
+            <Modal width={"90%"} title={`${ontology.toUpperCase()} ontology`} open={isModalOpen} onOk={handleOk} onCancel={handleCancel} destroyOnClose>
+                <Row><Col><Search 
                 style={{marginTop: '10px', marginBottom: '10px', width: 400}} 
                 allowClear 
                 placeholder="Search the ontology" 
                 
                 onSearch={val => getData(val)}
-                 />
+                 /></Col></Row>
+                <Row style={{marginBottom: "10px"}}><Col> Selected: {selectedItems.map((elm, index) => 
+                <Tag closable onClose={(e) => {
+                    e.preventDefault();
+                    console.log(selectedItems)
+                    console.log(selectedItems.filter(e => e !== elm))
+
+                    setSelectedItems(selectedItems.filter(e => e !== elm))
+                }}>{elm}</Tag>)}
+</Col></Row>
+
+                
                 <Table
                     loading={loading}
                     dataSource={data?.response?.docs?.length > 0 ? data?.response?.docs : []} columns={[
@@ -65,8 +79,9 @@ const OntologySelect = ({ onChange, term, ontology = null, initialValue }) => {
                             title: '',
                             key: 'selectVal',
                             render: (text, item) =>  <Button onClick={() => {
-                                onChange(`${item?.label} [${item?.obo_id}]`)
-                                handleCancel()
+                                setSelectedItems([...selectedItems, `${item?.label} [${item?.obo_id}]`])
+                                // onChange(`${item?.label} [${item?.obo_id}]`)
+                               // handleCancel()
                             }}>Select</Button>
                             
                         },
