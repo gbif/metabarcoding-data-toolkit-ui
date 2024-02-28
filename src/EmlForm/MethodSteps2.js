@@ -1,8 +1,9 @@
 import React from 'react';
-import { PlusOutlined } from '@ant-design/icons';
-import { Input, Tag, Tooltip, Steps, Timeline } from 'antd';
+import { PlusOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { Input, Tag, Tooltip, Steps, Timeline, Card, Button , Row, Col, Typography} from 'antd';
 import ReactDragListView from "react-drag-listview";
 
+const { Paragraph } = Typography;
 
 const stringToArray = value => {
   if (Array.isArray(value)) {
@@ -43,7 +44,8 @@ class TagControl extends React.Component {
     this.state = {
       tags: stringToArray(props.value),
       inputVisible: false,
-      inputValue: ''
+      inputValue: '',
+      editStepIndex: -1
     };
   }
 
@@ -62,7 +64,13 @@ class TagControl extends React.Component {
     this.setState({ inputValue: event.target.value });
   };
 
-  handleInputConfirm = () => {
+  editStep = (step, index) => {
+    this.setState(
+      { inputValue: step, editStepIndex: index }
+    );
+  };
+
+ /*  handleInputConfirm = () => {
     const state = this.state;
     const inputValue = state.inputValue;
     let tags = state.tags;
@@ -76,7 +84,29 @@ class TagControl extends React.Component {
       inputValue: ''
     });
     this.triggerChange(tags);
+  }; */
+
+  handleInputConfirm = () => {
+    const {tags, editStepIndex, inputValue} = this.state
+    let tags_ = [];
+    if(editStepIndex > -1){
+      tags_ = [...tags];
+      tags_.splice(editStepIndex, 1, inputValue)
+    } else {
+      tags_ = [...tags, inputValue]
+    }
+
+    this.setState({
+      tags: tags_,
+      inputVisible: false,
+      inputValue: '',
+      editStepIndex: -1
+    });
+    this.triggerChange(tags_)
+    ;
   };
+
+  
 
   triggerChange = changedValue => {
     // Should provide an event to pass value to Form
@@ -97,13 +127,15 @@ class TagControl extends React.Component {
     nodeSelector: ".ant-steps-item"
   });
   render() {
-    const { tags, inputVisible, inputValue } = this.state;
+    const { tags, inputVisible, inputValue, editStepIndex } = this.state;
     const { label, removeAll } = this.props;
     const newElement = <>{inputVisible && (
       <Input.TextArea
         ref={this.saveInputRef}
         type="text"
         size="small"
+        rows={5}
+
         value={inputValue}
         onChange={this.handleInputChange}
         onBlur={this.handleInputConfirm}
@@ -116,18 +148,46 @@ class TagControl extends React.Component {
         </Tag>
       )}</>
 
+      const editElement = 
+        <Input.TextArea
+          type="text"
+          size="small"
+          rows={5}
+          value={inputValue}
+          onChange={this.handleInputChange}
+          onBlur={this.handleInputConfirm}
+          onPressEnter={this.handleInputConfirm}
+        />
+      
+
     let items = [...tags.map((tag, index) => {
       const tagElem = (
-        <Tag key={tag} closable={removeAll || index !== 0} onClose={() => this.handleClose(tag)}>
+        <Tag key={tag} 
+          onClick={() => this.setState({editStepIndex: index, inputValue: tag})}
+          closable={removeAll || index !== 0} onClose={() => this.handleClose(tag)}>
           {tag}
         </Tag>
 
       );
-      return { title: tagElem };
+
+      const tagElem2 = <
+    >
+    <Row><Col><>
+    <Button size='small' onClick={() => this.setState({editStepIndex: index, inputValue: tag})}style={{padding: 0}} type='link'><EditOutlined />
+    </Button> 
+    <Button size='small' type='link' onClick={() => this.handleClose(tag)}><DeleteOutlined /></Button></></Col></Row>
+
+    <Row><Col>{tag}</Col></Row>
+
+    </>
+      return { description: tagElem2 };
     })]
 
-    if(tags.length > 0){
-      items = [...items, {title: newElement}]
+    if(tags.length > 0 && editStepIndex < 0){
+      items = [...items, {description: newElement}]
+    }
+    if(tags.length > 0 && editStepIndex > -1){
+      items.splice(editStepIndex, 1, {description: editElement})
     }
 
     return (

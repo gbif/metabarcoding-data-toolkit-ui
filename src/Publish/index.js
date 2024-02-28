@@ -8,7 +8,7 @@ import { Row, Col, Alert, Button, Progress, Timeline, Typography, Modal, message
 import { CheckCircleOutlined, ClockCircleOutlined, DownloadOutlined } from '@ant-design/icons';
 import config from "../config";
 import FilesAvailable from '../Components/FilesAvailable'
-
+import Help from "../Components/Help";
 import withContext from "../Components/hoc/withContext";
 import { axiosWithAuth } from "../Auth/userApi";
 const { Title } = Typography;
@@ -115,7 +115,12 @@ const Publish = ({ setDataset, dataset }) => {
       {error && <Alert type="error" >{error}</Alert>}
       <Row>
         <Col span={6}>
-          <Button style={{ marginBottom: "24px" }} onClick={() => processData(dataset?.id)} type="primary" >Create DWC archive</Button>
+          <Button style={{ marginBottom: "24px" }} onClick={() => processData(dataset?.id)} type="primary" >Create Darwin Core Archive</Button> 
+          <Help style={{marginLeft: '8px'}} title="Darwin Core" content={<>
+          <div>The Darwin Core Standard (DwC) offers a stable, straightforward and flexible framework for compiling biodiversity data from varied and variable sources. The majority of the datasets shared through GBIF.org are published using the Darwin Core Archive format (DwC-A).
+          </div>
+                                  <a href="https://gcube.wiki.gcube-system.org/gcube/Darwin_Core_Terms" target="_blank">More about Darwin Core Archives.</a>
+                            </>}/>
           {dataset?.dwc?.steps && dataset?.dwc?.steps?.length > 0 && <Timeline
             items={
               dataset?.dwc?.steps.map((s, idx) => ({

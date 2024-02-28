@@ -239,14 +239,14 @@ const MetaDataForm = ({
           </Select>
         </FormItem>
 
-        <FormItem
+     {/*    <FormItem
           {...formItemLayout}
           label="DOI"
           name="doi"
           help={showHelp && (help?.doi || null)}
         >
           <Input />
-        </FormItem>
+        </FormItem> */}
 
         {true && (
           <FormItem

@@ -134,7 +134,7 @@ const Workflow = ({ dataset, format }) => {
                 disabled: !dataset
             },
             {
-                title: 'Publish',
+                title: 'Export',
                 disabled: !(dataset?.metadata && dataset?.filesAvailable?.find(f => f.format === 'BIOM 1.0'))
             },
         ]}
