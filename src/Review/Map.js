@@ -39,23 +39,28 @@ const MapContent = ({ geoJson, onFeatureClick, selectedSample, setError }) => {
   const geoJsonRef = useRef();
   const [lastSelected, setLastSelected] = useState(selectedSample)
   useEffect(() => {
-    if (selectedSample && lastSelected !== selectedSample) {
+    try {
+      if (selectedSample && lastSelected !== selectedSample) {
 
-      const layers = geoJsonRef.current.getLayers();
-      const selectedLayer = layers.find(l => l?.feature?.properties?.id == selectedSample);
-      const lastSelectedLayer = layers.find(l => l?.feature?.properties?.id == lastSelected);
-      if(lastSelectedLayer){
-        lastSelectedLayer.closePopup()
+        const layers = geoJsonRef.current.getLayers();
+        const selectedLayer = layers.find(l => l?.feature?.properties?.id == selectedSample);
+        const lastSelectedLayer = layers.find(l => l?.feature?.properties?.id == lastSelected);
+        if(lastSelectedLayer){
+          lastSelectedLayer.closePopup()
+        }
+          
+        if (selectedLayer) {
+          
+           map.flyTo([selectedLayer?.feature?.geometry?.coordinates[1],selectedLayer?.feature?.geometry?.coordinates[0]], 14)
+           selectedLayer.openPopup()
+        }
+        setLastSelected(selectedSample)
+  
       }
-        
-      if (selectedLayer) {
-        
-         map.flyTo([selectedLayer?.feature?.geometry?.coordinates[1],selectedLayer?.feature?.geometry?.coordinates[0]], 14)
-         selectedLayer.openPopup()
-      }
-      setLastSelected(selectedSample)
-
+    } catch (error) {
+      console.log(error) 
     }
+
   }, [selectedSample, map])
 
   useEffect(() => {
