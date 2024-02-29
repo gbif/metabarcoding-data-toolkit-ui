@@ -247,19 +247,19 @@ const ProcessDataset = ({
 
                             {dataset?.processingErrors?.consistencyCheck?.taxonIdsWithNoRecordInTaxonFile?.length > 0
                                 && <li>
-                                    {truncateMissingIdError`${dataset?.processingErrors?.consistencyCheck?.taxonIdsWithNoRecordInTaxonFile} in the OTUTABLE are not present in the TAXONOMY`}
+                                    {truncateMissingIdError`${dataset?.processingErrors?.consistencyCheck?.taxonIdsWithNoRecordInTaxonFile} in the OTU table are not present in the TAXONOMY`}
                                 </li>}
                             {dataset?.processingErrors?.consistencyCheck?.taxonIdsWithNoRecordInOtuTable?.length > 0
                                 && <li>
-                                    {truncateMissingIdError`${dataset?.processingErrors?.consistencyCheck?.taxonIdsWithNoRecordInOtuTable} in the TAXONOMY are not present in the OTUTABLE`}
+                                    {truncateMissingIdError`${dataset?.processingErrors?.consistencyCheck?.taxonIdsWithNoRecordInOtuTable} in the TAXONOMY are not present in the OTU table`}
                                 </li>}
                                 {dataset?.processingErrors?.consistencyCheck?.sampleIdsWithNoRecordInSampleFile?.length > 0
                                 && <li>
-                                    {truncateMissingIdError`${dataset?.processingErrors?.consistencyCheck?.sampleIdsWithNoRecordInSampleFile} in the OTUTABLE are not present in the SAMPLETABLE`}
+                                    {truncateMissingIdError`${dataset?.processingErrors?.consistencyCheck?.sampleIdsWithNoRecordInSampleFile} in the OTU table are not present in the SAMPLE table`}
                                 </li>}
                                 {dataset?.processingErrors?.consistencyCheck?.sampleIdsWithNoRecordInOtuTable?.length > 0
                                 && <li>
-                                    {truncateMissingIdError`${dataset?.processingErrors?.consistencyCheck?.sampleIdsWithNoRecordInOtuTable} in the SAMPLETABLE are not present in the OTUTABLE`}
+                                    {truncateMissingIdError`${dataset?.processingErrors?.consistencyCheck?.sampleIdsWithNoRecordInOtuTable} in the SAMPLE table are not present in the OTU table`}
                                 </li>}
                         </ul>} />}
                 <Row>
