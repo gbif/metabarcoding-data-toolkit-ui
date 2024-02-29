@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 // import { MapContainer } from 'react-leaflet/MapContainer'
 import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet'
-
+import { Alert } from 'antd';
 import bbox from 'geojson-bbox';
 
 import { useMap } from 'react-leaflet/hooks'
@@ -34,7 +34,7 @@ var geojsonMarkerOptions = {
   marginBottom: '24px'
 }
 
-const MapContent = ({ geoJson, onFeatureClick, selectedSample }) => {
+const MapContent = ({ geoJson, onFeatureClick, selectedSample, setError }) => {
   const map = useMap()
   const geoJsonRef = useRef();
   const [lastSelected, setLastSelected] = useState(selectedSample)
@@ -59,38 +59,44 @@ const MapContent = ({ geoJson, onFeatureClick, selectedSample }) => {
   }, [selectedSample, map])
 
   useEffect(() => {
-    const onEachFeature = (feature, layer) => {
-      if (feature.properties) {
-        layer.bindPopup(`Sample ${feature.properties.id}`)
+
+    try {
+      const onEachFeature = (feature, layer) => {
+        if (feature.properties) {
+          layer.bindPopup(`Sample ${feature.properties.id}`)
+        }
+  
+  
+        if (typeof onFeatureClick === "function") {
+          layer.on({
+  
+            click: () => {
+              onFeatureClick(feature.properties.id)
+            }
+          });
+  
+        }
       }
-
-
-      if (typeof onFeatureClick === "function") {
-        layer.on({
-
-          click: () => {
-            onFeatureClick(feature.properties.id)
-          }
-        });
-
-      }
+      const markers = L.markerClusterGroup();
+  
+      const geoJsonLayer = L.geoJson(geoJson, {
+        onEachFeature,
+        pointToLayer: (feature, latlng) => {
+          return L.circleMarker(latlng, geojsonMarkerOptions)
+        }
+      });
+      geoJsonRef.current = geoJsonLayer;
+  
+      markers.addLayer(geoJsonLayer);
+      markers.on('mouseover', function (a) {
+        a.layer.openPopup();
+      });
+      map.addLayer(markers);
+      map.fitBounds(markers.getBounds());
+    } catch (error) {
+      console.log(error.message)
+      setError(error.message)
     }
-    const markers = L.markerClusterGroup();
-
-    const geoJsonLayer = L.geoJson(geoJson, {
-      onEachFeature,
-      pointToLayer: (feature, latlng) => {
-        return L.circleMarker(latlng, geojsonMarkerOptions)
-      }
-    });
-    geoJsonRef.current = geoJsonLayer;
-
-    markers.addLayer(geoJsonLayer);
-    markers.on('mouseover', function (a) {
-      a.layer.openPopup();
-    });
-    map.addLayer(markers);
-    map.fitBounds(markers.getBounds());
 
   }, [geoJson])
 
@@ -101,9 +107,12 @@ const MapContent = ({ geoJson, onFeatureClick, selectedSample }) => {
 
 const LeafletMap = ({ geoJson, onFeatureClick, selectedSample }) => {
   const [extent, setExtent] = useState([])
+  const [error, setError] = useState(null)
 
 
-
+useEffect(()=> {
+  console.log(error)
+}, [error])
   useEffect(() => {
     if (geoJson) {
       console.log(bbox(geoJson))
@@ -115,8 +124,10 @@ const LeafletMap = ({ geoJson, onFeatureClick, selectedSample }) => {
 
 
   return <div style={{ minWidth: "300px", height: "450px" }}>
+                    {error && <Alert type="error" message={error} style={{marginBottom: "10px"}}/>}
+
     {extent.length > 0 &&
-      <MapContainer style={css} center={[0, 0]} zoom={1} maxZoom={18} scrollWheelZoom={false} whenReady={e => {
+      <MapContainer  style={css} center={[0, 0]} zoom={1} maxZoom={18} scrollWheelZoom={false} whenReady={e => {
         /* mapRef = e.target; */
         try {
           e.target.flyToBounds([
@@ -129,7 +140,7 @@ const LeafletMap = ({ geoJson, onFeatureClick, selectedSample }) => {
         }
 
       }}>
-        <MapContent geoJson={geoJson} onFeatureClick={onFeatureClick} selectedSample={selectedSample} />
+        <MapContent setError={setError} geoJson={geoJson} onFeatureClick={onFeatureClick} selectedSample={selectedSample} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
