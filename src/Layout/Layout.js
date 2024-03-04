@@ -1,4 +1,6 @@
 import { Layout, Button, Row, Col, Typography, Space, Divider, theme } from "antd";
+import config from "../config";
+
 import { LoadingOutlined } from "@ant-design/icons";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, useMatch } from "react-router-dom";
@@ -31,7 +33,7 @@ const AppLayout = ({ children, setDataset, user }) => {
           <Col  onClick={() => navigate("/")} span={1} style={{ padding: "4px" , cursor: "pointer"}} >
             <Logo />
           </Col>
-          <Col><Button onClick={() => navigate("/")} type={"link"}><Title level={4} style={{color: "white"}}>eDNA Tool - Test environment</Title> </Button> </Col> 
+          <Col><Button onClick={() => navigate("/")} type={"link"}><Title level={4} style={{color: "white"}}>eDNA Tool {config?.env !== "prod" ? "- Test environment": ""}</Title> </Button> </Col> 
           <Col flex="auto">
            
           </Col>
