@@ -23,7 +23,7 @@ placeholder={placeholder || "Search to Select"}
 optionFilterProp="children"
 allowClear
 onClear={() => setSelected(null)}
-filterOption={(input, option) => (option?.value ?? '').includes(input)}
+filterOption={(input, option) => (option?.value ?? '').toLowerCase().includes((input ?? '').toLowerCase())}
 filterSort={(optionA, optionB) =>
     (optionA?.value ?? '').toLowerCase().localeCompare((optionB?.value ?? '').toLowerCase())
 }
