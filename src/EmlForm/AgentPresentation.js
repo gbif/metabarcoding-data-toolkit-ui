@@ -1,6 +1,7 @@
 import React from "react";
 import withContext from "../Components/hoc/withContext";
 import _ from "lodash";
+import { Button } from "antd";
 
 const AgentPresentation = ({
   agent,
@@ -8,6 +9,8 @@ const AgentPresentation = ({
   style,
   noLinks,
   hideEmail,
+  otherAgentTypes,
+  reUseAgentAsOtherAgentType
 }) => {
   const country = _.get(agent, "country", "");
 
@@ -69,8 +72,6 @@ const AgentPresentation = ({
             {agent.electronicMailAddress}
           </a>
         ))}
-
-        
 
 
     </span>

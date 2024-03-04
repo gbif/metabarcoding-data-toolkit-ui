@@ -14,7 +14,7 @@ import {
 import { useNavigate, useLocation, useMatch } from "react-router-dom";
 // import axios from "axios";
 import { axiosWithAuth } from "../Auth/userApi";
-
+import { isArray } from "lodash";
 import config from "../config";
 import TextArea from "antd/lib/input/TextArea";
 import AgentControl from "./AgentControl";
@@ -111,6 +111,16 @@ const MetaDataForm = ({
   };
 
   const initialValues = dataset?.metadata || {};
+
+  const reuseAgent = (agent, type) => {
+    if(isArray(values[type])){
+        form.setFieldsValue({[type]: [...values[type], agent]})
+
+    } else {
+        form.setFieldsValue({[type]: agent})
+
+    }
+  }
 
   return (
     <>
@@ -282,6 +292,7 @@ const MetaDataForm = ({
                 message: "You mush enter a contact person for the dataset",
               },
             ]}
+            
           >
             <AgentControl
               requiredFields={["electronicMailAddress", "userId"]}
@@ -289,6 +300,8 @@ const MetaDataForm = ({
               label="New contact"
               removeAll={true}
               array={false}
+              otherAgentTypes={["creator"]}
+              reUseAgentAsOtherAgentType={reuseAgent}
             />
           </FormItem>
         )}
@@ -318,6 +331,7 @@ const MetaDataForm = ({
               agentType="creator"
               label="New creator"
               removeAll={true}
+              
             />
           </FormItem>
         )}

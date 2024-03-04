@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { PlusOutlined } from "@ant-design/icons";
-import { Row, Tag, Col, Modal } from "antd";
+import { Row, Tag, Col, Modal, Button } from "antd";
 import AgentForm from "./AgentForm";
 import AgentPresentation from "./AgentPresentation";
 import ReactDragListView from "react-drag-listview";
@@ -37,7 +37,11 @@ class AgentControl extends React.Component {
     if ("value" in nextProps) {
       let value = stringToArray(nextProps.value);
 
-      return { agents: value, required: nextProps?.["aria-required"] === "true", invalid: nextProps?.["aria-invalid"] === "true"};
+      return {
+        agents: value,
+        required: nextProps?.["aria-required"] === "true",
+        invalid: nextProps?.["aria-invalid"] === "true",
+      };
     }
     return null;
   }
@@ -127,7 +131,9 @@ class AgentControl extends React.Component {
       removeAll,
       agentType = "contact",
       array = true,
-      requiredFields
+      requiredFields,
+      otherAgentTypes,
+      reUseAgentAsOtherAgentType,
     } = this.props;
 
     const dragProps = {
@@ -138,7 +144,11 @@ class AgentControl extends React.Component {
 
     return (
       <React.Fragment>
-        <div style={required && invalid ? {borderBottom: "1px solid #ff4d4f"} :null}>
+        <div
+          style={
+            required && invalid ? { borderBottom: "1px solid #ff4d4f" } : null
+          }
+        >
           <DragColumn {...dragProps}>
             <ol
               style={{
@@ -167,14 +177,36 @@ class AgentControl extends React.Component {
                       closable={removeAll || index !== 0}
                       onClose={(e) => this.handleClose(e, index)}
                     >
-                      <AgentPresentation
-                        agent={agent}
-                        noLinks={true}
-                        style={{
-                          display: "inline-grid",
-                          margin: "3px 0px 3px 0px",
-                        }}
-                      />
+                      <>
+                        {" "}
+                        <AgentPresentation
+                          agent={agent}
+                          noLinks={true}
+                          style={{
+                            display: "inline-grid",
+                            margin: "3px 0px 3px 0px",
+                          }}
+                        />
+                        {otherAgentTypes && otherAgentTypes?.length > 0 ? (
+                          <>
+                            {otherAgentTypes.map((type) => (
+                              <Button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  reUseAgentAsOtherAgentType(agent, type);
+                                }}
+                                style={{marginRight: "5px"}}
+                                type="link"
+                                size="small"
+                              >
+                                Copy to {type}
+                              </Button>
+                            ))}
+                          </>
+                        ) : (
+                          ""
+                        )}
+                      </>
                     </Tag>
                   </li>
                 );
@@ -188,10 +220,7 @@ class AgentControl extends React.Component {
                     height: "100%",
                   }}
                 >
-                  <Tag
-                    onClick={() => this.showForm()}
-                    style={styles.newTag}
-                  >
+                  <Tag onClick={() => this.showForm()} style={styles.newTag}>
                     <PlusOutlined /> {label}
                   </Tag>
                 </li>
@@ -232,6 +261,5 @@ class AgentControl extends React.Component {
     );
   }
 }
-
 
 export default AgentControl;
