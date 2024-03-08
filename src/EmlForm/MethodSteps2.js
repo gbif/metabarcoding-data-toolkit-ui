@@ -161,16 +161,9 @@ class TagControl extends React.Component {
       
 
     let items = [...tags.map((tag, index) => {
-      const tagElem = (
-        <Tag key={tag} 
-          onClick={() => this.setState({editStepIndex: index, inputValue: tag})}
-          closable={removeAll || index !== 0} onClose={() => this.handleClose(tag)}>
-          {tag}
-        </Tag>
+      
 
-      );
-
-      const tagElem2 = <
+      const tagElem = <
     >
     <Row><Col><>
     <Button size='small' onClick={() => this.setState({editStepIndex: index, inputValue: tag})}style={{padding: 0}} type='link'><EditOutlined />
@@ -180,7 +173,7 @@ class TagControl extends React.Component {
     <Row><Col>{tag}</Col></Row>
 
     </>
-      return { description: tagElem2 };
+      return { description: tagElem };
     })]
 
     if(tags.length > 0 && editStepIndex < 0){

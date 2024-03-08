@@ -195,7 +195,7 @@ const DataUpload = ({ user,
                             renderItem={(file) => (
                                 <List.Item
                                     actions={[
-                                        <Button type="link" disabled={file.name.endsWith('fasta') || file.name.endsWith('.fa')}  onClick={() => setSelectedFile(file)}><EyeOutlined /></Button>,
+                                        <Button type="link" disabled={file.name.endsWith('fasta') || file.name.endsWith('.fa') || dataFormat?.name === "Invalid format" }  onClick={() => setSelectedFile(file)}><EyeOutlined /></Button>,
                                         <Button type="link"  download={file.name} href={`${config.backend}/dataset/${dataset?.id}/uploaded-file/${file.name}`}><DownloadOutlined /></Button>,
                                         <Popconfirm
                                             placement="leftTop"

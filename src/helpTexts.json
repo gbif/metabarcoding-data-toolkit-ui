@@ -9,6 +9,8 @@
         "creator": "All persons that should be accredited when citing the dataset",
         "keywords": "A list of keywords that may help users find your dataset",
         "url": "If you have a project website or similar that you want to display om the dataset homepage",
-        "bibliographicReferences": "Papers that have been published based on the dataset. "
+        "bibliographicReferences": "Papers that have been published based on the dataset. ",
+        "studyExtent": "This field represents both a specific sampling area and the sampling frequency (temporal boundaries, frequency of occurrence).",
+        "samplingDescription": "This field allows for a text-based/human readable description of the sampling procedures used in the research project. The content of this element would be similar to a description of sampling procedures found in the methods section of a journal article."
     }
 }

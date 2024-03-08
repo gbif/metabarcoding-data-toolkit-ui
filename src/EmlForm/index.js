@@ -258,29 +258,7 @@ const MetaDataForm = ({
           <Input />
         </FormItem> */}
 
-        {true && (
-          <FormItem
-            {...formItemLayout}
-            label="Description"
-            name="description"
-            help={showHelp && (help?.description || null)}
-          >
-            <TextArea rows={6} />
-          </FormItem>
-        )}
-
-        {true && (
-          <FormItem
-            {...formItemLayout}
-            label="Method steps"
-            name="methodSteps"
-            help={showHelp && (help?.methodSteps || null)}
-          >
-            <MethodSteps removeAll={true} label="Add step" />
-          </FormItem>
-        )}
-
-        {true && (
+{true && (
           <FormItem
             {...formItemLayout}
             label="Contact"
@@ -305,6 +283,50 @@ const MetaDataForm = ({
             />
           </FormItem>
         )}
+
+        {true && (
+          <FormItem
+            {...formItemLayout}
+            label="Description"
+            name="description"
+            help={showHelp && (help?.description || null)}
+          >
+            <TextArea rows={6} />
+          </FormItem>
+        )}
+
+        {true && (
+          <FormItem
+            {...formItemLayout}
+            label="Study extent"
+            name="studyExtent"
+            help={showHelp && (help?.studyExtent || null)}
+          >
+            <TextArea rows={6} />
+          </FormItem>
+        )}
+        {true && (
+          <FormItem
+            {...formItemLayout}
+            label="Sampling description"
+            name="samplingDescription"
+            help={showHelp && (help?.samplingDescription || null)}
+          >
+            <TextArea rows={6} />
+          </FormItem>
+        )}
+
+        {true && (
+          <FormItem
+            {...formItemLayout}
+            label="Method steps"
+            name="methodSteps"
+            help={showHelp && (help?.methodSteps || null)}
+          >
+            <MethodSteps removeAll={true} label="Add step" />
+          </FormItem>
+        )}
+
         {/*       {true &&(
         <FormItem
           {...formItemLayout}
