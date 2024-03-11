@@ -101,7 +101,7 @@ const MetaDataForm = ({
         if (onSaveSuccess && typeof onSaveSuccess === "function") {
           onSaveSuccess(res);
         }
-        message.success("Metada saved");
+        message.success("Metadata saved");
         setDataset({ ...dataset, metadata: values });
         setSubmissionError(null);
       })
