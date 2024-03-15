@@ -9,6 +9,7 @@ const AgentForm = (props) => {
   // const [addNewMode, setAddNewMode] = useState(false);
   const [submissionError, setSubmissionError] = useState(null);
   const [form] = Form.useForm();
+  const values = Form.useWatch([], form);
 
   useEffect(() => {
     if (props.data) {
@@ -68,12 +69,15 @@ const AgentForm = (props) => {
     >
       <FormItem rules={[ {
           required: (requiredFields || [] ).includes('givenName')
-        }]} {...formItemLayout} label="Given name" name="givenName">
+        }]} {...formItemLayout} label="First name" name="givenName">
         <Input />
       </FormItem>
       <FormItem rules={[ {
           required: (requiredFields || [] ).includes('surName')
-        }]} {...formItemLayout} label="Family name" name="surName">
+        }, {
+          required: values?.givenName,
+          message: 'If the first name is supplied, the last name must be also supplied.',
+        },]} {...formItemLayout} label="Last name" name="surName">
         <Input />
       </FormItem>
       <FormItem rules={[ {

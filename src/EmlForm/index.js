@@ -368,6 +368,16 @@ const MetaDataForm = ({
             <TagControl label="Add keyword" removeAll={true} />
           </FormItem>
         )}
+        {true && values?.keywords?.length > 0 && (
+          <FormItem
+            {...formItemLayout}
+            label="Keyword Thesaurus"
+            name="keywordThesaurus"
+            help={showHelp && (help?.keywordThesaurus || null)}
+          >
+            <Input />
+          </FormItem>
+        )}
 
         {true && (
           <FormItem
