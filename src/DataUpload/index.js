@@ -133,15 +133,17 @@ const DataUpload = ({ user,
 
                     <Col span={12}>
 
-                        <Button style={{ marginBottom: "10px" }} href="/templates/edna_template.xlsx">Download template <FileExcelOutlined /></Button> 
-                        <Help style={{marginLeft: '8px'}} title="About the data template" content={<><span>The template is an Excel workbook with 4 sheets:
+                        <Button type="link" style={{ marginBottom: "10px" }} onClick={() => window.open('https://docs.gbif-uat.org/edna-tool-guide/en/#templates', '_blank')}>Templates <FileExcelOutlined /></Button> 
+                        <Help style={{marginLeft: '8px'}} title="About the OTU table templates" content={<><span>Each templates has three (or four) tables and and an optional fasta file. The tables are either sheets in an Excel workbook or separate text (tsv) files. We provide four different templates.
+                                The tables of each template are:
                                 <ul>
-                                    <li>OTU_table: a matrix with Sample IDs as column headers and OTU IDs as Row identifiers</li>
-                                    <li>Taxa: This should include the DNA sequence and taxonomic information about the sequence if available</li>
-                                    <li>Sample: Any metadata about the samples, i.e. event date (collection date), decimal latitude and longitude</li>
-                                    <li>DefaultValues (Optional): This sheet may contain defaults for the whole study such as target gene, primers, standard operating procedures etc. </li>
+                                    <li>OTU_table: a matrix with Sample IDs as column headers and OTU IDs as row identifiers</li>
+                                    <li>Taxonomy: DNA sequence and taxonomic information if available</li>
+                                    <li>Samples: Sample metadata, e.g. spatiotemporal information.</li>
+                                    <li>Study (Optional): Defaults for the whole study, e.g. primer information and target gene.</li>
+                                    <li>Seqs.fasta (Optional): Sequences provided as fasta instead on field in Taxonomy table.</li>
                                 </ul>
-                                 See <a href="https://rs.gbif.org/core/dwc_occurrence_2022-02-02.xml" target="_blank">Darwin Core Occurrence</a> and <a href="https://rs.gbif.org/extension/gbif/1.0/dna_derived_data_2022-02-23.xml" target="_blank">DNA dervied data Darwin Core extension</a> for available fields.
+                                 See <a href="https://docs.gbif-uat.org/edna-tool-guide/en/" target="_blank">the guide</a> for templates and information of how to prepare datasets.
                             </span></>}/>
 
                         <Uploader datasetKey={match?.params?.key}

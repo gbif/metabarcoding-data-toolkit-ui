@@ -54,7 +54,11 @@ const AppLayout = ({ children, setDataset, user }) => {
             >
              <span style={{ color: "white" }}> New dataset</span>
             </Button>
-            <Button type={"link"} onClick={() => navigate("/faq")}> <span style={{  color: "white"  }}>FAQ </span></Button>
+            <Button 
+              type={"link"} 
+              onClick={() => window.open('https://docs.gbif-uat.org/edna-tool-guide/en/#faq', '_blank')}
+              > 
+              <span style={{  color: "white"  }}>FAQ </span></Button>
             <UserMenu />
           </Col>
         </Row>
@@ -83,7 +87,8 @@ const AppLayout = ({ children, setDataset, user }) => {
         </Row>
         <Row>
         <Space split={<Divider type="vertical" />}>
-        <Button style={{paddingLeft: 8}} type="link" target="_blank" href="/faq" /* onClick={() => navigate("/faq")} */>FAQ</Button>
+        <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://docs.gbif-uat.org/edna-tool-guide/en/" /* onClick={() => navigate("/faq")} */>How to use it?</Button>
+        <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://docs.gbif-uat.org/edna-tool-guide/en/#faq" /* onClick={() => navigate("/faq")} */>FAQ</Button>
     <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://github.com/gbif/edna-tool-ui/issues/new">Report a bug</Button>
     <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://github.com/gbif/edna-tool-ui/issues/new">Request a feature</Button>
   </Space>

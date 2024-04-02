@@ -1,30 +1,14 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
 import { Row, Col, Typography, Card } from "antd";
-import { useNavigate } from "react-router-dom";
 
-import { marked } from "marked";
 const { Title } = Typography;
 const { Meta } = Card;
 
 function App() {
-  const [markdown, setMarkdown] = useState(null);
-  const navigate = useNavigate()
 
-  useEffect(() => {
-    const getAbout = async () => {
-      try {
-        const res = await axios(`/ABOUT.md`);
-        setMarkdown(res.data);
-        // console.log(res.data)
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    getAbout();
-  }, []);
+  
   return (
     <Layout>
       <Row style={{ height: "48px" }}></Row>
@@ -52,7 +36,7 @@ function App() {
           <Col flex="auto"></Col>
           <Col style={{padding: "24px"}}>
             <Card
-              onClick={() => navigate("/how-to-use-the-tool")}
+              onClick={() => window.open('https://docs.gbif-uat.org/edna-tool-guide/en/', '_blank')}
               className="home-card"
               style={{
                 width: 200,
@@ -82,7 +66,7 @@ function App() {
           </Col>
           <Col style={{padding: "24px"}}>
             <Card
-              onClick={() => navigate("/faq")}
+              onClick={() => window.open('https://docs.gbif-uat.org/edna-tool-guide/en/#faq', '_blank')}
               className="home-card"
               style={{
                 width: 200,
