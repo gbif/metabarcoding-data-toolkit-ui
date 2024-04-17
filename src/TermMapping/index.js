@@ -5,7 +5,7 @@ import {useMatch} from "react-router-dom"
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
 import withContext from "../Components/hoc/withContext";
-import TermMapper from "../Components/TermMapperEmof";
+import TermMapper from "../Components/TermMapper";
 
 const TermMapping = ({dataset}) => {
 

@@ -1,5 +1,5 @@
 import { useEffect, useState, useReducer, useRef } from "react";
-import { Table, Popover, Typography, Row, Col,Skeleton, theme, Button, Tour, Tag, message, notification } from "antd"
+import { Table, Popover, Typography, Row, Col,Skeleton, theme, Button, Tour, Tag, message, notification, Input } from "antd"
 import HeaderSelect from "./HeaderSelect";
 import DefaultValueSelect from "./DefaultValueSelect";
 import DwcTermSelect from "./DwcTermSelect";
@@ -22,14 +22,16 @@ const reducer = (state, action) => {
             return { ...state, samples: action.payload.value ? {...state.samples, [action.payload.term]: action.payload.value} : _.omit(state.samples, action.payload.term)};
         case 'createDefaultValue':
             return {...state, defaultValues:  action.payload.value ? {...state.defaultValues, [action.payload.term]: action.payload.value} : _.omit(state.defaultValues, action.payload.term)}
+        case 'createMeasurement':
+            return {...state, measurements:  action.payload.value ? {...(state.measurements || {}), [action.payload.term]: action.payload.value} : _.omit(state.measurements, action.payload.term)}
         case 'loadStoredMapping':
-            return {taxa: {...action.payload.taxa, ...state.taxa}, samples: {...action.payload.samples, ...state.samples}, defaultValues: {...action.payload.defaultValues, ...state.defaultValues}}
+            return {taxa: {...action.payload.taxa, ...state.taxa}, samples: {...action.payload.samples, ...state.samples}, defaultValues: {...action.payload.defaultValues, ...state.defaultValues}, measurements: {...action.payload.measurements, ...state.measurements}}
         default:
           throw new Error(`Unknown action type: ${action.type}`);
       }
   }; 
 
-const initialState = {taxa: {}, samples: {}, defaultValues: {}};
+const initialState = {taxa: {}, samples: {}, defaultValues: {}, measurements: {}};
 
 const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
     const { token } = useToken();
@@ -50,32 +52,38 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
   const ref3 = useRef(null);
   const ref4 = useRef(null);
   const ref5 = useRef(null);
+  const ref6 = useRef(null);
 
 
   const steps = [
     {
-      title: 'Field name in Darwin Core',
-      description: <>The <a href="http://rs.tdwg.org/dwc" target="_blank" rel="noreferrer">Darwin Core Standard (DwC)</a> offers a stable, straightforward and flexible framework for compiling biodiversity data from varied and variable sources. In order to make your data interpretable for GBIF, you will have to map the columns in your data onto these standard fields. Full lists of available fieldnames can be found here <a target="_blank" rel="noreferrer" href="https://rs.gbif.org/core/dwc_occurrence_2022-02-02.xml">Occurrence</a> and here <a target="_blank" rel="noreferrer" href="https://rs.gbif.org/extension/gbif/1.0/dna_derived_data_2022-02-23.xml">DNA derived data</a></>,
+      title: 'Field name (term) in Darwin Core',
+      description: <>The <a href="http://rs.tdwg.org/dwc" target="_blank" rel="noreferrer">Darwin Core Standard (DwC)</a> offers a stable, straightforward and flexible framework for compiling biodiversity data from varied and variable sources. In order to make your data interpretable for GBIF, you will have to map the columns (fields) in your data onto these standard terms. Full lists of available terms can be found here (<a target="_blank" rel="noreferrer" href="https://rs.gbif.org/core/dwc_occurrence_2022-02-02.xml">Occurrence Core</a>) and here (<a target="_blank" rel="noreferrer" href="https://rs.gbif.org/extension/gbif/1.0/dna_derived_data_2022-02-23.xml">DNA derived data</a>)</>,
       target: () => ref1.current,
     },
     {
         title: 'Adding more fields to your mapping',
-        description: 'If you want to add more DWC fields to your mapping than present in the table by default, you can search and add them here.',
+        description: 'If you wish to add more DwC terms to your mapping than present in this form by default, you can search and add them here.',
         target: () => ref5.current,
       },
     {
       title: 'Your field name',
-      description: <>Select the field in your data that you want to map to the Darwin Core field. For example, you might want to map your field <Text code>lat</Text> to the Darwin Core term <Text code>decimalLatitude</Text></>,
+      description: <>Select the field in your data that you want to map to the Darwin Core term. For example, you might want to map your field  <Text code>lat</Text> to the Darwin Core term <Text code>decimalLatitude</Text></>,
       target: () => ref2.current,
     },
     {
-      title: 'Default values',
-      description: <>You may also set/select a default value that applies to the entire dataset. Examples of good candidates for default values are <Text code>target_gene</Text> (ITS, COI, 16S, etc), <Text code>pcr_primer_forward</Text>,  <Text code>pcr_primer_reverse</Text>, <Text code>otu_db</Text> (the reference database used for taxonomic annotation) </>,
+      title: 'Default/global values',
+      description: <>You may also set/select a default (global) value that applies to the entire dataset. Examples of good candidates for default values are <Text code>target_gene</Text> (ITS, COI, 16S, etc), <Text code>pcr_primer_forward</Text>,  <Text code>pcr_primer_reverse</Text>, <Text code>otu_db</Text> </>,
       target: () => ref3.current,
     },
     {
+        title: 'Adding measurements',
+        description: <>You may have fields that do not fit into the standard set of Darwin Core terms (often various measurements). These can be added to the <a href="https://rs.gbif.org/extension/obis/extended_measurement_or_fact_2023-08-28.xml" target="_blank">Extended Measurement Or Facts</a> extension which is a key/value based extension that allows any measurement type. This is where you can add information about pH, salinity, sample biomass etc.</>,
+        target: () => ref6.current,
+      },
+    {
         title: 'Proceed to the data processing',
-        description: 'Once you have mapped the fields in your data to the equivalent Darwin core fields, you can proceed to the data processing step',
+        description: 'Once you have mapped the fields in your data to the equivalent Darwin Core terms, you can proceed to the data processing step.',
         target: () => ref4.current,
       },
   ];
@@ -149,7 +157,13 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
                     }
                     return acc
                 }, {})
-                const res = await axiosWithAuth.post(`${config.backend}/dataset/${dataset?.id}/mapping`, {taxa: taxaMapping, samples: samplesMapping, defaultValues: defaultValues})
+                const measurements = Object.keys(state?.measurements || {}).reduce((acc, key) => {
+                    if(!!state.measurements[key]){
+                        acc[key] = state.measurements[key]
+                    }
+                    return acc
+                }, {})
+                const res = await axiosWithAuth.post(`${config.backend}/dataset/${dataset?.id}/mapping`, {taxa: taxaMapping, samples: samplesMapping, defaultValues: defaultValues, measurements: measurements})
                 message.success("Mapping saved")
                 setError(null) 
                 setLoading(false)
@@ -207,9 +221,11 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
             const mapped = new Set([...Object.keys(state?.samples).map(s => state?.samples?.[s]), ...Object.keys(state?.taxa).map(s => state?.taxa?.[s]) ])
             const unMappedSampleTerms = (dataset?.sampleHeaders || []).filter(t => !termMap.has(t) && !mapped.has(t) && !state?.defaultValues?.[t] && t.toLowerCase() !== 'id' ) 
             const unMappedTaxonTerms = (dataset?.taxonHeaders || []).filter(t => !termMap.has(t) && !mapped.has(t) && !state?.defaultValues?.[t] && t.toLowerCase() !== 'id'  );
-            return [...unMappedSampleTerms, ...unMappedTaxonTerms]
+            const measurementSet = new Set(Object.keys(state?.measurements || {}))
+            return [...unMappedSampleTerms, ...unMappedTaxonTerms].filter(t => !measurementSet.has(t))
         } catch (error) {
             console.log(error)
+            return []
         }
     }
 
@@ -347,13 +363,55 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
 
         </>
         <Title level={5} style={{ marginTop: '10px' }}>{unMapped.length > 0 ? `Unmapped fields`:`No unmapped fields`} <Popover placement="rightTop" trigger="click" title={"Unmapped fields"} content={<><p>Here is a list of the fields in your data that has not yet been mapped to a standard field name. </p><p>
-        Not all fields does neccessarily map to standard fields in a logical sense.</p><p> Unmapped fields will stil be available in the BIOM files created in the next step, but they will not be in the Darwin Core achive.</p></>}>
+        Not all fields does neccessarily map to standard fields in a logical sense.</p><p> Unmapped fields will stil be available in the BIOM files created in the next step, but they will not be in the Darwin Core achive unless you include them as a measurement.</p></>}>
                     <InfoCircleOutlined /> </Popover></Title> 
+                    <Text ref={ref6}>Click a field to include as a measurement. Fields selected as measurements will be included in the <a href="https://rs.gbif.org/extension/obis/extended_measurement_or_fact_2023-08-28.xml" target="_blank">Extended Measurement Or Facts</a> extension for Darwin core</Text>
         <Row>
 
-            <p>{unMapped.map(t => <Tag style={{marginBottom: "8px"}}>{t}</Tag>)}</p>
+            <p>{unMapped.map(t => <Tag style={{marginBottom: "8px", cursor: "pointer"}} onClick={() => dispatch({ type: 'createMeasurement', payload: {term: t, value: {measurementType:t}} })}>{t}</Tag>)}</p>
         </Row>
-        <Row>
+        <Title level={5} style={{ marginTop: '10px' }}>Fields for inclusion in the <a href="https://rs.gbif.org/extension/obis/extended_measurement_or_fact_2023-08-28.xml" target="_blank">Extended Measurement Or Facts</a> extension:  </Title> 
+    
+        <Table
+                dataSource={state?.measurements ? Object.keys(state?.measurements).map(t => state?.measurements[t]) : []} 
+                columns={[{
+                    title: "Measurement Type",
+                    dataIndex: "measurementType",
+                    key: "measurementType"
+                    
+                  }, {
+                    title: "Measurement Unit (optional)",
+                    dataIndex: "measurementUnit",
+                    key: "measurementUnit",
+                    width: 150,
+                    render: (text, record) => <Input value={record?.measurementUnit} onChange={(e) => dispatch({ type: 'createMeasurement', payload: {term: record.measurementType, value: {...record, measurementUnit: e?.target?.value }} })}/>
+                    
+                  }, {
+                    title: "Measurement Accuracy (optional)",
+                    dataIndex: "measurementAccuracy",
+                    key: "measurementAccuracy",
+                    width: 150,
+                    render: (text, record) => <Input value={record?.measurementAccuracy} onChange={(e) => dispatch({ type: 'createMeasurement', payload: {term: record.measurementType, value: {...record, measurementAccuracy: e?.target?.value }} })}/>
+                    
+                  },{
+                    title: "Measurement Method (optional)",
+                    dataIndex: "measurementMethod",
+                    key: "measurementMethod",
+                    render: (text, record) => <Input value={record?.measurementMethod} onChange={(e) => dispatch({ type: 'createMeasurement', payload: {term: record.measurementType, value: {...record, measurementMethod: e?.target?.value }} })}/>
+                    
+                  }, {
+                    title:"",
+                    dataIndex: "",
+                    key: "__actions",
+                    render: (text, record) => <Button type="link" onClick={() => dispatch({ type: 'createMeasurement', payload: {term: record.measurementType, value: null} })}>Delete</Button>
+                  }]}
+                size="small"
+                pagination={false}
+                
+            />
+{/*             {Object.keys(state?.measurements).map(t => <Tag style={{marginBottom: "8px"}} onClick={() => dispatch({ type: 'createMeasurement', payload: {term: t, value: null} })}>{t}</Tag>)}
+ */}            
+        <Row style={{marginTop: "10px"}}>
             <Col flex="auto"></Col>
             <Col>
             <Button onClick={saveMapping}>Save mapping</Button>
