@@ -313,7 +313,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
     return !!dataset ? <>
     <Tour open={open} onClose={() => setOpen(false)} steps={steps} />
         <Row>
-            <Col><Button style={{marginLeft: "-18px"}} type="link" onClick={() => setOpen(true)}><QuestionCircleOutlined /> How to use this form</Button></Col>
+            <Col><Button style={{marginLeft: "-18px"}} type="link" onClick={() => setOpen(true)}><QuestionCircleOutlined /> How to use this</Button></Col>
             <Col flex="auto"></Col>
             <Col>
             <Button onClick={() => { 

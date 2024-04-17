@@ -1,17 +1,18 @@
 
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation, useMatch } from "react-router-dom";
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
 import _ from "lodash"
-import { Row, Col, Alert, Button, List, Typography, Popconfirm, Tag, theme, message, notification } from "antd"
+import { Row, Col, Alert, Button, List, Typography, Popconfirm, Tag, Tour, theme, message, notification } from "antd"
 import {
     CheckCircleOutlined,
     CloseCircleOutlined,
     DeleteOutlined,
     EyeOutlined,
     DownloadOutlined,
-    FileExcelOutlined
+    FileExcelOutlined,
+    QuestionCircleOutlined
 } from '@ant-design/icons';
 import Uploader from "./Upload"
 import FileView from "./FileView";
@@ -39,8 +40,45 @@ const DataUpload = ({ user,
     const [valid, setValid] = useState(false);
     const [dataFormat, setDataFormat] = useState(null)
     const [selectedFile, setSelectedFile] = useState(null)
+    const [open, setOpen] = useState(false)
+    const ref1 = useRef(null);
+    const ref2 = useRef(null);
+    const ref3 = useRef(null);
+ 
+    const steps = [
+        {
+            title: "About the OTU table templates",
+            description: <><span>Each templates has three (or four) tables and and an optional fasta file. The tables are either sheets in an Excel workbook or separate text (tsv) files. We provide four different templates.
+            The tables of each template are:
+            <ul>
+                <li>OTU_table: a matrix with Sample IDs as column headers and OTU IDs as row identifiers</li>
+                <li>Taxonomy: DNA sequence and taxonomic information if available</li>
+                <li>Samples: Sample metadata, e.g. spatiotemporal information.</li>
+                <li>Study (Optional): Defaults for the whole study, e.g. primer information and target gene.</li>
+                <li>Seqs.fasta (Optional): Sequences provided as fasta instead on field in Taxonomy table.</li>
+            </ul>
+             See <a href="https://docs.gbif-uat.org/edna-tool-guide/en/" target="_blank">the guide</a> for templates and information of how to prepare datasets.
+        </span></>,
+                  target: () => ref1.current,
 
-   
+        },
+        {
+          title: 'Dataset name',
+          description: <>Give your dataset a nickname. You can always change it later.</>,
+          target: () => ref2.current,
+          placement: "top"
+        },
+        {
+            title: 'Uploading data',
+            description: 'Here you can drop/upload your DNA metabarcoding dataset in one of the supported templates.',
+            target: () => ref2.current,
+            placement: "right"
+          },
+        {
+          title: 'Uploaded files',
+          description: <>Uploaded files are listed here. Some basic consistency and formatting checks are performed. A “green signal” will indicate detected format and if your data looks OK. Uploaded files can be inspected in a simple viewer by clicking the eye icon.</>,
+          target: () => ref3.current,
+        }]
 
     useEffect(() => {
         const key = match?.params?.key;
@@ -123,6 +161,8 @@ const DataUpload = ({ user,
     return (
         <Layout>
             <PageContent>
+            <Tour open={open} onClose={() => setOpen(false)} steps={steps} />
+
                 {error && <Alert type="error" >{error}</Alert>}
                 {(selectedFile && (selectedFile?.name?.endsWith('.tsv') || selectedFile?.name?.endsWith('.txt') || selectedFile?.name?.endsWith('.csv'))) 
                 && <FileView file={selectedFile} dismiss={() => setSelectedFile(null)} />} 
@@ -132,9 +172,18 @@ const DataUpload = ({ user,
                 {!selectedFile && <Row>
 
                     <Col span={12}>
+                        <Row>
+                            <Col>
+                            <Button style={{marginLeft: "-18px"}} type="link" onClick={() => setOpen(true)}><QuestionCircleOutlined /> How to use this</Button>
+                            </Col>
+                            <Col flex="auto"></Col>
+                            <Col>
+                            <Button ref={ref1} type="link" style={{ marginBottom: "10px" }} onClick={() => window.open('https://docs.gbif-uat.org/edna-tool-guide/en/#templates', '_blank')}>Templates <FileExcelOutlined /></Button> 
 
-                        <Button type="link" style={{ marginBottom: "10px" }} onClick={() => window.open('https://docs.gbif-uat.org/edna-tool-guide/en/#templates', '_blank')}>Templates <FileExcelOutlined /></Button> 
-                        <Help style={{marginLeft: '8px'}} title="About the OTU table templates" content={<><span>Each templates has three (or four) tables and and an optional fasta file. The tables are either sheets in an Excel workbook or separate text (tsv) files. We provide four different templates.
+                            </Col>
+                        </Row>
+                        
+                        {/* <Help style={{marginLeft: '8px'}} title="About the OTU table templates" content={<><span>Each templates has three (or four) tables and and an optional fasta file. The tables are either sheets in an Excel workbook or separate text (tsv) files. We provide four different templates.
                                 The tables of each template are:
                                 <ul>
                                     <li>OTU_table: a matrix with Sample IDs as column headers and OTU IDs as row identifiers</li>
@@ -144,9 +193,11 @@ const DataUpload = ({ user,
                                     <li>Seqs.fasta (Optional): Sequences provided as fasta instead on field in Taxonomy table.</li>
                                 </ul>
                                  See <a href="https://docs.gbif-uat.org/edna-tool-guide/en/" target="_blank">the guide</a> for templates and information of how to prepare datasets.
-                            </span></>}/>
+                            </span></>}/> */}
 
-                        <Uploader datasetKey={match?.params?.key}
+                       <div ref={ref2}> <Uploader datasetKey={match?.params?.key}
+                           
+                            
                             onError={(e) => { 
                                 if(e?.response?.status > 399 && e?.response?.status < 500){
                                     setLoginFormVisible(true)
@@ -165,7 +216,7 @@ const DataUpload = ({ user,
                                     validate(match?.params?.key)
                                 }
                             }}
-                        />
+                        /></div>
 
                     </Col>
                     <Col span={12} style={{ paddingLeft: "10px" }}>
@@ -184,8 +235,7 @@ const DataUpload = ({ user,
                                 </Button>
                             </Col>
                         </Row>
-                        {/* {dataset && <pre>{JSON.stringify(dataset, null, 2)}</pre>} */}
-                        { <List
+                        { <div ref={ref3}><List
                             loading={loading}
                             itemLayout="horizontal"
                             header={<Text>Files uploaded</Text>}
@@ -216,7 +266,7 @@ const DataUpload = ({ user,
                                     />
                                 </List.Item>
                             )}
-                        />}
+                        /></div>}
 
                     </Col>
                 </Row>}
