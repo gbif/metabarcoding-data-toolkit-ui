@@ -9,6 +9,7 @@ import L from 'leaflet';
 import MarkerCluster from 'leaflet.markercluster';
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+import { filter } from 'lodash';
 
 let DefaultIcon = L.icon({
   iconUrl: icon,
@@ -34,10 +35,29 @@ var geojsonMarkerOptions = {
   marginBottom: '24px'
 }
 
-const MapContent = ({ geoJson, onFeatureClick, selectedSample, setError }) => {
+
+
+const MapContent = ({ geoJson, onFeatureClick, selectedSample, setError, geoJsonFilter }) => {
   const map = useMap()
   const geoJsonRef = useRef();
+  const markerRef = useRef()
   const [lastSelected, setLastSelected] = useState(selectedSample)
+  const onEachFeature = (feature, layer) => {
+    if (feature.properties) {
+      layer.bindPopup(`Sample ${feature.properties.id}`)
+    }
+  
+  
+    if (typeof onFeatureClick === "function") {
+      layer.on({
+  
+        click: () => {
+          onFeatureClick(feature.properties.id)
+        }
+      });
+  
+    }
+  }
   useEffect(() => {
     try {
       if (selectedSample && lastSelected !== selectedSample) {
@@ -66,24 +86,10 @@ const MapContent = ({ geoJson, onFeatureClick, selectedSample, setError }) => {
   useEffect(() => {
 
     try {
-      const onEachFeature = (feature, layer) => {
-        if (feature.properties) {
-          layer.bindPopup(`Sample ${feature.properties.id}`)
-        }
-  
-  
-        if (typeof onFeatureClick === "function") {
-          layer.on({
-  
-            click: () => {
-              onFeatureClick(feature.properties.id)
-            }
-          });
-  
-        }
-      }
+      
+      
       const markers = L.markerClusterGroup();
-  
+      markerRef.current = markers;
       const geoJsonLayer = L.geoJson(geoJson, {
         onEachFeature,
         pointToLayer: (feature, latlng) => {
@@ -105,12 +111,34 @@ const MapContent = ({ geoJson, onFeatureClick, selectedSample, setError }) => {
 
   }, [geoJson])
 
+  useEffect(()=>{
+    
+    if(geoJsonFilter &&  markerRef.current ){
+      const markers =  markerRef.current
+      markers.clearLayers()
+      const geoJsonLayer = L.geoJson(geoJson, {
+        filter: geoJsonFilter,
+        onEachFeature,
+        pointToLayer: (feature, latlng) => {
+          return L.circleMarker(latlng, geojsonMarkerOptions)
+        }
+      });
+      geoJsonRef.current = geoJsonLayer;
+  
+      markers.addLayer(geoJsonLayer);
+      markers.on('mouseover', function (a) {
+        a.layer.openPopup();
+      });
+    }
+
+  }, [geoJsonFilter])
+
 
   // return geoJson ?  <GeoJSON ref={geoJsonRef} key="whatever" data={geoJson} pointToLayer={pointToLayer}  onClick={console.log} onEachFeature={onEachFeature} /> : null;
   return <></>
 }
 
-const LeafletMap = ({ geoJson, onFeatureClick, selectedSample }) => {
+const LeafletMap = ({ geoJson, onFeatureClick, selectedSample , geoJsonFilter}) => {
   const [extent, setExtent] = useState([])
   const [error, setError] = useState(null)
 
@@ -145,7 +173,7 @@ useEffect(()=> {
         }
 
       }}>
-        <MapContent setError={setError} geoJson={geoJson} onFeatureClick={onFeatureClick} selectedSample={selectedSample} />
+        <MapContent setError={setError} geoJson={geoJson} onFeatureClick={onFeatureClick} selectedSample={selectedSample} geoJsonFilter={geoJsonFilter}/>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

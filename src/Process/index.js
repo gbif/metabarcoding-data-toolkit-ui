@@ -3,9 +3,11 @@ import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
-import { Row, Col, Alert, Button, Timeline, Progress, Statistic, Space, Typography, Tooltip, Checkbox, message, theme } from "antd"
+import { Table, Descriptions, Row, Col, Alert, Button, Timeline, Progress, Statistic, Space, Typography, Tooltip, Checkbox, message, theme, Tabs } from "antd"
 import { CheckCircleOutlined, ClockCircleOutlined, WarningOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import {dateFormatter, numberFormatter} from '../Util/formatters'
 import FilesAvailable from '../Components/FilesAvailable'
+import _ from "lodash"
 import Help from "../Components/Help";
 import config from "../config";
 import withContext from "../Components/hoc/withContext";
@@ -16,6 +18,7 @@ const { Title } = Typography;
 const { useToken } = theme;
 
 const truncateMissingIdError = (strings, ...values) => ((values[0].length > 10 ? values[0].slice(0, 10).join(', ') + ` and ${values[0].length - 10} more ids` : values[0].join(', ')) + ` ${strings[1]}`);
+
 
 /* const missingIdrMessages = {
     sampleIdsWithNoRecordInOtuTable`Sample_4 in the SAMPLETABLE is not present in the OTUTABLE`,
@@ -38,6 +41,7 @@ const ProcessDataset = ({
     const [showProcessingErrors, setShowProcessingErrors] = useState(false)
     const [assignTaxonomy, setAssignTaxonomy] = useState(dataset?.assignTaxonomy || false)
     const [showAssignTaxonomyCheckbox, setShowAssignTaxonomyCheckbox] = useState(false)
+    const [metrics, setMetrics] = useState(null)
     const { token } = useToken();
     //    let hdl = useRef();
     //  let refreshUserHdl = useRef();
@@ -85,6 +89,17 @@ const ProcessDataset = ({
         }
     }, [dataset?.mapping])
 
+    const getMetrics = async () => {
+
+        try {
+            const metrics_ = await axiosWithAuth.get(`${config.backend}/dataset/${dataset?.id}/data/metrics`);
+            console.log(metrics_)
+            setMetrics(metrics_.data)
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
 
     const isValidForProcessing = () => {
         if (!dataset) {
@@ -196,6 +211,10 @@ const ProcessDataset = ({
 
                 }
 
+                if(isFinished){
+                    getMetrics()
+                }
+
             }
         } catch (error) {
             console.log(error)
@@ -262,8 +281,8 @@ const ProcessDataset = ({
                                     {truncateMissingIdError`${dataset?.processingErrors?.consistencyCheck?.sampleIdsWithNoRecordInOtuTable} in the SAMPLE table are not present in the OTU table`}
                                 </li>}
                         </ul>} />}
-                <Row>
-                    <Col span={8}>
+                <Row justify="space-evenly">
+                    <Col span={6}>
                         <Button 
                             type="primary" 
                             style={{ marginBottom: "24px" }} 
@@ -302,7 +321,7 @@ const ProcessDataset = ({
                                     dot:  getStepDot(s),//s.status === "finished" ? <CheckCircleOutlined /> : s.status === "failed" ? <ExclamationCircleOutlined /> : s.status === "pending" ? <ClockCircleOutlined /> : null,
                                     color: getStatusColor(s.status),
                                     children: (s.status === "finished" && idx === dataset?.steps?.length - 1) ? "Finished" :
-                                        (s.status === "failed") ? `${s.messagePending} - Failed${s?.message ? ": " + s.message + (s.message.includes('This data matrix has out of bounds value') ? ' - Check that column names in the OTU table corresponds to the IDs in the sample file.':'') : ""}` :
+                                        (s.status === "failed") ? `${s.messagePending} - Failed${s?.message ? ": " + s.message + ( typeof s.message === "string" && s.message?.includes('This data matrix has out of bounds value') ? ' - Check that column names in the OTU table corresponds to the IDs in the sample file.':'') : ""}` :
                                             <>
                                                 {`${s.status === "processing" ? s.message : s.messagePending}${(s.subTask && idx === dataset?.steps.length - 1) ? " - " + s.subTask : ""}`}
                                                 {s.status === "processing" && (!isNaN(s.total) && s.total !== 0 && s.progress) &&
@@ -321,21 +340,37 @@ const ProcessDataset = ({
 
                     </Col>
 
-                    {dataset?.filesAvailable && dataset?.filesAvailable.length > 0 && <Col span={6}>
-                        <FilesAvailable dataset={dataset} />
-                    </Col>}
-                    <Col span={6}>
+                     <Col span={6}>
+                     {dataset?.filesAvailable && dataset?.filesAvailable.length > 0 &&  <FilesAvailable dataset={dataset} />}
+                    </Col>
+                    <Col span={6} 
+                    >
                         {dataset?.summary?.sampleCount && <Title level={3}>Data collected</Title>}
-                        <Row >
-                            <Space>
-                                {dataset?.summary?.sampleCount && <Statistic title="Samples" value={dataset?.summary?.sampleCount} />}
-                                {dataset?.summary?.taxonCount && <Statistic title="Taxa" value={dataset?.summary?.taxonCount} />}
-                            </Space>
-                        </Row>
+ 
+                        {dataset?.summary?.sampleCount && metrics &&  <>{dataset?.summary &&   <Table showHeader={false} pagination={false} dataSource={[
+                                ...Object.keys(dataset?.summary).filter(k => ['sampleCount', 'taxonCount'].includes(k)).map(k => ({key:k, label: _.startCase(k), value: numberFormatter.format(dataset?.summary[k])})),
+                                ...Object.keys(metrics).filter(k => ['totalReads', 'singletonsTotal'].includes(k)).map(k => ({key: k, label: _.startCase(k), value:  numberFormatter.format(Math.round(metrics[k]))})),
+                                ...Object.keys(metrics)
+                                    .filter(k => ['otuCountPrSample', 'readSumPrSample', 'sequenceLength'].includes(k))
+                                    .map(k => ({key: k, label: _.startCase(k), value: <span>{`${ numberFormatter.format(Math.round(metrics[k].mean))} (+/- ${ numberFormatter.format(Math.round(Math.round(metrics[k].stdev)*2))})`} <Help title="" content="Mean +/- stdev * 2"/></span>}))
+                            ]}
+                            columns={[{title: 'Label',
+                            dataIndex: 'label',
+                            key: 'label',
+                            render: text => <span>{text}:</span>,
+                            align: 'right'}, {
+                                title: 'value',
+                                dataIndex: 'value',
+                                key: 'value'
+                            }]} />}</>}
+
+
+                       
+                        
 
                     </Col>
-                    <Col flex="auto"></Col>
-                    <Col><Button type="primary" onClick={() => navigate(`/dataset/${dataset?.id}/review`)} disabled={!finished}>Proceed</Button></Col>
+{/*                     <Col flex="auto"></Col>
+ */}                    <Col><Button type="primary" onClick={() => navigate(`/dataset/${dataset?.id}/review`)} disabled={!finished}>Proceed</Button></Col>
                 </Row>
 
             </PageContent>

@@ -4,7 +4,7 @@ import config from "../config";
 import axios from "axios"
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
-import { Button, Row, Col, Typography, Descriptions, Tabs, Select } from "antd";
+import { Button, Row, Col, Typography, Descriptions, Tabs, Select, Table } from "antd";
 import TaxonomyChart from "./TaxonomyChart";
 import { useNavigate, useLocation, useMatch } from "react-router-dom";
 import LeafletMap from "./Map";
@@ -14,8 +14,25 @@ import { getDataForDissimilarityPlot , getBrayCurtisDistanceMatrix} from "../Uti
 import _ from "lodash"
 import { getPromiseState } from "../Util/promises"
 import withContext from "../Components/hoc/withContext";
+import DnaSequence from "../Components/DnaSequence";
+import {dateFormatter, numberFormatter} from '../Util/formatters'
+
 const ORDINATION_MAX_CARDINALITY = 2500000;
 const { Title } = Typography;
+
+const formatTaxonomy =  (record, truncate = true) => {
+    const taxa = ['kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'scientificName'].filter(rank => !!record[rank]).map(rank => record[rank])
+    if(taxa.length > 5 && truncate){
+        return `${taxa[0]}; ${taxa[1]};...${taxa[taxa.length-3]}; ${taxa[taxa.length-2]}; ${taxa[taxa.length-1]}`
+    } else {
+        return taxa.join("; ")
+    }
+};
+
+const expandedRowRender = (record) => <>
+<Row><Col style={{marginLeft: "48px"}}>{">"}{record?.id} | {formatTaxonomy(record, false)}</Col></Row>
+<Row><Col style={{marginLeft: "48px"}}><DnaSequence sequence={record?.DNA_sequence} /></Col></Row>
+ </>
 
 const DataBrowser = ({ dataset }) => {
 
@@ -35,6 +52,8 @@ const DataBrowser = ({ dataset }) => {
     const [topTaxa, setTopTaxa] = useState(null)
     const [loading, setLoading] = useState(false)
     const [datasetId, setDatasetId] = useState(null)
+    const [metrics, setMetrics] = useState({})
+    const [geoJsonFilter, setGeoJsonFilter] = useState(null)
 
     useEffect(() => {
 
@@ -46,6 +65,7 @@ const DataBrowser = ({ dataset }) => {
 
             getSampleData(dataset?.id)
             getTaxonomyData(dataset?.id)
+            getMetrics(dataset?.id)
             /* if (((dataset?.summary?.sampleCount * dataset?.summary?.taxonCount) < ORDINATION_MAX_CARDINALITY)) {
                 getOrdination(dataset?.id)
             } */
@@ -208,13 +228,36 @@ const DataBrowser = ({ dataset }) => {
 
     }
 
+    const getMetrics = async (id) => {
 
- 
+        try {
+            const metrics_ = await axios.get(`${config.backend}/dataset/${id}/data/metrics`);
+            console.log(metrics_)
+            setMetrics(metrics_.data)
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+const geoJsonFilterFn = (geoJsonFeature) => !!geoJsonFilter ? geoJsonFilter.includes(samplIdToArrayIndex.get(geoJsonFeature?.properties?.id)) : true
+ const getGeoJsonFilter = async (observationID) => {
+    try {
+        const res = await axios.get(`${config.backend}/dataset/${dataset.id}/data/observation/${observationID}`)
+        setGeoJsonFilter(res?.data)
+    } catch (error) {
+        
+    }
+ }
     return (
 
         <Row>
-            <Col span={12}> {geoJson && <LeafletMap geoJson={geoJson} onFeatureClick={setSelectedSample} selectedSample={selectedSample} />}
-                <Tabs defaultActiveKey="1" items={[
+            <Col span={12}> {geoJson && <LeafletMap geoJson={geoJson} onFeatureClick={setSelectedSample} selectedSample={selectedSample} geoJsonFilter={geoJsonFilterFn}/>}
+                <Tabs defaultActiveKey="1" onChange={activeKey => {
+                    if(['1', '2'].includes(activeKey)){
+                        setGeoJsonFilter(null)
+                    }
+                }  } items={[
                     {
                         key: '1',
                         label: `Taxonomy barplot`,
@@ -226,6 +269,36 @@ const DataBrowser = ({ dataset }) => {
                         label: `PCoA/MDS plot`,
                         children: <TaxonomicSimilarity sampleLabels={samples?.id} onSampleClick={setSelectedSample} selectedSample={selectedSample} />,
                     },
+                    {
+                        key: '3',
+                        label: 'Most frequent OTUs',
+                        children: <>{metrics?.sampleCountPrOtu?.mostFrequent &&   <Table expandable={{expandedRowRender}} showHeader={false} pagination={false} dataSource={metrics?.sampleCountPrOtu?.mostFrequent}
+                        columns={[{title: 'OTU',
+                        dataIndex: 'DNA_sequence',
+                        key: 'DNA_sequence',
+                        render: (text, record) => formatTaxonomy(record)}, 
+                        {
+                            title: 'value',
+                            dataIndex: 'value',
+                            key: 'value'
+                        }, 
+                    {title: "Count", dataIndex: "val", key: "val", render: (text, record) => <Button type="link" onClick={() => getGeoJsonFilter(record.key)}>{`In ${numberFormatter.format(text)}/${numberFormatter.format(dataset?.summary?.sampleCount)} samples`}</Button>}]} />}</> ,
+                      },
+                      {
+                        key: '4',
+                        label: 'Least frequent non-singleton OTUs',
+                        children: <>{metrics?.sampleCountPrOtu?.leastFrequent &&   <Table expandable={{expandedRowRender}} showHeader={false} pagination={false} dataSource={metrics?.sampleCountPrOtu?.leastFrequent}
+                        columns={[{title: 'OTU',
+                        dataIndex: 'DNA_sequence',
+                        key: 'DNA_sequence',
+                        render: (text, record) => formatTaxonomy(record)}, 
+                        {
+                            title: 'value',
+                            dataIndex: 'value',
+                            key: 'value'
+                        }, 
+                    {title: "Count", dataIndex: "val", key: "val", render: (text, record) => <Button type="link" onClick={() => getGeoJsonFilter(record.key)}>{`In ${numberFormatter.format(text)}/${numberFormatter.format(dataset?.summary?.sampleCount)} samples`}</Button>}]} />}</> ,
+                      }
 
                 ]} />
 
