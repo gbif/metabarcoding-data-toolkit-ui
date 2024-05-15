@@ -1,5 +1,5 @@
  import React, { useState, useEffect, useRef, useMemo } from "react";
-import { Row, Col, Spin, Select } from "antd";
+import { Row, Col, Spin, Select, Typography } from "antd";
 import axios from "axios";
 import Highcharts, { setOptions } from "highcharts";
 import config from "../config";
@@ -10,7 +10,7 @@ import HighchartsReact from "highcharts-react-official";
 import _ from 'lodash'
 import withContext from "../Components/hoc/withContext";
 import Help from "../Components/Help"
-
+const {Text} = Typography
 HC_exporting(Highcharts);
 HC_sunburst(Highcharts);
 
@@ -98,14 +98,12 @@ const TaxonomyChart = ({dataset, onSampleClick, selectedSample, sampleLabels}) =
   const [invalid, setInvalid] = useState(false);
   const [hoverPoint, setHoverPoint] = useState(null);
   const [indexType, setIndexType] = useState('jaccard');
-  // const [jaccardOptions, setJaccardOptions] = useState(null);
- // const [brayCurtisOptions, setBrayCurtisOptions] = useState(null)
+  const [readCounts, setReadCounts] = useState(null);
   const [sparseMatrix, setSparseMatrix] = useState(null)
-  const [datasetID, setDatasetID] = useState(null)
 
   // const options = useMemo(() => !(sparseMatrix && sampleLabels) ? null : getChartOptions(getDataForDissimilarityPlot(sparseMatrix, indexType, sampleLabels) ,indexType, onSampleClick), [sparseMatrix, indexType, sampleLabels]);
   const jaccardOptions = useMemo(() => !(sparseMatrix && sampleLabels) ? null : getChartOptions(getDataForDissimilarityPlot(sparseMatrix, "jaccard", sampleLabels), "jaccard" , onSampleClick), [sparseMatrix, sampleLabels]);
-  const brayCurtisOptions = useMemo(() => !(sparseMatrix && sampleLabels) ? null : getChartOptions(getDataForDissimilarityPlot(sparseMatrix, "bray-curtis", sampleLabels), "bray-curtis" , onSampleClick), [sparseMatrix, sampleLabels]);
+  const brayCurtisOptions = useMemo(() => !(sparseMatrix && sampleLabels && readCounts) ? null : getChartOptions(getDataForDissimilarityPlot(sparseMatrix, "bray-curtis", sampleLabels, readCounts), "bray-curtis" , onSampleClick), [sparseMatrix, sampleLabels, readCounts]);
 
    const chartRef = useRef()
   useEffect(() => {
@@ -119,6 +117,7 @@ const TaxonomyChart = ({dataset, onSampleClick, selectedSample, sampleLabels}) =
         } */
         //getData(dataset)
         getSparseMatrix()
+        getTotalReadCountsForAllSamples()
     }
   }, [dataset?.id])
 
@@ -139,26 +138,7 @@ const TaxonomyChart = ({dataset, onSampleClick, selectedSample, sampleLabels}) =
         }
     }
   }, [selectedSample])
-/* 
-    useEffect(()=> {
-    const chart = chartRef.current?.chart;
-    
-     if(chart && indexType === "jaccard" && jaccardOptions){
-      // chart.update(jaccardOptions)
-      
-    } else if(chart && indexType === "bray-curtis" && brayCurtisOptions){
-      // chart.update(brayCurtisOptions)
-    }
-    if(indexType === "jaccard" && jaccardOptions){
-      setOptions({...jaccardOptions})
-    } else if(indexType === "bray-curtis" && brayCurtisOptions){
-      setOptions({...brayCurtisOptions})
-    }
 
-    
-    
-    
-  }, [indexType, jaccardOptions, brayCurtisOptions]) */
 
   const getSparseMatrix = async () => {
     try {
@@ -172,40 +152,20 @@ const TaxonomyChart = ({dataset, onSampleClick, selectedSample, sampleLabels}) =
     }
 
   }
-/* 
-  const  getData = async (dataset) => {
 
-    let plotData;
-      if(indexType === 'jaccard' && jaccardData){
-        plotData = [...jaccardData]
-      } else if(indexType === 'bray-curtis' && brayCurtisData){
-        plotData = [...brayCurtisData]
-      } else {
-        try {
-          setLoading(true)
-          const res =  indexType === 'jaccard' ? await axios.get(`${config.backend}/dataset/${dataset.id}/data/ordination`) :  await axios.get(`${config.backend}/dataset/${dataset.id}/data/sparse-matrix`)
-          plotData = getDataForDissimilarityPlot(res?.data, indexType, sampleLabels);
-          if(indexType === 'jaccard'){
-            setJaccardData(plotData)
-          } else if(indexType === 'bray-curtis') {
-            setBrayCurtisData(plotData)
-          }
-          
-         setLoading(false)
-    
-        } catch (error) {
-          setLoading(false)
-    
-        }
-      }
+  const getTotalReadCountsForAllSamples = async () => {
+    try {
+      setLoading(true)
+      const res = await axios.get(`${config.backend}/dataset/${dataset.id}/data/read-counts`);
+      
+      setReadCounts(res?.data)
+      setLoading(false)
+    } catch (error) {
+      setError(error)
+      setLoading(false)
+    }
 
-      if(plotData){
-        const options = getChartOptions(plotData, indexType)
-        setOptions(options);
-
-      }
-    
-  } */
+  }
 
 
     
@@ -230,7 +190,7 @@ const TaxonomyChart = ({dataset, onSampleClick, selectedSample, sampleLabels}) =
               <Select.Option value={"bray-curtis"}>Bray-Curtis Dissimilarity</Select.Option>
             </Select> <Help title="" content={<ul>
               <li>The <a href="https://en.wikipedia.org/wiki/Jaccard_index" target="_blank">Jaccard index</a> is purely presence/absence based and does not take abundance into account.</li>
-              <li><a href="https://en.wikipedia.org/wiki/Bray%E2%80%93Curtis_dissimilarity" target="_blank">Bray-Curtis dissimilarity</a> integrates information about species abundance</li>
+              <li><a href="https://en.wikipedia.org/wiki/Bray%E2%80%93Curtis_dissimilarity" target="_blank">Bray-Curtis dissimilarity</a> integrates information about species abundance. This plot is based on relative abundances. To adjust influence of high numbers, the fourth root of each value is used: <Text code>(readCount / totalReadCountInSample * 100) ^0.25</Text></li>
             </ul>}/>
           </Col>
         </Row>

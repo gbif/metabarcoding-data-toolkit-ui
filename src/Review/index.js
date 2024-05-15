@@ -1,22 +1,14 @@
 
-import React, {useEffect, useState} from "react";
-import config from "../config";
-import axios from "axios"
+import React from "react";
+
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
-import { Button, Row, Col, Typography, Descriptions, Tabs } from "antd";
-import TaxonomyBarplot from "./TaxonomyBarplot";
-import { useNavigate, useLocation, useMatch } from "react-router-dom";
-import LeafletMap from "./Map";
-import TaxonomicSimilarity from "./TaxonomicSimilarity"
-import {getDataForDissimilarityPlot} from "../Util/ordination"
-import _ from "lodash"
-import {getPromiseState} from "../Util/promises"
+import { Button, Row, Col } from "antd";
+import { useNavigate, useMatch } from "react-router-dom";
+
 import withContext from "../Components/hoc/withContext";
 import DataBrowser from "./DataBrowser";
 
-const ORDINATION_MAX_CARDINALITY = 2500000;
-const {Title} = Typography;
 
 const Review = ({dataset}) => {
   const match = useMatch('/dataset/:key/review');

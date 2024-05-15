@@ -80,8 +80,7 @@ const sparseToDense = (data, transformValue = (val) => val) => {
 
      data.forEach((elm, idx) => {
         const [taxonIdx, sampleIdx, abundance] = elm;      
-       // console.log(`abundance ${abundance}  ${transformValue(abundance)}`)
-        denseData[sampleIdx][taxonIdx] = transformValue(abundance);
+        denseData[sampleIdx][taxonIdx] = transformValue(abundance, sampleIdx);
        
     }) 
 
@@ -91,11 +90,13 @@ const sparseToDense = (data, transformValue = (val) => val) => {
     }
 }
 
-export const getBrayCurtisDistanceMatrix = (sparseMatrix, samples) => {
+export const getBrayCurtisDistanceMatrix = (sparseMatrix, samples, readCounts) => {
     console.log('getBrayCurtisDistanceMatrix')
 
+    // Use relative abundance see https://github.com/gbif/edna-tool-ui/issues/104
+    const relativeAbundance = (val, idx) => (val / readCounts[idx]) *100
     // Scale abundances, see https://github.com/gbif/edna-tool-ui/issues/2#issuecomment-1717637957 
-    const transformAbundance = (val) => Math.pow(val, 1/4)
+    const transformAbundance = (val, idx) =>  Math.pow(relativeAbundance(val, idx), 1/4)
    
     // create a dataframe
     const vectors =  sparseToDense(sparseMatrix, transformAbundance)
@@ -158,8 +159,8 @@ export const classicMDS = (distances, dimensions) => {
 };
 
 
-export const getDataForDissimilarityPlot = (data, method = 'jaccard', sampleIds) => {
-    const processedData = method === 'jaccard' ? getJaccardDistanceMatrix(data, sampleIds) : getBrayCurtisDistanceMatrix(data, sampleIds);
+export const getDataForDissimilarityPlot = (data, method = 'jaccard', sampleIds, readCounts) => {
+    const processedData = method === 'jaccard' ? getJaccardDistanceMatrix(data, sampleIds) : getBrayCurtisDistanceMatrix(data, sampleIds, readCounts);
     const mds = classicMDS(processedData.matrix);
     const positions = numeric.transpose(mds);
     const plotData = processedData.samples.map((s,i) => { return {Sample: s, x: positions[0][i], y:positions[1][i]}})
