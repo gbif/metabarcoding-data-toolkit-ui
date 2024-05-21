@@ -5,7 +5,7 @@ import { useNavigate, useLocation, useMatch } from "react-router-dom";
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
 import { Row, Col, Alert, Button, Progress, Timeline, Typography, Modal, message } from "antd"
-import { CheckCircleOutlined, ClockCircleOutlined, DownloadOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, ClockCircleOutlined, DownloadOutlined,  } from '@ant-design/icons';
 import config from "../config";
 import FilesAvailable from '../Components/FilesAvailable'
 import Help from "../Components/Help";
@@ -148,10 +148,12 @@ const Publish = ({ setDataset, dataset }) => {
                     </Col>}
         <Col flex="auto"></Col>
         <Col>
-          <Button loading={registering}  disabled={registering || !finished  } type="primary" onClick={() => registerData(dataset?.id) } >Publish to GBIF test environment (UAT)</Button>
+          <Button  loading={registering}  disabled={true/* registering || !finished  */ } type="primary" onClick={() => registerData(dataset?.id) } >Publish to GBIF test environment (UAT)</Button>
+          <Alert type="warning" style={{marginTop: "10px"}} description={`Publishing to the test environment is currently disabled as GBIF is updating core software parts`}/>
         </Col>
         <Col>
-          {gbifKey && <Button type="link" href={`https://www.gbif-uat.org/dataset/${gbifKey}`}>Dataset at gbif-uat.org</Button>}
+          {gbifKey && <Button disabled type="link" href={`https://www.gbif-uat.org/dataset/${gbifKey}`}>Dataset at gbif-uat.org</Button>}
+          
         </Col>
       </Row>
       <Modal title="Info" open={showRegisterModal && gbifKey} onOk={() => setShowRegisterModal(false)} onCancel={() => setShowRegisterModal(false)}>
