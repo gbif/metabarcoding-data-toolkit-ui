@@ -10,7 +10,6 @@ import { useNavigate, useLocation, useMatch } from "react-router-dom";
 import LeafletMap from "./Map";
 import TaxonomicSimilarity from "./TaxonomicSimilarity"
 import TaxonomyBarplot from "./TaxonomyBarplot";
-import { getDataForDissimilarityPlot , getBrayCurtisDistanceMatrix} from "../Util/ordination"
 import _ from "lodash"
 import { getPromiseState } from "../Util/promises"
 import withContext from "../Components/hoc/withContext";
@@ -240,7 +239,10 @@ const DataBrowser = ({ dataset }) => {
         }
     }
 
-const geoJsonFilterFn = (geoJsonFeature) => !!geoJsonFilter ? geoJsonFilter.includes(samplIdToArrayIndex.get(geoJsonFeature?.properties?.id)) : true
+const geoJsonFilterFn = (geoJsonFeature) => {
+     return !!geoJsonFilter ? geoJsonFilter.includes(samplIdToArrayIndex.get(geoJsonFeature?.properties?.id?.toString())) : true
+
+} 
  const getGeoJsonFilter = async (observationID) => {
     try {
         const res = await axios.get(`${config.backend}/dataset/${dataset.id}/data/observation/${observationID}`)
@@ -267,7 +269,7 @@ const geoJsonFilterFn = (geoJsonFeature) => !!geoJsonFilter ? geoJsonFilter.incl
                     {
                         key: '2',
                         label: `PCoA/MDS plot`,
-                        children: <TaxonomicSimilarity sampleLabels={samples?.id} onSampleClick={setSelectedSample} selectedSample={selectedSample} />,
+                        children: <TaxonomicSimilarity loading={!(metrics?.jaccard && metrics?.brayCurtis)} jaccard={metrics?.jaccard} brayCurtis={metrics?.brayCurtis} sampleLabels={samples?.id} onSampleClick={setSelectedSample} selectedSample={selectedSample} />,
                     },
                     {
                         key: '3',

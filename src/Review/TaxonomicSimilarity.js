@@ -1,13 +1,9 @@
  import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Row, Col, Spin, Select, Typography } from "antd";
-import axios from "axios";
 import Highcharts, { setOptions } from "highcharts";
-import config from "../config";
-import {getDataForDissimilarityPlot} from "../Util/ordination"
 import HC_exporting from "highcharts/modules/exporting";
 import HC_sunburst from "highcharts/modules/sunburst";
 import HighchartsReact from "highcharts-react-official";
-import _ from 'lodash'
 import withContext from "../Components/hoc/withContext";
 import Help from "../Components/Help"
 const {Text} = Typography
@@ -91,35 +87,25 @@ const getChartOptions = (data, type, onSampleClick) => {
     return options
 };
 
-const TaxonomyChart = ({dataset, onSampleClick, selectedSample, sampleLabels}) => {
-  const [options, setOptions] = useState(null);
+const TaxonomyChart = ({loading, onSampleClick, selectedSample, sampleLabels, jaccard, brayCurtis}) => {
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [invalid, setInvalid] = useState(false);
   const [hoverPoint, setHoverPoint] = useState(null);
   const [indexType, setIndexType] = useState('jaccard');
-  const [readCounts, setReadCounts] = useState(null);
-  const [sparseMatrix, setSparseMatrix] = useState(null)
+ 
 
   // const options = useMemo(() => !(sparseMatrix && sampleLabels) ? null : getChartOptions(getDataForDissimilarityPlot(sparseMatrix, indexType, sampleLabels) ,indexType, onSampleClick), [sparseMatrix, indexType, sampleLabels]);
-  const jaccardOptions = useMemo(() => !(sparseMatrix && sampleLabels) ? null : getChartOptions(getDataForDissimilarityPlot(sparseMatrix, "jaccard", sampleLabels), "jaccard" , onSampleClick), [sparseMatrix, sampleLabels]);
-  const brayCurtisOptions = useMemo(() => !(sparseMatrix && sampleLabels && readCounts) ? null : getChartOptions(getDataForDissimilarityPlot(sparseMatrix, "bray-curtis", sampleLabels, readCounts), "bray-curtis" , onSampleClick), [sparseMatrix, sampleLabels, readCounts]);
+  const jaccardOptions = useMemo(() => !(jaccard && sampleLabels) ? null : getChartOptions(jaccard, "jaccard" , onSampleClick), [jaccard, sampleLabels]);
+  const brayCurtisOptions = useMemo(() => !(brayCurtis && sampleLabels) ? null : getChartOptions(brayCurtis, "bray-curtis" , onSampleClick), [brayCurtis, sampleLabels]);
 
    const chartRef = useRef()
-  useEffect(() => {
+  /* useEffect(() => {
 
-    if(dataset?.id){
-       /*  if(datasetID !== dataset?.id){
-          setBrayCurtisData(null)
-          setJaccardData(null)
-          setOptions(null)
-          setDatasetID(dataset?.id)
-        } */
-        //getData(dataset)
+     if(dataset?.id){
+       
         getSparseMatrix()
         getTotalReadCountsForAllSamples()
     }
-  }, [dataset?.id])
+  }, [dataset?.id]) */
 
   useEffect(()=>{
     const chart = chartRef.current?.chart;
@@ -139,7 +125,7 @@ const TaxonomyChart = ({dataset, onSampleClick, selectedSample, sampleLabels}) =
     }
   }, [selectedSample])
 
-
+/* 
   const getSparseMatrix = async () => {
     try {
       setLoading(true)
@@ -151,9 +137,9 @@ const TaxonomyChart = ({dataset, onSampleClick, selectedSample, sampleLabels}) =
       setLoading(false)
     }
 
-  }
+  } */
 
-  const getTotalReadCountsForAllSamples = async () => {
+/*   const getTotalReadCountsForAllSamples = async () => {
     try {
       setLoading(true)
       const res = await axios.get(`${config.backend}/dataset/${dataset.id}/data/read-counts`);
@@ -165,13 +151,13 @@ const TaxonomyChart = ({dataset, onSampleClick, selectedSample, sampleLabels}) =
       setLoading(false)
     }
 
-  }
+  } */
 
 
     
 
 
-      return invalid ? null : (loading ) ? (
+      return loading  ? (
         <Row style={{ padding: "48px" }}>
           <Col flex="auto"></Col>
           <Col>

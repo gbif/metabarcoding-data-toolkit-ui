@@ -28,7 +28,8 @@
     "react-leaflet": "^4.2.1",
     "react-router-dom": "^6.7.0",
     "react-scripts": "5.0.1",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "workerize-loader": "^2.0.2"
   },
   "scripts": {
     "start": "react-scripts start",
