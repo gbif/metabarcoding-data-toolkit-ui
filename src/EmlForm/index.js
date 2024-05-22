@@ -23,6 +23,9 @@ import Citation from "./Citation";
 import TagControl from "./TagControl";
 //import Auth from "../Auth"
 import withContext from "../Components/hoc/withContext";
+import GeographicCoverage from "./GeographicCoverage";
+import TaxonomicCoverage from "./TaxonomicCoverage";
+import TemporalCoverage from "./TemporalCoverage";
 import helpTexts from "../helpTexts.json";
 const { Text, Link } = Typography;
 
@@ -91,11 +94,18 @@ const MetaDataForm = ({
 
   const submitData = (values) => {
     const key = match?.params?.key;
-
+    let metadata = {...values};
+    if(values.includeGeographicCoverage){
+      metadata.geographicCoverage = dataset?.metrics?.geographicScope
+    }
+    if(values.includeTaxonomicCoverage){
+      metadata.taxonomicCoverage = dataset?.metrics?.taxonomicScope
+    }
+    if(values.includeTemporalCoverage){
+      metadata.temporalCoverage = dataset?.metrics?.temporalScope
+    }
     return axiosWithAuth
-      .post(`${config.backend}/dataset/${key}/metadata`, {
-        ...values,
-      })
+      .post(`${config.backend}/dataset/${key}/metadata`, metadata)
       .then((res) => {
         setIsTouched(false);
         if (onSaveSuccess && typeof onSaveSuccess === "function") {
@@ -357,6 +367,41 @@ const MetaDataForm = ({
             />
           </FormItem>
         )}
+
+        {true && (
+          <FormItem
+            {...formItemLayout}
+            label="Geographic coverage"
+            name="includeGeographicCoverage"
+            help={showHelp && (help?.geographicCoverage || null)}
+          >
+            <GeographicCoverage geographicCoverage={dataset?.metrics?.geographicScope} />
+          </FormItem>
+        )}
+
+{true && (
+          <FormItem
+            {...formItemLayout}
+            label="Taxonomic coverage"
+            name="includeTaxonomicCoverage"
+            help={showHelp && (help?.taxonomicCoverage || null)}
+          >
+            <TaxonomicCoverage taxonomicCoverage={dataset?.metrics?.taxonomicScope} />
+          </FormItem>
+        )}
+
+{true && (
+          <FormItem
+            {...formItemLayout}
+            label="Temporal coverage"
+            name="includeTemporalCoverage"
+            help={showHelp && (help?.temporalCoverage || null)}
+          >
+            <TemporalCoverage temporalCoverage={dataset?.metrics?.temporalScope} />
+          </FormItem>
+        )}
+
+
 
         {true && (
           <FormItem

@@ -3,7 +3,7 @@ import React, {useEffect, useState} from "react";
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
 import EmlForm from "../EmlForm";
-const Prepare = () => {
+const Metadata = () => {
     
   return (
     <Layout><PageContent>
@@ -12,4 +12,4 @@ const Prepare = () => {
   );
 }
 
-export default Prepare;
+export default Metadata;

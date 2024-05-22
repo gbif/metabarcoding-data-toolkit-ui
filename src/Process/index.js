@@ -95,6 +95,7 @@ const ProcessDataset = ({
             const metrics_ = await axiosWithAuth.get(`${config.backend}/dataset/${dataset?.id}/data/metrics`);
             console.log(metrics_)
             setMetrics(metrics_.data)
+            setDataset({...dataset, metrics: metrics_.data})
 
         } catch (error) {
             console.log(error)

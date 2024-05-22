@@ -64,7 +64,10 @@ const DataBrowser = ({ dataset }) => {
 
             getSampleData(dataset?.id)
             getTaxonomyData(dataset?.id)
-            getMetrics(dataset?.id)
+            if(dataset?.metrics){
+                setMetrics(dataset?.metrics)
+            }
+          //  getMetrics(dataset?.id)
             /* if (((dataset?.summary?.sampleCount * dataset?.summary?.taxonCount) < ORDINATION_MAX_CARDINALITY)) {
                 getOrdination(dataset?.id)
             } */
@@ -227,7 +230,7 @@ const DataBrowser = ({ dataset }) => {
 
     }
 
-    const getMetrics = async (id) => {
+/*     const getMetrics = async (id) => {
 
         try {
             const metrics_ = await axios.get(`${config.backend}/dataset/${id}/data/metrics`);
@@ -237,7 +240,7 @@ const DataBrowser = ({ dataset }) => {
         } catch (error) {
             console.log(error)
         }
-    }
+    } */
 
 const geoJsonFilterFn = (geoJsonFeature) => {
      return !!geoJsonFilter ? geoJsonFilter.includes(samplIdToArrayIndex.get(geoJsonFeature?.properties?.id?.toString())) : true

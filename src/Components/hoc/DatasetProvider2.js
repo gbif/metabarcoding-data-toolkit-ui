@@ -59,13 +59,31 @@ const DatasetProvider = ({setDataset, user, setLoginFormVisible }) => {
    const getDataset  = async (key) => {
     try {
         const res = await axiosWithAuth.get(`${config.backend}/dataset/${key}/process`)
-        
+
+        const metrics = await getMetrics(key)
+        const dataset = res?.data
+        if(metrics){
+            dataset.metrics = metrics
+        }
         console.log(`Dataset provider set dataset ${res?.data?.id}`)
-        setDataset(res?.data)
+        setDataset(dataset)
        
               
     } catch (error) {
         console.log(error)
+    }
+} 
+
+const getMetrics  = async (key) => {
+    try {
+        const res = await axiosWithAuth.get(`${config.backend}/dataset/${key}/data/metrics`)
+        
+        console.log(`Dataset provider set metrics for ${res?.data?.id}`)
+        return res?.data
+       
+              
+    } catch (error) {
+        return null
     }
 } 
     return null;
