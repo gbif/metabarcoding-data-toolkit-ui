@@ -89,6 +89,13 @@ const ProcessDataset = ({
         }
     }, [dataset?.mapping])
 
+    useEffect(()=> {
+        if(finished){
+            getMetrics()
+        }
+
+    }, [finished, dataset])
+
     const getMetrics = async () => {
 
         try {
@@ -212,9 +219,7 @@ const ProcessDataset = ({
 
                 }
 
-                if(isFinished){
-                    getMetrics()
-                }
+                
 
             }
         } catch (error) {

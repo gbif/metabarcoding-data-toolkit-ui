@@ -41,7 +41,7 @@ const Workflow = ({ dataset, format }) => {
         try {
             if(!!dataset?.steps){
                 const {steps} = dataset;
-                const isFinished = !!steps && !!steps[steps.length -1].status === 'finished'  // .find(s => s.status === 'finished');
+                const isFinished = !!steps && !!steps[steps.length -1]?.status === 'finished'  // .find(s => s.status === 'finished');
                 const isFailed = !!steps && !!steps.find(s => s.status === 'failed');
                 const activeSteps = (isFailed || isFinished) ? steps : steps.filter(s => s.status === 'processing')
                 const currentStep = activeSteps[activeSteps.length -1];
