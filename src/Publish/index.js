@@ -148,11 +148,11 @@ const Publish = ({ setDataset, dataset }) => {
                     </Col>}
         <Col flex="auto"></Col>
         <Col>
-          <Button  loading={registering}  disabled={true/* registering || !finished  */ } type="primary" onClick={() => registerData(dataset?.id) } >Publish to GBIF test environment (UAT)</Button>
-          <Alert type="warning" style={{marginTop: "10px"}} description={`Publishing to the test environment is currently disabled as GBIF is updating core software parts`}/>
-        </Col>
+          <Button  loading={registering}  disabled={ registering || !finished  } type="primary" onClick={() => registerData(dataset?.id) } >Publish to GBIF test environment (UAT)</Button>
+{/*           <Alert type="warning" style={{marginTop: "10px"}} description={`Publishing to the test environment is currently disabled as GBIF is updating core software parts`}/>
+ */}        </Col>
         <Col>
-          {gbifKey && <Button disabled type="link" href={`https://www.gbif-uat.org/dataset/${gbifKey}`}>Dataset at gbif-uat.org</Button>}
+          {gbifKey && <Button  type="link" href={`https://www.gbif-uat.org/dataset/${gbifKey}`}>Dataset at gbif-uat.org</Button>}
           
         </Col>
       </Row>
