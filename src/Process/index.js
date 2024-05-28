@@ -94,7 +94,7 @@ const ProcessDataset = ({
             getMetrics()
         }
 
-    }, [finished, dataset])
+    }, [finished, dataset?.id])
 
     const getMetrics = async () => {
 
