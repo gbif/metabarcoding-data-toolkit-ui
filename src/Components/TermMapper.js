@@ -179,8 +179,8 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
     }
 
     const idsExistsOrHaveMapping = () => {
-        const hasSampleID = dataset?.sampleHeaders.includes('id') || Object.keys(state.samples).includes('id');
-        const hasTaxonID = dataset?.taxonHeaders.includes('id') || Object.keys(state.taxa).includes('id');
+        const hasSampleID = dataset?.sampleHeaders?.includes('id') || Object.keys(state.samples).includes('id');
+        const hasTaxonID = dataset?.taxonHeaders?.includes('id') || Object.keys(state.taxa).includes('id');
         if(!hasSampleID || !hasTaxonID ){
             notification.error({
                 duration: 0,

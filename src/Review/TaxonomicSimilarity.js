@@ -79,7 +79,7 @@ const getChartOptions = (data, type, onSampleClick) => {
 
           name: "Sample",
          
-        //  turboThreshold: 2500,
+          turboThreshold: 5000,
 
         
           point: {
