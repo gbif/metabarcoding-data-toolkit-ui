@@ -53,6 +53,7 @@ const DataBrowser = ({ dataset }) => {
     const [datasetId, setDatasetId] = useState(null)
     const [metrics, setMetrics] = useState({})
     const [geoJsonFilter, setGeoJsonFilter] = useState(null)
+    const [sampleDataTypes, setSampleDataTypes] = useState(null)
 
     useEffect(() => {
 
@@ -64,6 +65,7 @@ const DataBrowser = ({ dataset }) => {
 
             getSampleData(dataset?.id)
             getTaxonomyData(dataset?.id)
+            getSampleDataTypes(dataset?.id)
             if(dataset?.metrics){
                 setMetrics(dataset?.metrics)
             }
@@ -141,6 +143,16 @@ const DataBrowser = ({ dataset }) => {
         } catch (error) {
             setLoading(false)
 
+        }
+    }
+
+    const getSampleDataTypes = async (key) => {
+
+        try {
+            const res = await axios.get(`${config.backend}/dataset/${key}/data/sample/datatypes`);
+            setSampleDataTypes(res?.data)
+        } catch (error) {
+            console.log(error)
         }
     }
 
@@ -272,7 +284,9 @@ const geoJsonFilterFn = (geoJsonFeature) => {
                     {
                         key: '2',
                         label: `PCoA/MDS plot`,
-                        children: <TaxonomicSimilarity loading={!(metrics?.jaccard && metrics?.brayCurtis)} jaccard={metrics?.jaccard} brayCurtis={metrics?.brayCurtis} sampleLabels={samples?.id} onSampleClick={setSelectedSample} selectedSample={selectedSample} />,
+                        children: <TaxonomicSimilarity 
+                                        datasetKey={dataset?.id} 
+                                        sampleHeaders={(sampleDataTypes || []).filter(e => e.type.startsWith("<")).map(e => e.key) } loading={!(metrics?.jaccard && metrics?.brayCurtis)} jaccard={metrics?.jaccard} brayCurtis={metrics?.brayCurtis} sampleLabels={samples?.id} onSampleClick={setSelectedSample} selectedSample={selectedSample} />,
                     },
                     {
                         key: '3',

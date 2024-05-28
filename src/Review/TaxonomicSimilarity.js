@@ -3,17 +3,27 @@ import { Row, Col, Spin, Select, Typography } from "antd";
 import Highcharts, { setOptions } from "highcharts";
 import HC_exporting from "highcharts/modules/exporting";
 import HC_sunburst from "highcharts/modules/sunburst";
+import HC_colorAxis from "highcharts/modules/coloraxis"
 import HighchartsReact from "highcharts-react-official";
 import withContext from "../Components/hoc/withContext";
 import Help from "../Components/Help"
+import config from "../config";
+import { values } from "lodash";
+import axios from "axios";
 const {Text} = Typography
 HC_exporting(Highcharts);
-HC_sunburst(Highcharts);
+HC_colorAxis(Highcharts)
 
 const getChartOptions = (data, type, onSampleClick) => {
-         
+  
+       //  console.log(JSON.stringify(data))
   let options = {
+    colorAxis: {
       
+        min: Math.min(...data.map(e => e.colorValue)), 
+        max: Math.max(...data.map(e => e.colorValue)),
+        },
+
       chart: {
         type: 'scatter',
         zoomType: 'xy'
@@ -35,11 +45,13 @@ const getChartOptions = (data, type, onSampleClick) => {
           text: 'Axis 2'
         }
       }, 
-      legend: {
+       /* legend: {
         enabled: false
-      },
-      plotOptions: {
+      },  */
+        plotOptions: {
         scatter: {
+
+          colorKey: 'colorValue',
           marker: {
             radius: 2.5,
             symbol: 'circle',
@@ -58,16 +70,18 @@ const getChartOptions = (data, type, onSampleClick) => {
             }
           }
         }
-      },
+      },  
      
       series: [{
          // color: 'rgba(152,0,67,0.1)',
+         type: 'scatter',
+         colorKey: 'colorValue',
+
           name: "Sample",
-          data: data,
-          turboThreshold: 2500,
-         /*  marker: {
-            radius: 0.5
-          }, */
+         
+        //  turboThreshold: 2500,
+
+        
           point: {
               events: {
                 click: (e) => {
@@ -81,31 +95,33 @@ const getChartOptions = (data, type, onSampleClick) => {
           tooltip: {
             followPointer: false,
             pointFormat: '{point.Sample}'
-          }
+          },
+          data: data,
         }]
     };
+  // console.log(JSON.stringify(options))
     return options
+  
 };
 
-const TaxonomyChart = ({loading, onSampleClick, selectedSample, sampleLabels, jaccard, brayCurtis}) => {
+const TaxonomyChart = ({loading, onSampleClick, selectedSample, sampleLabels, jaccard, brayCurtis, sampleHeaders, datasetKey}) => {
   const [error, setError] = useState(null);
   const [hoverPoint, setHoverPoint] = useState(null);
   const [indexType, setIndexType] = useState('jaccard');
- 
-
+  const [colorBy, setColorBy] = useState(null)
+  const [colorByData, setColorByData] = useState(null)
   // const options = useMemo(() => !(sparseMatrix && sampleLabels) ? null : getChartOptions(getDataForDissimilarityPlot(sparseMatrix, indexType, sampleLabels) ,indexType, onSampleClick), [sparseMatrix, indexType, sampleLabels]);
-  const jaccardOptions = useMemo(() => !(jaccard && sampleLabels) ? null : getChartOptions(jaccard, "jaccard" , onSampleClick), [jaccard, sampleLabels]);
-  const brayCurtisOptions = useMemo(() => !(brayCurtis && sampleLabels) ? null : getChartOptions(brayCurtis, "bray-curtis" , onSampleClick), [brayCurtis, sampleLabels]);
+  const jaccardOptions = useMemo(() => !(jaccard && sampleLabels) ? null : getChartOptions(jaccard.map((e,i) => colorByData ? {...e, colorValue: Number(colorByData?.[i])} : e), "jaccard" , onSampleClick), [jaccard, sampleLabels, colorByData]);
+  const brayCurtisOptions = useMemo(() => !(brayCurtis && sampleLabels) ? null : getChartOptions(brayCurtis.map((e,i) => colorByData ? {...e, colorValue: Number(colorByData?.[i])} : e), "bray-curtis" , onSampleClick), [brayCurtis, sampleLabels, colorByData]);
 
    const chartRef = useRef()
-  /* useEffect(() => {
-
-     if(dataset?.id){
-       
-        getSparseMatrix()
-        getTotalReadCountsForAllSamples()
+   useEffect(() => {
+    if(!!colorBy){
+      getSampleMetadataColumn(colorBy)
+    } else {
+      setColorByData(null)
     }
-  }, [dataset?.id]) */
+  }, [colorBy])
 
   useEffect(()=>{
     const chart = chartRef.current?.chart;
@@ -125,37 +141,17 @@ const TaxonomyChart = ({loading, onSampleClick, selectedSample, sampleLabels, ja
     }
   }, [selectedSample])
 
-/* 
-  const getSparseMatrix = async () => {
+ const getSampleMetadataColumn = async (column) => {
     try {
-      setLoading(true)
-      const res = await axios.get(`${config.backend}/dataset/${dataset.id}/data/sparse-matrix`);
-      setSparseMatrix(res?.data)
-      setLoading(false)
-    } catch (error) {
-      setError(error)
-      setLoading(false)
-    }
-
-  } */
-
-/*   const getTotalReadCountsForAllSamples = async () => {
-    try {
-      setLoading(true)
-      const res = await axios.get(`${config.backend}/dataset/${dataset.id}/data/read-counts`);
       
-      setReadCounts(res?.data)
-      setLoading(false)
+      const data = await axios.get(`${config.backend}/dataset/${datasetKey}/data/sample/metadata/${column}`);
+
+      setColorByData(data?.data)
     } catch (error) {
-      setError(error)
-      setLoading(false)
+      console.log(error)
     }
 
-  } */
-
-
-    
-
+ }
 
       return loading  ? (
         <Row style={{ padding: "48px" }}>
@@ -168,6 +164,10 @@ const TaxonomyChart = ({loading, onSampleClick, selectedSample, sampleLabels, ja
       ) : (
         <>
         <Row >
+        <Col style={{marginRight: "10px"}}>Color by:</Col>
+          <Col>
+            <Select value={colorBy} onChange={setColorBy} style={{width: 200}} options={(sampleHeaders || []).map(h => ({value: h, label: h}))}></Select>
+          </Col>
           <Col flex="auto"></Col>
          <Col style={{marginRight: "10px"}}>Choose distance metric:</Col>
           <Col >
