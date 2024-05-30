@@ -59,12 +59,17 @@ const DatasetProvider = ({setDataset, user, setLoginFormVisible }) => {
    const getDataset  = async (key) => {
     try {
         const res = await axiosWithAuth.get(`${config.backend}/dataset/${key}/process`)
-
-        const metrics = await getMetrics(key)
         const dataset = res?.data
-        if(metrics){
-            dataset.metrics = metrics
+        let metrics;
+        if(dataset?.filesAvailable && dataset?.filesAvailable.find(f => f.format === "BIOM 2.1")){
+            metrics = await getMetrics(key)
+            if(metrics){
+                dataset.metrics = metrics
+            }
         }
+        
+        
+        
         console.log(`Dataset provider set dataset ${res?.data?.id}`)
         setDataset(dataset)
        
