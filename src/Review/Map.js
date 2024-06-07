@@ -112,23 +112,29 @@ const MapContent = ({ geoJson, onFeatureClick, selectedSample, setError, geoJson
 
   useEffect(()=>{
     
-    if(geoJsonFilter &&  markerRef.current ){
-      const markers =  markerRef.current
-      markers.clearLayers()
-      const geoJsonLayer = L.geoJson(geoJson, {
-        filter: geoJsonFilter,
-        onEachFeature,
-        pointToLayer: (feature, latlng) => {
-          return L.circleMarker(latlng, geojsonMarkerOptions)
-        }
-      });
-      geoJsonRef.current = geoJsonLayer;
-  
-      markers.addLayer(geoJsonLayer);
-      markers.on('mouseover', function (a) {
-        a.layer.openPopup();
-      });
+    try {
+      if(geoJsonFilter &&  markerRef.current ){
+        const markers =  markerRef.current
+        markers.clearLayers()
+        const geoJsonLayer = L.geoJson(geoJson, {
+          filter: geoJsonFilter,
+          onEachFeature,
+          pointToLayer: (feature, latlng) => {
+            return L.circleMarker(latlng, geojsonMarkerOptions)
+          }
+        });
+        geoJsonRef.current = geoJsonLayer;
+    
+        markers.addLayer(geoJsonLayer);
+        markers.on('mouseover', function (a) {
+          a.layer.openPopup();
+        });
+      }
+    } catch (error) {
+      console.log(error.message)
+      setError(error.message)
     }
+   
 
   }, [geoJsonFilter])
 
