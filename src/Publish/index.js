@@ -1,177 +1,150 @@
-
 import React, { useEffect, useState, useRef } from "react";
-import axios from "axios"
+import axios from "axios";
 import { useNavigate, useLocation, useMatch } from "react-router-dom";
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
-import { Row, Col, Alert, Button, Progress, Timeline, Typography, Modal, message } from "antd"
-import { CheckCircleOutlined, ClockCircleOutlined, DownloadOutlined,  } from '@ant-design/icons';
+import {
+  Row,
+  Col,
+  Select,
+  Alert,
+  Button,
+  Progress,
+  Timeline,
+  Typography,
+  Modal,
+  message,
+} from "antd";
+import {
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  DownloadOutlined,
+} from "@ant-design/icons";
+import OrganisationAutoComplete from "./OrganisationAutocomplete";
 import config from "../config";
-import FilesAvailable from '../Components/FilesAvailable'
+import FilesAvailable from "../Components/FilesAvailable";
 import Help from "../Components/Help";
 import withContext from "../Components/hoc/withContext";
 import { axiosWithAuth } from "../Auth/userApi";
-const { Title } = Typography;
-const Publish = ({ setDataset, dataset }) => {
+const { Text } = Typography;
 
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const [failed, setFailed] = useState(dataset?.dwc?.steps?.find(s => s.status === 'failed') || false);
-  const [finished, setFinished] = useState(dataset?.dwc?.steps?.find(s => s.status === 'finished') || false);
+const Publish = ({ setDataset, dataset }) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
   const [registering, setRegistering] = useState(false);
-  const [gbifKey, setGbifKey] = useState(dataset?.publishing?.gbifDatasetKey);
-  const [showRegisterModal, setShowRegisterModal] = useState(false)
-  let hdl = useRef();
-  let refreshUserHdl = useRef();
+  const [gbifProdKey, setGbifProdKey] = useState(
+    dataset?.publishing?.gbifDatasetKey
+  );
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [organisations, setOrganisations] = useState([]);
+  const [organisationsResolved, setOrganisationsResolved] = useState(false);
+
+  const [selectedOrg, setSelectedOrg] = useState(null);
 
   useEffect(() => {
-    if (!!dataset) {
-      setFailed(dataset?.dwc?.steps?.find(s => s.status === 'failed') || false)
-      setFinished(dataset?.dwc?.steps[dataset?.dwc?.steps.length - 1].status === 'finished' || false)
-      setGbifKey(dataset?.publishing?.gbifDatasetKey)
-    }
-  }, [dataset])
+    getOrganizations();
+  }, []);
 
-  const processData = async key => {
-
-    setFailed(false)
-    setFinished(false)
+  const getOrganizations = async () => {
     try {
-      const processRes = await axiosWithAuth.post(`${config.backend}/dataset/${key}/dwc`);
-      message.info("Processing data");
-
-      hdl.current = setInterval(() => getData(key, hdl.current), 1000);
-
-    } catch (error) {
-      alert(error)
-      console.log(error)
-      setError(error)
-    }
-
-
-  }
-
-  const getData = async (key, hdl) => {
-    try {
-      setLoading(true)
-      const res = await axiosWithAuth.get(`${config.backend}/dataset/${key}/dwc`)
-      setDataset(res?.data)
-
-      setLoading(false)
-      const isFinished = res?.data?.dwc?.steps[res?.data?.dwc?.steps.length - 1].status === 'finished';
-      const isFailed = !!res?.data?.dwc?.steps.find(s => s.status === 'failed');
-      if (isFinished || isFailed) {
-        clearInterval(hdl);
+      const res = await axiosWithAuth.get(
+        `${config.backend}/user/organizations`
+      );
+      setOrganisationsResolved(true);
+      setOrganisations(res?.data);
+      if (res?.data?.length > 0) {
+        setSelectedOrg(res?.data[0]);
       }
-      setFailed(isFailed)
-      setFinished(isFinished)
-
-
     } catch (error) {
-      setLoading(false)
-
+      setError(error);
+      setOrganisationsResolved(true);
     }
-  }
+  };
 
-  const registerData = async key => {
-
-    setRegistering(true)
+  const registerData = async (key) => {
+    setRegistering(true);
     try {
-      message.info("Registering dataset in GBIF-UAT");
+      message.info("Registering dataset in GBIF-Prod");
 
-      const registerRes = await axiosWithAuth.post(`${config.backend}/dataset/${key}/register-in-gbif`);
-
-      if (registerRes?.data?.publishing?.gbifDatasetKey) {
-        setGbifKey(registerRes?.data?.publishing?.gbifDatasetKey)
+      const registerRes = await axiosWithAuth.post(
+        `${config.backend}/dataset/${key}/register-in-gbif-prod`
+      );
+      // Legacy: the key was just called gbifDatasetKey before
+      if (registerRes?.data?.publishing?.gbifProdDatasetKey) {
+        setGbifProdKey(registerRes?.data?.publishing?.gbifProdDatasetKey);
       }
-      setShowRegisterModal(true); 
-      setDataset(registerRes?.data)
-      setRegistering(false)
+      setShowRegisterModal(true);
+      setDataset(registerRes?.data);
+      setRegistering(false);
     } catch (error) {
-      alert(error)
-      console.log(error)
-      setRegistering(false)
-      setError(error)
+      alert(error);
+      console.log(error);
+      setRegistering(false);
+      setError(error);
     }
-
-
-  }
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "processing":
-        return '#108ee9'
-      case "finished":
-        return 'green'
-      case "failed":
-        return 'red'
-      default:
-        return 'grey'
-    }
-  }
+  };
 
   return (
-    <Layout><PageContent>
-      {error && <Alert type="error" >{error}</Alert>}
-      <Row>
-        <Col span={6}>
-          <Button style={{ marginBottom: "24px" }} onClick={() => processData(dataset?.id)} type="primary" >Create Darwin Core Archive</Button> 
-          <Help style={{marginLeft: '8px'}} title="Darwin Core" content={<>
-          <div>The Darwin Core Standard (DwC) offers a stable, straightforward and flexible framework for compiling biodiversity data from varied and variable sources. The majority of the datasets shared through GBIF.org are published using the Darwin Core Archive format (DwC-A).
-          </div>
-                                  <a href="https://gcube.wiki.gcube-system.org/gcube/Darwin_Core_Terms" target="_blank">More about Darwin Core Archives.</a>
-                            </>}/>
-          {dataset?.dwc?.steps && dataset?.dwc?.steps?.length > 0 && <Timeline
-            items={
-              dataset?.dwc?.steps.map((s, idx) => ({
-                dot: s.status === "finished" ? <CheckCircleOutlined /> : s.status === "pending" ? <ClockCircleOutlined /> : null,
-                color: getStatusColor(s.status),
-                children: (s.status === "finished" && idx === dataset?.dwc?.steps?.length - 1) ? "Finished" :
-                  <>
-                    {`${s.status === "processing" ? s.message : s.messagePending}${s.subTask && idx === dataset?.dwc?.steps.length - 1 ? " - " + s.subTask : ""}`}
-                    {s.total && s.progress && s.status === "processing" &&
-                      <div
-                        style={{
-                          width: 200,
-                        }}
-                      >
-                        <Progress size="small" percent={Math.round(s.progress / s.total * 100)} />
-                      </div>}
-                  </>
+    <Layout>
+      <PageContent>
+        {error && <Alert type="error">{error}</Alert>}
 
-              }))
-            }
-          />}
-        </Col>
-        {dataset?.filesAvailable && dataset?.filesAvailable.length > 0 && <Col span={6}>
-                        <FilesAvailable dataset={dataset}/>
-                    </Col>}
-        <Col flex="auto"></Col>
-        <Col>
-          <Button  loading={registering}  disabled={ registering || !finished  } type="primary" onClick={() => registerData(dataset?.id) } >Publish to GBIF test environment (UAT)</Button>
-{/*           <Alert type="warning" style={{marginTop: "10px"}} description={`Publishing to the test environment is currently disabled as GBIF is updating core software parts`}/>
- */}        </Col>
-        <Col>
-          {gbifKey && <Button  type="link" href={`https://www.gbif-uat.org/dataset/${gbifKey}`}>Dataset at gbif-uat.org</Button>}
-          
-        </Col>
-      </Row>
-      <Modal title="Info" open={showRegisterModal && gbifKey} onOk={() => setShowRegisterModal(false)} onCancel={() => setShowRegisterModal(false)}>
-        <p>Your data is being processed. Depending on the data volume, it may take from 15 minutes to a an hour before it is finished. This means that you may initally see "0 occurrences" on the new <a  href={`https://www.gbif-uat.org/dataset/${gbifKey}`}>dataset page</a> if it is accessed before the processing has finished.</p>
-        
-      </Modal>
+        {organisations.length === 0 && organisationsResolved &&
+            <>
+            <Row>
+                <Col span={8} style={{paddingRight: "20px"}}>
+                    <Text>In order to publish your dataset to GBIF, your institution/organisation must be registered as a data publisher in GBIF. Use the search box on the right to see of your institution is already registered.</Text>
+                </Col>
+                <Col>
+                <OrganisationAutoComplete />
+                </Col>
+            </Row>
+            </>
+        }
 
-    </PageContent></Layout>
+        {!!selectedOrg && organisations.length > 1 && (
+          <Row>
+            <Col>
+              <Select
+                value={selectedOrg}
+                onChange={setSelectedOrg}
+                style={{ width: "400px" }}
+                options={organisations.map((o) => ({
+                  value: o.key,
+                  label: o.name,
+                }))}
+              />
+            </Col>
+          </Row>
+        )}
+        {!!selectedOrg && organisations.length === 1 && (
+        <> <Row>
+            <Col span={4} style={{textAlign: "right", paddingRight: "20px"}}><Text >You are ready to publish the dataset: </Text></Col>
+            <Col span={20}>
+              
+              <Text strong>{dataset?.metadata?.title}.</Text></Col>
+              <Col></Col>
+              <Col span={4} style={{textAlign: "right", paddingRight: "20px"}}><Text>The publishing institution will be: </Text></Col>
+            <Col span={20}>
+              <Text strong>{organisations[0].name}</Text>
+            </Col>
+            </Row>
+            <Row>
+            
+          </Row></> 
+        )}
+      </PageContent>
+    </Layout>
   );
-}
-
+};
 
 const mapContextToProps = ({ user, login, logout, dataset, setDataset }) => ({
   user,
   login,
   logout,
-  dataset, setDataset
+  dataset,
+  setDataset,
 });
 
 export default withContext(mapContextToProps)(Publish);
-

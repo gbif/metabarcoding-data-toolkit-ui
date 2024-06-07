@@ -30,8 +30,10 @@ const Workflow = ({ dataset, format }) => {
             setStep(3)
         } else if (location?.pathname.endsWith("/metadata")) {
             setStep(4)
-        } else if (location?.pathname.endsWith("/publish")) {
+        } else if (location?.pathname.endsWith("/export")) {
             setStep(5)
+        } else if (location?.pathname.endsWith("/publish")) {
+            setStep(6)
         } else {
             setStep(null)
         }
@@ -100,6 +102,9 @@ const Workflow = ({ dataset, format }) => {
                 navigate(`/dataset/${key}/metadata`)
                 break;
             case 5:
+                navigate(`/dataset/${key}/export`)
+                break;
+            case 6:
                 navigate(`/dataset/${key}/publish`)
                 break;
             default:
@@ -135,6 +140,10 @@ const Workflow = ({ dataset, format }) => {
             },
             {
                 title: 'Export',
+                disabled: !(dataset?.metadata && dataset?.filesAvailable?.find(f => f.format === 'BIOM 1.0'))
+            },
+            {
+                title: 'Publish',
                 disabled: !(dataset?.metadata && dataset?.filesAvailable?.find(f => f.format === 'BIOM 1.0'))
             },
         ]}

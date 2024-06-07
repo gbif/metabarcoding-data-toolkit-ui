@@ -26,7 +26,6 @@ export const authenticate = async (username, password) => {
     },
   })
     .then((res) => {
-      //  localStorage.setItem('col_plus_auth_token', res.data)
       if(res?.data?.token){
         axiosWithAuth.defaults.headers.common["Authorization"] = `Bearer ${res?.data?.token}`;
       }

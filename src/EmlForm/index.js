@@ -199,7 +199,7 @@ const MetaDataForm = ({
                 try {
                   
                   await submitData(values);
-                  navigate(`/dataset/${dataset?.id}/publish`);
+                  navigate(`/dataset/${dataset?.id}/export`);
                 } catch (err) {
                     console.log(err)
                   //  onFinishFailed(err)

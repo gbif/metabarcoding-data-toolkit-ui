@@ -11,8 +11,8 @@ import Process from "./Process";
 import TermMapping from "./TermMapping";
 import Review from "./Review";
 import Metadata from "./Metadata";
-import Publish from "./Publish";
-
+import Export from "./Export";
+import Publish from "./Publish"
 import UserProfile from "./UserProfile"
 import Dataset from "./Dataset"
 import Faq from "./Faq"
@@ -33,6 +33,7 @@ const App = () => {
     { key: "process", path: "/dataset/:key/process", element: [<DatasetProvider />, <Process />] }, 
     { key: "review", path: "/dataset/:key/review", element: [<DatasetProvider />,<Review />] },
     { key: "metadata", path: "/dataset/:key/metadata", element: [<DatasetProvider />,<Metadata />] },
+    { key: "export",path: "/dataset/:key/export", element: [<DatasetProvider />,<Export /> ]},
     { key: "publish",path: "/dataset/:key/publish", element: [<DatasetProvider />,<Publish /> ]},
     { key: "user-profile",path: "/user-profile", element: [<UserProfile /> ]},
     { key: "admin",path: "/admin", element: [<Admin /> ]},
