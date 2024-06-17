@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useLocation, useMatch, useParams, matchPath } from "react-router-dom";
 import withContext from "./hoc/withContext"
 
-const Workflow = ({ dataset, format }) => {
+const Workflow = ({ dataset, installationSettings, format }) => {
    /*  const uploadMatch = useMatch('/dataset/:key/upload');
     const reviewMatch = useMatch('/dataset/:key/review');
     const mappingMatch = useMatch('/dataset/:key/term-mapping');
@@ -152,12 +152,13 @@ const Workflow = ({ dataset, format }) => {
 
 }
 
-const mapContextToProps = ({ user, login, logout, dataset, format}) => ({
+const mapContextToProps = ({ user, login, logout, dataset, format, installationSettings}) => ({
     user,
     login,
     logout,
     dataset,
-    format
+    format,
+    installationSettings
   });
   
 export default withContext(mapContextToProps)(Workflow);

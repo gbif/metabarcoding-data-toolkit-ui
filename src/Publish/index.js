@@ -1,34 +1,32 @@
 import React, { useEffect, useState, useRef } from "react";
-import axios from "axios";
-import { useNavigate, useLocation, useMatch } from "react-router-dom";
+
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
+import ProdPublishingNotEnabled from "./ProdPublishingNotEnabled";
 import {
   Row,
   Col,
   Select,
   Alert,
   Button,
-  Progress,
-  Timeline,
+
   Typography,
-  Modal,
+  Tabs,
+  Space,
   message,
+  notification,
 } from "antd";
-import {
-  CheckCircleOutlined,
-  ClockCircleOutlined,
-  DownloadOutlined,
-} from "@ant-design/icons";
+
 import OrganisationAutoComplete from "./OrganisationAutocomplete";
 import config from "../config";
-import FilesAvailable from "../Components/FilesAvailable";
-import Help from "../Components/Help";
+
 import withContext from "../Components/hoc/withContext";
 import { axiosWithAuth } from "../Auth/userApi";
+import {getExistingOrgEmailBody, getNewOrgEmailBody} from "./EmailTemplate";
+
 const { Text } = Typography;
 
-const Publish = ({ setDataset, dataset }) => {
+const Publish = ({ setDataset, dataset, user, installationSettings }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -39,8 +37,10 @@ const Publish = ({ setDataset, dataset }) => {
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [organisations, setOrganisations] = useState([]);
   const [organisationsResolved, setOrganisationsResolved] = useState(false);
-
+  const [installationContactEmail, setInstallationContactEmail] = useState(null)
   const [selectedOrg, setSelectedOrg] = useState(null);
+  const [selectedPendingOrg, setSelectedPendingOrg] = useState(null)
+  const [tab, setTab] = useState("1")
 
   useEffect(() => {
     getOrganizations();
@@ -61,6 +61,8 @@ const Publish = ({ setDataset, dataset }) => {
       setOrganisationsResolved(true);
     }
   };
+
+ 
 
   const registerData = async (key) => {
     setRegistering(true);
@@ -85,28 +87,92 @@ const Publish = ({ setDataset, dataset }) => {
     }
   };
 
+ const onSelectOrganisation = org => {
+    if(organisations.length > 0){
+      const existing = organisations.find(o => o?.key === org?.key)
+      if(existing){
+        setSelectedOrg(existing)
+        setTab("2")
+        notification.info({description: `${existing?.title} is already registered for data publication.`})
+      } else {
+        setSelectedPendingOrg(org)
+
+      }
+    } else {
+      setSelectedPendingOrg(org)
+    }
+  }
+
   return (
     <Layout>
       <PageContent>
         {error && <Alert type="error">{error}</Alert>}
-
-        {organisations.length === 0 && organisationsResolved &&
-            <>
+      {!!installationSettings.prodPublishingEnabled ?  <>
+        <Tabs activeKey={tab} items={[
+          {
+            key: '1',
+            label: 'Find / register your institution',
+            children: <>
             <Row>
                 <Col span={8} style={{paddingRight: "20px"}}>
-                    <Text>In order to publish your dataset to GBIF, your institution/organisation must be registered as a data publisher in GBIF. Use the search box on the right to see of your institution is already registered.</Text>
+                  {organisations.length === 0 && organisationsResolved && <Text>You have not yet been associated with a publishing organization. </Text>}
+                    <Text>In order to publish your dataset to GBIF, your institution/organisation must be registered as a data publisher in GBIF. Use the search box on the right to select your institution, if it is already registered.</Text>
                 </Col>
                 <Col>
-                <OrganisationAutoComplete />
+                <OrganisationAutoComplete onSelectOrganisation={onSelectOrganisation} style={{width: "300px"}} /> <br/>
+                <Space
+    direction="vertical"
+    size="middle"
+    style={{
+      display: 'flex',
+    }}
+  >
+                <div>{!!selectedPendingOrg &&  <a href={`mailto:${installationSettings?.installationContactEmail}?subject=${encodeURIComponent("eDNA dataset publishing")}&body=${
+                    encodeURIComponent(getExistingOrgEmailBody(
+                      {
+                        ednaDatasetID: dataset?.id, 
+                        gbifUatKey: dataset?.publishing?.gbifUatDatasetKey || dataset?.publishing?.gbifDatasetKey, 
+                        toolBaseUrl: window.location.protocol +"//"+ window.location.hostname, 
+                        registryBaseUrl: installationSettings?.gbifRegistryBaseUrl,
+                        user: user,
+                        publishingOrganizationTitle: selectedPendingOrg?.title,
+                        publishingOrganizationKey: selectedPendingOrg?.key,
+                        }))}`} target="_blank" rel="noreferrer" >Ask for access to publish under this institution/organisation</a> }
+                        <br />
+                        </div>
+                        <div> <Text style={{marginTop: "24px"}} >Can´t find your institution/organisation?</Text><br />
+                        <a href={`mailto:${installationSettings?.installationContactEmail}?subject=${encodeURIComponent("eDNA dataset publishing")}&body=${
+                    encodeURIComponent(getNewOrgEmailBody(
+                      {
+                        ednaDatasetID: dataset?.id, 
+                        gbifUatKey: dataset?.publishing?.gbifUatDatasetKey || dataset?.publishing?.gbifDatasetKey, 
+                        toolBaseUrl: window.location.protocol +"//"+ window.location.hostname, 
+                        registryBaseUrl: installationSettings?.gbifRegistryBaseUrl,
+                        user: user
+                        }))}`} target="_blank" rel="noreferrer" >Ask for help with registering your institution/organisation</a> </div>
+                        </Space>
+                </Col>
+                <Col style={{paddingLeft: "10px"}}>
+                  
                 </Col>
             </Row>
-            </>
-        }
-
-        {!!selectedOrg && organisations.length > 1 && (
-          <Row>
-            <Col>
-              <Select
+            </>,
+          },
+          {
+            key: '2',
+            label: 'Publish data',
+            children: <>
+              
+        {organisations.length > 0 && (
+        <> <Row>
+            <Col span={4} style={{textAlign: "right", paddingRight: "20px"}}><Text >You are ready to publish the dataset: </Text></Col>
+            <Col span={20}>
+              
+              <Text strong>{dataset?.metadata?.title}.</Text></Col>
+              <Col></Col>
+              <Col span={4} style={{textAlign: "right", paddingRight: "20px"}}><Text>The publishing institution will be: </Text></Col>
+            <Col span={20}>
+            <Select
                 value={selectedOrg}
                 onChange={setSelectedOrg}
                 style={{ width: "400px" }}
@@ -116,35 +182,39 @@ const Publish = ({ setDataset, dataset }) => {
                 }))}
               />
             </Col>
-          </Row>
+            </Row>
+            <Row>
+            
+          </Row></> 
         )}
-        {!!selectedOrg && organisations.length === 1 && (
+        {organisations.length === 0 && (
         <> <Row>
-            <Col span={4} style={{textAlign: "right", paddingRight: "20px"}}><Text >You are ready to publish the dataset: </Text></Col>
-            <Col span={20}>
-              
-              <Text strong>{dataset?.metadata?.title}.</Text></Col>
-              <Col></Col>
-              <Col span={4} style={{textAlign: "right", paddingRight: "20px"}}><Text>The publishing institution will be: </Text></Col>
-            <Col span={20}>
-              <Text strong>{organisations[0].name}</Text>
+            
+            <Col >
+              <Text>You have not yet been affiliated with a GBIF pubilishing institution. Please <Button style={{padding: 0}} type="link" onClick={() => setTab("1")}>go back to the registration page.</Button></Text><br />
+              <Text>When your institution/organization has been registered, you will be able to do the final data publishing from this page.</Text>
             </Col>
             </Row>
             <Row>
             
           </Row></> 
         )}
+            </>,
+          },
+        ]} onChange={setTab} />
+        </> : <ProdPublishingNotEnabled />}
       </PageContent>
     </Layout>
   );
 };
 
-const mapContextToProps = ({ user, login, logout, dataset, setDataset }) => ({
+const mapContextToProps = ({ user, login, logout, dataset, setDataset, installationSettings }) => ({
   user,
   login,
   logout,
   dataset,
   setDataset,
+  installationSettings
 });
 
 export default withContext(mapContextToProps)(Publish);

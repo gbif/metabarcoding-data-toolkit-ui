@@ -2,18 +2,21 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
-import { Table, Typography, Card , Button} from "antd";
+import { Table, Typography, Card, Result, Button} from "antd";
 import { useNavigate } from "react-router-dom";
 import { axiosWithAuth } from "../Auth/userApi";
 import DataBrowser from "../Review/DataBrowser";
 import {dateFormatter, numberFormatter} from '../Util/formatters'
+import AdminTabs from "./AdminTabs"
 import _ from "lodash";
+import withContext from "../Components/hoc/withContext";
+
 
 import config from "../config";
 const { Title, Text } = Typography;
 const { Meta } = Card;
 
-function Admin() {
+function Admin({user, setLoginFormVisible}) {
   const [datasets, setDatasets] = useState([]);
   const [userFilter, setUserFilter] = useState([])
   const navigate = useNavigate()
@@ -39,8 +42,9 @@ function Admin() {
     <Layout>
       
       <PageContent >
-        <Title level={4}> All datasets in the tool </Title>
-
+      {user?.isAdmin && <>  <AdminTabs />
+{/*         <Title level={4}> All datasets in the tool </Title>
+ */}
         <Table 
         dataSource={datasets}
         rowKey="dataset_id"
@@ -123,12 +127,23 @@ function Admin() {
 
           }
         ]}
-        />
+        /></>}
+        { !user?.isAdmin && <Result
+    status="403"
+    title=""
+    subTitle="You don´t have access to this page"
+    extra={!!user ? null : <Button type="primary" onClick={() => setLoginFormVisible(true)}>Login</Button>}
+  />}
       </PageContent>
     </Layout>
   );
 }
 
-export default Admin;
+const mapContextToProps = ({ user, setLoginFormVisible }) => ({
+  user,
+  setLoginFormVisible
+});
+export default withContext(mapContextToProps)(Admin);
+
 
 

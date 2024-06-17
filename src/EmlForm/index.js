@@ -451,15 +451,12 @@ const MetaDataForm = ({
 };
 
 const mapContextToProps = ({
-  addError,
-  addInfo,
-
+ 
   license: licenseEnum,
   dataset,
   setDataset,
 }) => ({
-  addError,
-  addInfo,
+  
 
   licenseEnum,
   dataset,

@@ -18,6 +18,7 @@ import Dataset from "./Dataset"
 import Faq from "./Faq"
 import HowTo from "./HowTo"
 import Admin from "./Admin";
+import OrganizationAdmin from "./Admin/OrganizationAdmin";
 import history from "./history";
 import "./App.css";
 
@@ -37,6 +38,8 @@ const App = () => {
     { key: "publish",path: "/dataset/:key/publish", element: [<DatasetProvider />,<Publish /> ]},
     { key: "user-profile",path: "/user-profile", element: [<UserProfile /> ]},
     { key: "admin",path: "/admin", element: [<Admin /> ]},
+    { key: "organisationadmin",path: "/admin/organizations", element: [<OrganizationAdmin /> ]},
+
     
   ]);
 

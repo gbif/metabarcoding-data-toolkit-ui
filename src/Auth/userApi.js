@@ -20,7 +20,7 @@ const storeToken = (jwt) => {
   localStorage.setItem(JWT_STORAGE_NAME, jwt);    
 }
 export const authenticate = async (username, password) => {
-  return axios(`${config.authWebservice}/login`, {
+  return axios(`${config.backend}/auth/login`, {
     headers: {
       Authorization: `Basic ${base64.encode(username + ":" + password)}`,
     },
@@ -36,7 +36,7 @@ export const authenticate = async (username, password) => {
 
 export const refreshLogin = async () => {
   try {
-    const response = await axiosWithAuth.post(`${config.authWebservice}/whoami`)
+    const response = await axiosWithAuth.post(`${config.backend}/auth/whoami`)
     return response?.data;
   } catch (err) {
     logout()
