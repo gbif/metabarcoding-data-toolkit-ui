@@ -15,15 +15,17 @@ It works on top of [edna-tool-backend](https://github.com/gbif/edna-tool-backend
 
 # Tecnical details
 
+
 In the project directory, you can run:
 
 ### `npm start`
 
 Runs the app in the development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
-
 The page will reload when you make changes.\
-You may also see any lint errors in the console.
+You may also see any lint errors in the console.\
+In development mode, the backend service is configured in the `.env` file through the `REACT_APP_API_URL` variable.
+
 
 ### `npm test`
 
@@ -34,6 +36,10 @@ See the section about [running tests](https://facebook.github.io/create-react-ap
 
 Builds the app for production to the `build` folder.\
 It correctly bundles React in production mode and optimizes the build for the best performance.
+To configure the the associated backend installation, set the environment variable `REACT_APP_API_URL`.
+
+Example:
+`REACT_APP_API_URL=http://localhost:9001 npm run build`
 
 The build is minified and the filenames include the hashes.\
 Your app is ready to be deployed!
