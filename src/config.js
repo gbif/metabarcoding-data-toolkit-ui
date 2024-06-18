@@ -1,4 +1,4 @@
-import environments from "./env.json";
+import environments from "./env.js";
 
 const domain = window.location.hostname;
 
