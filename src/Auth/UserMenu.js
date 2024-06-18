@@ -10,7 +10,6 @@ import {refreshLogin} from './userApi'
 const { useToken } = theme;
  
 // we should have a role in the registry for this, however this is not sensitive information. Maybe all users should just have the link?
-const admins = ['tobiasgf', 'thomasgbif']
 /* const hashCode = function (str) {
   let hash = 0,
     i,
@@ -110,7 +109,7 @@ const defaultMenuItems = [
     } */
     }
 
-    if(user && admins.includes(user?.userName)){
+    if(user && user?.isAdmin){
       setMenuItems([...defaultMenuItems, {
         key: 'admin',
         label: 'Admin',
