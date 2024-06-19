@@ -1,10 +1,11 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { PlusOutlined } from "@ant-design/icons";
-import { Row, Tag, Col, Modal, Button } from "antd";
+import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
+import { Row, Tag, Col, Modal, Button, Upload } from "antd";
 import AgentForm from "./AgentForm";
 import AgentPresentation from "./AgentPresentation";
 import ReactDragListView from "react-drag-listview";
+import parse from "./ExcelAgentParser";
 import _ from "lodash";
 const { DragColumn } = ReactDragListView;
 
@@ -56,6 +57,7 @@ class AgentControl extends React.Component {
       formVisible: false,
       agentForEdit: null,
       editAgentIndex: null,
+      fileList: []
     };
   }
 
@@ -124,6 +126,19 @@ class AgentControl extends React.Component {
     );
   };
 
+  addFromFile = async (file) => {
+
+    try {
+        const agents = await parse(file)
+        const onChange = this.props.onChange;
+    if (onChange) {
+      onChange(agents); // will get derived state from props
+    }
+        this.setState({fileList:[]})
+    } catch (error) {
+        console.log(error)
+    }
+  }
   render() {
     const { agents, formVisible, agentForEdit, required, invalid } = this.state;
     const {
@@ -135,6 +150,7 @@ class AgentControl extends React.Component {
       otherAgentTypes,
       reUseAgentAsOtherAgentType,
     } = this.props;
+
 
     const dragProps = {
       onDragEnd: this.onDragEnd,
@@ -227,6 +243,10 @@ class AgentControl extends React.Component {
               )}
             </ol>
           </DragColumn>
+
+         {array && <><Upload beforeUpload={this.addFromFile} maxCount={1} fileList={this.state.fileList} >
+             <Button size="small" icon={<UploadOutlined />}>{`Upload ${agentType} list`}</Button>
+         </Upload> <a href="/templates/people.xlsx">{`Download excel template to upload ${agentType} list`}</a></>}
         </div>
 
         <Modal
