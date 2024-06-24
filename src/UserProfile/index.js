@@ -104,6 +104,7 @@ const deleteDataset = async (id) => {
                         {d?.taxon_count ? <p style={{marginBottom: "0px"}}>{`Taxa/ASVs: ${numberFormatter.format(d?.taxon_count)}`}</p> : ""}
                         {d?.occurrence_count ? <p >{`Occurrences: ${numberFormatter.format(d?.occurrence_count)}`}</p> : ""}
                         {d?.gbif_uat_key ? <a href={`https://www.gbif-uat.org/dataset/${d.gbif_uat_key}`} target="_blank" rel="noreferrer" >{`https://www.gbif-uat.org/dataset/${d.gbif_uat_key}`}</a> : ""}
+                        {d?.gbif_prod_key ? <a href={`https://www.gbif${config?.env !== "prod" ? "-uat" : ""}.org/dataset/${d.gbif_prod_key}`} target="_blank" rel="noreferrer" >{`https://www.gbif-uat.org/dataset/${d.gbif_prod_key}`}</a> : ""}
 
                     </>}
                 />

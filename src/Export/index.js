@@ -19,7 +19,7 @@ const Export = ({ setDataset, dataset }) => {
   const [failed, setFailed] = useState(dataset?.dwc?.steps?.find(s => s.status === 'failed') || false);
   const [finished, setFinished] = useState(dataset?.dwc?.steps?.find(s => s.status === 'finished') || false);
   const [registering, setRegistering] = useState(false);
-  const [gbifUatKey, setGbifUatKey] = useState(dataset?.publishing?.gbifDatasetKey);
+  const [gbifUatKey, setGbifUatKey] = useState(dataset?.publishing?.gbifDatasetKey || dataset?.publishing?.gbifDatasetKey);
   const [showRegisterModal, setShowRegisterModal] = useState(false)
   const [organisations, setOrganisations] = useState([])
   let hdl = useRef();
@@ -92,7 +92,7 @@ const Export = ({ setDataset, dataset }) => {
 
     setRegistering(true)
     try {
-      message.info("Registering dataset in GBIF-UAT");
+      message.info("Registering dataset in GBIF-UAT (Test environment)");
 
       const registerRes = await axiosWithAuth.post(`${config.backend}/dataset/${key}/register-in-gbif-uat`);
       // Legacy: the key was just called gbifDatasetKey before
@@ -134,7 +134,7 @@ const Export = ({ setDataset, dataset }) => {
           <Help style={{marginLeft: '8px'}} title="Darwin Core" content={<>
           <div>The Darwin Core Standard (DwC) offers a stable, straightforward and flexible framework for compiling biodiversity data from varied and variable sources. The majority of the datasets shared through GBIF.org are published using the Darwin Core Archive format (DwC-A).
           </div>
-                                  <a href="https://gcube.wiki.gcube-system.org/gcube/Darwin_Core_Terms" target="_blank">More about Darwin Core Archives.</a>
+                                  <a href="https://gcube.wiki.gcube-system.org/gcube/Darwin_Core_Terms" target="_blank" rel="noreferrer">More about Darwin Core Archives.</a>
                             </>}/>
           {dataset?.dwc?.steps && dataset?.dwc?.steps?.length > 0 && <Timeline
             items={

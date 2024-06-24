@@ -9,10 +9,11 @@ import {
   Select,
   Alert,
   Button,
-
+  Checkbox,
   Typography,
   Tabs,
   Space,
+  Modal,
   message,
   notification,
 } from "antd";
@@ -32,7 +33,7 @@ const Publish = ({ setDataset, dataset, user, installationSettings }) => {
 
   const [registering, setRegistering] = useState(false);
   const [gbifProdKey, setGbifProdKey] = useState(
-    dataset?.publishing?.gbifDatasetKey
+    dataset?.publishing?.gbifProdDatasetKey
   );
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [organisations, setOrganisations] = useState([]);
@@ -40,11 +41,14 @@ const Publish = ({ setDataset, dataset, user, installationSettings }) => {
   const [installationContactEmail, setInstallationContactEmail] = useState(null)
   const [selectedOrg, setSelectedOrg] = useState(null);
   const [selectedPendingOrg, setSelectedPendingOrg] = useState(null)
+  const [userAgreedToterms, setUserAgreedToterms] = useState(false)
   const [tab, setTab] = useState("1")
 
   useEffect(() => {
     getOrganizations();
   }, []);
+
+ 
 
   const getOrganizations = async () => {
     try {
@@ -67,10 +71,10 @@ const Publish = ({ setDataset, dataset, user, installationSettings }) => {
   const registerData = async (key) => {
     setRegistering(true);
     try {
-      message.info("Registering dataset in GBIF-Prod");
+      message.info("Registering dataset in GBIF");
 
       const registerRes = await axiosWithAuth.post(
-        `${config.backend}/dataset/${key}/register-in-gbif-prod`
+        `${config.backend}/dataset/${key}/register-in-gbif-prod?organizationKey=${selectedOrg?.key}`
       );
       // Legacy: the key was just called gbifDatasetKey before
       if (registerRes?.data?.publishing?.gbifProdDatasetKey) {
@@ -102,6 +106,8 @@ const Publish = ({ setDataset, dataset, user, installationSettings }) => {
       setSelectedPendingOrg(org)
     }
   }
+
+  
 
   return (
     <Layout>
@@ -164,28 +170,36 @@ const Publish = ({ setDataset, dataset, user, installationSettings }) => {
             children: <>
               
         {organisations.length > 0 && (
-        <> <Row>
-            <Col span={4} style={{textAlign: "right", paddingRight: "20px"}}><Text >You are ready to publish the dataset: </Text></Col>
-            <Col span={20}>
+        <> 
+        <Row>
+          <Col span={18}>
+          <Row>
+            <Col span={6} style={{textAlign: "right", paddingRight: "20px"}}><Text >You are ready to publish the dataset: </Text></Col>
+            <Col span={18}>
               
               <Text strong>{dataset?.metadata?.title}.</Text></Col>
               <Col></Col>
-              <Col span={4} style={{textAlign: "right", paddingRight: "20px"}}><Text>The publishing institution will be: </Text></Col>
-            <Col span={20}>
+              <Col span={6} style={{textAlign: "right", paddingRight: "20px", marginTop: "10px"}}><Text>The publishing institution will be: </Text></Col>
+            <Col span={18}>
             <Select
                 value={selectedOrg}
                 onChange={setSelectedOrg}
-                style={{ width: "400px" }}
+                style={{ width: "400px", marginTop: "10px" }}
                 options={organisations.map((o) => ({
                   value: o.key,
                   label: o.name,
                 }))}
               />
             </Col>
-            </Row>
-            <Row>
             
-          </Row></> 
+            </Row>
+          </Col>
+          <Col><Button onClick={() => registerData(dataset?.id) }  loading={registering} type="primary" disabled={!!installationSettings?.termsLink && !userAgreedToterms}>Publish to gbif.org</Button>
+             <br /> 
+             {installationSettings?.termsLink && <Checkbox style={{marginTop: "10px"}} value={userAgreedToterms} onChange={e => setUserAgreedToterms(!!e?.target?.checked)}>I have read and agree to the <a target="_blank" href={installationSettings?.termsLink} rel="noreferrer">terms</a></Checkbox>}</Col>
+        </Row>
+        
+            </> 
         )}
         {organisations.length === 0 && (
         <> <Row>
@@ -204,6 +218,10 @@ const Publish = ({ setDataset, dataset, user, installationSettings }) => {
         ]} onChange={setTab} />
         </> : <ProdPublishingNotEnabled />}
       </PageContent>
+      <Modal title="Info" open={showRegisterModal && gbifProdKey} onOk={() => setShowRegisterModal(false)} onCancel={() => setShowRegisterModal(false)}>
+        <p>Your data is being published. Depending on the data volume, it may take from 15 minutes to a an hour before it is finished. This means that you may initally see "0 occurrences" on the new <a  href={`https://www.gbif${config?.env !== 'prod' ? '-uat':''}.org/dataset/${gbifProdKey}`}>dataset page</a> if it is accessed before the processing has finished.</p>
+        
+      </Modal>
     </Layout>
   );
 };

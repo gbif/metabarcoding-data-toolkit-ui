@@ -112,6 +112,18 @@ function Admin({user, setLoginFormVisible}) {
 
             },
             {
+              title: "GBIF",
+              dataIndex: "gbif_prod_key",
+              key: "gbif_prod_key",
+              filters: [
+                  {text: "Published", value: true},
+                  {text: "Not published", value: false},
+              ],
+              onFilter: (value, record) => value ? !!record.gbif_prod_key : !record.gbif_prod_key,
+              render: (text, record) => !!text ? <a href={`https://www.gbif${config.env !== "prod" ? "-uat" : ""}.org/dataset/${text}`} target="_blank" rel="noreferrer" >{text}</a> : ""
+
+          },
+            {
               title: "Deleted",
               dataIndex: "deleted",
               key: "deleted",

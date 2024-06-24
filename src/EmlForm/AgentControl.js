@@ -250,7 +250,7 @@ class AgentControl extends React.Component {
         </div>
 
         <Modal
-          visible={formVisible}
+          open={formVisible}
           footer={null}
           onCancel={() =>
             agentForEdit
