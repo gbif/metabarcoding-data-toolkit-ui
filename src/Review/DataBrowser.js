@@ -6,7 +6,8 @@ import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
 import { Button, Row, Col, Typography, Descriptions, Tabs, Select, Table } from "antd";
 import TaxonomyChart from "./TaxonomyChart";
-import { useNavigate, useLocation, useMatch } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
+
 import LeafletMap from "./Map";
 import TaxonomicSimilarity from "./TaxonomicSimilarity"
 import TaxonomyBarplot from "./TaxonomyBarplot";
@@ -54,9 +55,13 @@ const DataBrowser = ({ dataset }) => {
     const [metrics, setMetrics] = useState({})
     const [geoJsonFilter, setGeoJsonFilter] = useState(null)
     const [sampleDataTypes, setSampleDataTypes] = useState(null)
+    let [searchParams, setSearchParams] = useSearchParams();
+
 
     useEffect(() => {
-
+        if(searchParams.has("eventID")){
+            setSelectedSample(searchParams.get("eventID"))
+        }
         if (dataset?.id && dataset?.id !== datasetId) {
             setDatasetId(dataset?.id)
             setGeoJson(null)
@@ -69,6 +74,9 @@ const DataBrowser = ({ dataset }) => {
             if(dataset?.metrics){
                 setMetrics(dataset?.metrics)
             }
+
+            
+            console.log(searchParams.get("eventID"))
           //  getMetrics(dataset?.id)
             /* if (((dataset?.summary?.sampleCount * dataset?.summary?.taxonCount) < ORDINATION_MAX_CARDINALITY)) {
                 getOrdination(dataset?.id)
@@ -93,6 +101,10 @@ const DataBrowser = ({ dataset }) => {
     useEffect(() => {
         //  console.log(selectedSample)
         //  console.log(`the array index is ${samplIdToArrayIndex.get(selectedSample)}`)
+        if(selectedSample){
+            setSearchParams(new URLSearchParams(`eventID=${selectedSample}`))
+            //searchParams.set("eventID", selectedSample)
+        }
     }, [selectedSample])
 
     useEffect(()=>{

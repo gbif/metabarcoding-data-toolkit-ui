@@ -102,7 +102,21 @@ const MapContent = ({ geoJson, onFeatureClick, selectedSample, setError, geoJson
         a.layer.openPopup();
       });
       map.addLayer(markers);
-      map.fitBounds(markers.getBounds());
+      if(selectedSample){
+        const layers = geoJsonRef.current.getLayers();
+
+        const selectedLayer = layers.find(l => l?.feature?.properties?.id == selectedSample);
+       
+          
+        if (selectedLayer) {
+          
+           map.flyTo([selectedLayer?.feature?.geometry?.coordinates[1],selectedLayer?.feature?.geometry?.coordinates[0]], 14)
+           selectedLayer.openPopup()
+        } else {
+          map.fitBounds(markers.getBounds());
+
+        }
+      }
     } catch (error) {
       console.log(error.message)
       setError(error.message)
