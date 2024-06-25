@@ -11,7 +11,7 @@ import FilesAvailable from '../Components/FilesAvailable'
 import Help from "../Components/Help";
 import withContext from "../Components/hoc/withContext";
 import { axiosWithAuth } from "../Auth/userApi";
-const { Title } = Typography;
+const { Title, Text } = Typography;
 const Export = ({ setDataset, dataset }) => {
 
   const [loading, setLoading] = useState(false)
@@ -163,7 +163,7 @@ const Export = ({ setDataset, dataset }) => {
                     </Col>}
         <Col flex="auto"></Col>
         <Col>
-          <Button  loading={registering}  disabled={ registering || !finished  } type="primary" onClick={() => registerData(dataset?.id) } >Publish to GBIF test environment (UAT)</Button>
+          <Button  loading={registering}  disabled={ registering || !finished  } type="primary" onClick={() => registerData(dataset?.id) } >Publish to GBIF test environment (UAT)</Button><Help style={{marginLeft: "8px"}} title="Publishing" content={<Text>You can "publish" your Darwin Core Archive to the GBIF test environment, also known as the User Acceptance Testing (UAT) environment. In UAT, the data will be indexed and processed almost exactly as on GBIF.org, and it allows you to verify that the data looks as you expect and is being indexed correctly. The indexing takes some time, and not all elements are added immediately (e.g. the map of the samples).</Text>} />
 {/*           <Alert type="warning" style={{marginTop: "10px"}} description={`Publishing to the test environment is currently disabled as GBIF is updating core software parts`}/>
  */}        </Col>
         <Col>
@@ -172,7 +172,7 @@ const Export = ({ setDataset, dataset }) => {
         </Col>
       </Row>
       <Modal title="Info" open={showRegisterModal && gbifUatKey} onOk={() => setShowRegisterModal(false)} onCancel={() => setShowRegisterModal(false)}>
-        <p>Your data is being processed. Depending on the data volume, it may take from 15 minutes to a an hour before it is finished. This means that you may initally see "0 occurrences" on the new <a  href={`https://www.gbif-uat.org/dataset/${gbifUatKey}`}>dataset page</a> if it is accessed before the processing has finished.</p>
+        <p>Your data is being processed and "published" on the test environment.. Depending on the data volume, it may take from 15 minutes to a an hour before it is finished. This means that you may initally see "0 occurrences" on the new <a  href={`https://www.gbif-uat.org/dataset/${gbifUatKey}`}>dataset page</a> if it is accessed before the processing has finished. You can also find the link to the dataset on the test environment (gbif-uat) in the list of datasets in your user profile.</p>
         
       </Modal>
 
