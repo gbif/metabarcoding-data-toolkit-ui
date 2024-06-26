@@ -46,7 +46,7 @@ const DataBrowser = ({ dataset }) => {
    // const [ordination, setOrdination] = useState(null)
   //  const [ordinationPromise, setOrdinationPromise] = useState(Promise.resolve())
     const [taxonomyData, setTaxonomyData] = useState(null)
-    const [taxonomyBySampleDataMap, setTaxonomyBySampleDataMap] = useState(null)
+    const [taxonomyBySampleDataMap, setTaxonomyBySampleDataMap] = useState({})
     const [taxonomyDataMap, setTaxonomyDataMap] = useState(null)
     const [taxonomyLoading, setTaxonomyLoading] = useState(false)
     const [topTaxa, setTopTaxa] = useState(null)
