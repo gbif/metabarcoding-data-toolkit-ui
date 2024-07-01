@@ -147,10 +147,12 @@ class AgentControl extends React.Component {
       agentType = "contact",
       array = true,
       requiredFields,
+      hasRole,
       otherAgentTypes,
       reUseAgentAsOtherAgentType,
     } = this.props;
 
+    const agentLabel = _.startCase(agentType)
 
     const dragProps = {
       onDragEnd: this.onDragEnd,
@@ -245,8 +247,8 @@ class AgentControl extends React.Component {
           </DragColumn>
 
          {array && <><Upload beforeUpload={this.addFromFile} maxCount={1} fileList={this.state.fileList} >
-             <Button size="small" icon={<UploadOutlined />}>{`Upload ${agentType} list`}</Button>
-         </Upload> <a href="/templates/people.xlsx">{`Download excel template to upload ${agentType} list`}</a></>}
+             <Button size="small" icon={<UploadOutlined />}>{`Upload ${agentLabel} list`}</Button>
+         </Upload> <a href="/templates/people.xlsx">{`Download excel template to upload ${agentLabel} list`}</a></>}
         </div>
 
         <Modal
@@ -259,14 +261,15 @@ class AgentControl extends React.Component {
           }
           title={
             agentForEdit
-              ? `Editing ${agentType}${
+              ? `Editing ${agentLabel}${
                   agentForEdit.name ? " " + agentForEdit.name : ""
                 }`
-              : `New ${agentType}`
+              : `New ${agentLabel}`
           }
         >
           <AgentForm
             requiredFields={requiredFields}
+            hasRole={hasRole}
             data={agentForEdit}
             style={{ marginTop: "10px" }}
             onSubmit={this.onFormSubmit}

@@ -367,6 +367,38 @@ const MetaDataForm = ({
             />
           </FormItem>
         )}
+        {true && (
+          <FormItem
+            {...formItemLayout}
+            label="Metadata providers"
+            name="metadataProvider"
+            help={showHelp && (help?.metadataProvider || null)}
+          >
+            <AgentControl
+              agentType="metadataProvider"
+              label="New Metadata Provider"
+              removeAll={true}
+              
+            />
+          </FormItem>
+        )}
+
+{true && (
+          <FormItem
+            {...formItemLayout}
+            label="Associated parties"
+            name="associatedParty"
+            help={showHelp && (help?.associatedParty || null)}
+          >
+            <AgentControl
+              agentType="associatedParty"
+              label="New associated party"
+              hasRole={true}
+              removeAll={true}
+              
+            />
+          </FormItem>
+        )}
 
         {true && (
           <FormItem

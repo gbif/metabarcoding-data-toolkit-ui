@@ -163,6 +163,26 @@ const AgentForm = (props) => {
         }]} {...formItemLayout} label="Url (webpage)" name="onlineUrl">
         <Input />
       </FormItem>
+
+      {props?.hasRole && <FormItem rules={[ {
+          required: true
+        }]} {...formItemLayout} label="Role" name="role">
+        <Select
+          style={{ width: 300 }}
+          
+          showSearch
+          allowClear
+        >
+          {props.agentRoles.map((r) => {
+            
+            return (
+              <Option key={r.value} value={r.value}>
+                {r.label}
+              </Option>
+            );
+          })}
+        </Select>
+      </FormItem>}
       <FormItem {...tailFormItemLayout}>
         <Button style={{ marginRight: "10px" }} onClick={props.onCancel}>
           Cancel
@@ -184,8 +204,9 @@ const AgentForm = (props) => {
     </Form>
   );
 };
-const mapContextToProps = ({ country }) => ({
+const mapContextToProps = ({ country, agentRoles }) => ({
   country,
+  agentRoles
 });
 
 export default withContext(mapContextToProps)(AgentForm);

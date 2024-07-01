@@ -72,7 +72,9 @@ const AgentPresentation = ({
             {agent.electronicMailAddress}
           </a>
         ))}
-
+      {agent?.role && (
+        <span style={{ display: "block" }}>Role: {agent?.role}</span>
+      )}
 
     </span>
   ) : null;

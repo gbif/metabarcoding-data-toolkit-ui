@@ -27,3 +27,13 @@ export const getSupportedMarkers = async () => {
         throw error
     }
 }
+
+
+export const getAgentRoles = async () => {
+    try {
+        const res = await axios(`${config.backend}/enum/agent-roles`)
+        return res
+    } catch (error) {
+        throw error
+    }
+}

@@ -17,8 +17,7 @@ import withContext from "../Components/hoc/withContext";
 import DnaSequence from "../Components/DnaSequence";
 import {dateFormatter, numberFormatter} from '../Util/formatters'
 
-const ORDINATION_MAX_CARDINALITY = 2500000;
-const { Title } = Typography;
+
 
 const formatTaxonomy =  (record, truncate = true) => {
     const taxa = ['kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'scientificName'].filter(rank => !!record[rank]).map(rank => record[rank])
@@ -76,7 +75,7 @@ const DataBrowser = ({ dataset }) => {
             }
 
             
-            console.log(searchParams.get("eventID"))
+            //console.log(searchParams.get("eventID"))
           //  getMetrics(dataset?.id)
             /* if (((dataset?.summary?.sampleCount * dataset?.summary?.taxonCount) < ORDINATION_MAX_CARDINALITY)) {
                 getOrdination(dataset?.id)

@@ -7,7 +7,7 @@ import {
   JWT_STORAGE_NAME,
 } from "../../Auth/userApi";
 import {getDwcTerms, getRequiredTerms, getDefault} from "../../Api/terms.js"
-import { getFormat , getLicense, getSupportedMarkers} from "../../Api/enum.js";
+import { getFormat , getLicense, getSupportedMarkers, getAgentRoles} from "../../Api/enum.js";
 import {getInstallationSettings} from "../../Api/installationSettings.js"
 import country from "../../Enum/country.json"
  // import {getTrees} from '../../Api'
@@ -23,6 +23,7 @@ class ContextProvider extends React.Component {
     requiredTerms: {},
     defaultTerms: [], // terms that may have a default value
     supportedMarkers: [],
+    agentRoles: [],
     installationSettings: {},
     license: {},
     format: {},
@@ -56,7 +57,7 @@ class ContextProvider extends React.Component {
         this.setState({user})
       })
     } */
-   Promise.all([getDwcTerms(), getRequiredTerms(), getLicense(), getFormat(), getDefault(), getSupportedMarkers(), getInstallationSettings()])
+   Promise.all([getDwcTerms(), getRequiredTerms(), getLicense(), getFormat(), getDefault(), getSupportedMarkers(), getInstallationSettings(), getAgentRoles()])
     .then(responses => {
       this.setState({
         dwcTerms: responses[0]?.data,
@@ -65,7 +66,8 @@ class ContextProvider extends React.Component {
         format: responses[3]?.data,
         defaultTerms: responses[4]?.data,
         supportedMarkers: responses[5]?.data,
-        installationSettings: responses[6]?.data
+        installationSettings: responses[6]?.data,
+        agentRoles: responses[7]?.data
       })
     }) 
 

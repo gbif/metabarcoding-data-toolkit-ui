@@ -167,7 +167,7 @@ const ProcessDataset = ({
             return Math.max(POLLING_INTERVAL, _dataset?.summary?.sampleCount)
         } else {
 
-            const interval = Math.max(POLLING_INTERVAL, Math.max(MAX_POLLING_INTERVAL, Math.round(_dataset?.summary?.sampleCount * _dataset?.summary?.taxonCount / 100000)))
+            const interval = Math.max(POLLING_INTERVAL, Math.min(MAX_POLLING_INTERVAL, Math.round(_dataset?.summary?.sampleCount * _dataset?.summary?.taxonCount / 100000)))
             //  console.log(interval)
             return interval;
         }
