@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { Input, Button, Checkbox, Alert, Form } from 'antd';
 const FormItem = Form.Item;
@@ -7,12 +7,13 @@ const FormItem = Form.Item;
 
 const LoginForm = ({onLogin, invalid}) => {
   const [form] = Form.useForm();
-
+  const [loading, setLoading] = useState(false)
   const onFinishFailed = ({ errorFields }) => {
     form.scrollToField(errorFields[0].name);
   };
 
   const onFinish = (values) => {
+    setLoading(true)
     onLogin(values)
   }
 
@@ -27,7 +28,7 @@ const LoginForm = ({onLogin, invalid}) => {
         <Input prefix={<LockOutlined style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="Password" />
       </FormItem>
       <FormItem style={{width: '100%'}} valuePropName="checked" name="remember">
-        <Button type="primary" htmlType="submit" style={{width: '100%'}}>
+        <Button  loading={loading} type="primary" htmlType="submit" style={{width: '100%'}}>
           Log in
         </Button>
         Or <a href="https://www.gbif-uat.org/user/profile">register at gbif-uat.org now!</a>
