@@ -14,6 +14,7 @@ import {
   Tabs,
   Space,
   Modal,
+  Tooltip,
   message,
   notification,
 } from "antd";
@@ -27,7 +28,7 @@ import {getExistingOrgEmailBody, getNewOrgEmailBody} from "./EmailTemplate";
 
 const { Text } = Typography;
 
-const Publish = ({ setDataset, dataset, user, installationSettings }) => {
+const Publish = ({ setDataset, dataset, user, installationSettings, networks }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -40,15 +41,36 @@ const Publish = ({ setDataset, dataset, user, installationSettings }) => {
   const [organisationsResolved, setOrganisationsResolved] = useState(false);
   const [installationContactEmail, setInstallationContactEmail] = useState(null)
   const [selectedOrg, setSelectedOrg] = useState(null);
+  const [selectedNetwork, setSelectedNetwork] = useState(dataset?.publishing?.netWorkKey)
+  const [addingNetwork, setAddingNetwork] = useState(false)
   const [selectedPendingOrg, setSelectedPendingOrg] = useState(null)
   const [userAgreedToterms, setUserAgreedToterms] = useState(false)
+  const [prodEnv, setProdEnv] = useState(null)
   const [tab, setTab] = useState("1")
 
   useEffect(() => {
     getOrganizations();
   }, []);
 
- 
+ useEffect(() => {
+  // registryBaseUrl.split(".").slice(1).join(".")
+    if(!!installationSettings?.gbifRegistryBaseUrl){
+     // console.log(installationSettings?.gbifRegistryBaseUrl.split(".").slice(1).join("."))
+      setProdEnv(installationSettings?.gbifRegistryBaseUrl.split(".").slice(1).join("."))
+    }
+ }, [installationSettings?.gbifRegistryBaseUrl])
+
+ useEffect(() => {
+  if(!!dataset?.publishing?.netWorkKey){
+    setSelectedNetwork(dataset?.publishing?.netWorkKey)
+  }
+ }, [dataset?.publishing?.netWorkKey])
+
+ useEffect(() => {
+  if(!!dataset?.publishing?.gbifProdDatasetKey){
+    setGbifProdKey(dataset?.publishing?.gbifProdDatasetKey)
+  }
+ }, [dataset?.publishing?.gbifProdDatasetKey])
 
   const getOrganizations = async () => {
     try {
@@ -104,6 +126,22 @@ const Publish = ({ setDataset, dataset, user, installationSettings }) => {
       }
     } else {
       setSelectedPendingOrg(org)
+    }
+  }
+
+  const addNetwork = async () => {
+    setAddingNetwork(true);
+    try {
+
+      const res = await axiosWithAuth.post(
+        `${config.backend}/dataset/${dataset?.id}/network/${selectedNetwork}`
+      );
+      notification.info({description: `The dataset was successfully associated with the netowork`})
+      setAddingNetwork(false);
+    } catch (error) {
+      console.log(error);
+      setAddingNetwork(false);
+      setError(error);
     }
   }
 
@@ -166,13 +204,13 @@ const Publish = ({ setDataset, dataset, user, installationSettings }) => {
           },
           {
             key: '2',
-            label: 'Publish data',
+            label: !!gbifProdKey ? 'Re-publish data' : 'Publish data',
             children: <>
               
         {organisations.length > 0 && (
         <> 
         <Row>
-          <Col span={18}>
+          <Col span={17}>
           <Row>
             <Col span={6} style={{textAlign: "right", paddingRight: "20px"}}><Text >You are ready to publish the dataset: </Text></Col>
             <Col span={18}>
@@ -191,12 +229,35 @@ const Publish = ({ setDataset, dataset, user, installationSettings }) => {
                 }))}
               />
             </Col>
+            <Col span={6} style={{textAlign: "right", paddingRight: "20px"}}><Text >Associate a Network with your dataset: </Text></Col>
+            <Col span={18} style={{paddingTop: "10px"}}>
+            <Space direction="horizontal">
+            <Select
+                allowClear
+                value={selectedNetwork}
+                onChange={setSelectedNetwork}
+                style={{ width: "336px"}}
+                options={networks.map((o) => ({
+                  value: o.key,
+                  label: o.name,
+                }))}
+              />
+              <Tooltip title="The dataset must be published before adding a network"><Button loading={addingNetwork} type="primary" disabled={!selectedNetwork || !gbifProdKey} onClick={addNetwork}>Add</Button></Tooltip>
+              
+              </Space>
+            </Col>
             
             </Row>
           </Col>
-          <Col><Button onClick={() => registerData(dataset?.id) }  loading={registering} type="primary" disabled={!!installationSettings?.termsLink && !userAgreedToterms}>Publish to gbif.org</Button>
+          <Col>
+          <Button onClick={() => registerData(dataset?.id) }  loading={registering} type="primary" disabled={!!installationSettings?.termsLink && !userAgreedToterms}>Publish to gbif.org</Button>
+          {gbifProdKey && <Button  type="link" href={`https://www.${prodEnv}dataset/${gbifProdKey}`}>Dataset at gbif.org</Button>}
              <br /> 
-             {installationSettings?.termsLink && <Checkbox style={{marginTop: "10px"}} value={userAgreedToterms} onChange={e => setUserAgreedToterms(!!e?.target?.checked)}>I have read and agree to the <a target="_blank" href={installationSettings?.termsLink} rel="noreferrer">terms</a></Checkbox>}</Col>
+             {installationSettings?.termsLink && <Checkbox style={{marginTop: "10px"}} value={userAgreedToterms} onChange={e => setUserAgreedToterms(!!e?.target?.checked)}>I have read and agree to the <a target="_blank" href={installationSettings?.termsLink} rel="noreferrer">terms</a></Checkbox>}
+             <br /> 
+             
+
+             </Col>
         </Row>
         
             </> 
@@ -205,7 +266,7 @@ const Publish = ({ setDataset, dataset, user, installationSettings }) => {
         <> <Row>
             
             <Col >
-              <Text>You have not yet been affiliated with a GBIF pubilishing institution. Please <Button style={{padding: 0}} type="link" onClick={() => setTab("1")}>go back to the registration page.</Button></Text><br />
+              <Text>You have not yet been affiliated with a GBIF publishing institution. Please <Button style={{padding: 0}} type="link" onClick={() => setTab("1")}>go back to the registration page.</Button></Text><br />
               <Text>When your institution/organization has been registered, you will be able to do the final data publishing from this page.</Text>
             </Col>
             </Row>
@@ -226,13 +287,14 @@ const Publish = ({ setDataset, dataset, user, installationSettings }) => {
   );
 };
 
-const mapContextToProps = ({ user, login, logout, dataset, setDataset, installationSettings }) => ({
+const mapContextToProps = ({ user, login, logout, dataset, setDataset, installationSettings, networks }) => ({
   user,
   login,
   logout,
   dataset,
   setDataset,
-  installationSettings
+  installationSettings,
+  networks
 });
 
 export default withContext(mapContextToProps)(Publish);

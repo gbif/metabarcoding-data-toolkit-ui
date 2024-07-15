@@ -37,3 +37,12 @@ export const getAgentRoles = async () => {
         throw error
     }
 }
+
+export const getNetworks = async () => {
+    try {
+        const res = await axios(`${config.backend}/enum/networks`)
+        return res
+    } catch (error) {
+        throw error
+    }
+}
