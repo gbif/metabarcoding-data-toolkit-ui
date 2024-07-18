@@ -33,9 +33,10 @@ const HeaderSelect = ({ headers = [], style = { width: 300 }, onChange, term, va
         style={style} 
         value={value} 
         showSearch 
-        filterOption={(input, option) =>
-            (option?.value ?? '').toLowerCase().startsWith(input.toLowerCase())
-          }
+        filterOption={(input, option) => (option?.value ?? '').toLowerCase().includes((input ?? '').toLowerCase())}
+        filterSort={(optionA, optionB) =>
+            (optionA?.value ?? '').toLowerCase().localeCompare((optionB?.value ?? '').toLowerCase())
+        }
         allowClear 
         onChange={setValue}>
         {headers?.map(h => <Select.Option key={h} value={h}>{h}</Select.Option>)}
