@@ -29,7 +29,15 @@ const HeaderSelect = ({ headers = [], style = { width: 300 }, onChange, term, va
         return !!header && header.toLowerCase() === term?.name?.toLowerCase()
     }
 
-    return <><Select style={style} value={value} allowClear onChange={setValue}>
+    return <><Select 
+        style={style} 
+        value={value} 
+        showSearch 
+        filterOption={(input, option) =>
+            (option?.value ?? '').toLowerCase().startsWith(input.toLowerCase())
+          }
+        allowClear 
+        onChange={setValue}>
         {headers?.map(h => <Select.Option key={h} value={h}>{h}</Select.Option>)}
     </Select>
         {
