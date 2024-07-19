@@ -348,11 +348,12 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
                     }  
                     setSampleTerms([...sampleTerms, termMap.get(val)])
                 } }/>
-                <Row>
                 <Title level={5} style={{ marginTop: '10px' }}>{unMapped.length > 0 ? `Unmapped fields`:`No unmapped fields`} <Popover placement="rightTop" trigger="click" title={"Unmapped fields"} content={<><p>Here is a list of the fields in your data that has not yet been mapped to a standard field name. 
                     </p><p>If you want to map some of these fields, start by selecting their Darwin core or MiXS equivalent in the "Add Field" search box above.</p><p>
         Not all fields does neccessarily map to standard fields in a logical sense.</p><p> Unmapped fields will stil be available in the BIOM files created in the next step, but they will not be in the Darwin Core achive unless you include them as a measurement.</p><p> This can be done at the bottom of this page.</p></>}>
                     <InfoCircleOutlined /> </Popover></Title> 
+                <Row>
+                
 
 <p>{unMapped.map(t => <Tag style={{marginBottom: "8px"}} >{t}</Tag>)}</p>
 </Row>
