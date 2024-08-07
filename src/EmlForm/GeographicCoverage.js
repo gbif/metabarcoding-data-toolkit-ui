@@ -15,6 +15,7 @@ import { error } from "highcharts";
 /* import DrawTools from './DrawTools';
  */const css = {
     width: '100%',
+    minWidth: "300px",
     height: '400px',
     overflow: 'hidden',
     position: 'relative',
