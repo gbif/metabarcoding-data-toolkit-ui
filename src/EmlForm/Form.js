@@ -523,7 +523,7 @@ const MetaDataForm = ({
             name="includeGeographicCoverage"
             help={showHelp && (help?.geographicCoverage || null)}
           >
-            <GeographicCoverage geographicCoverage={dataset?.metrics?.geographicScope} />
+            <GeographicCoverage geographicCoverage={dataset?.metrics?.geographicScope}  hidden={section !== "geographic_coverage"} />
           </FormItem>
         
 

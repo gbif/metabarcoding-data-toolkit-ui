@@ -93,7 +93,7 @@ class GeographicCoverage extends React.Component {
 
   render() {
     const { includeGeographicCoverage, error } = this.state;
-    const { geographicCoverage} = this.props;
+    const { geographicCoverage, hidden} = this.props;
 
     return (
       <div style={{ minWidth: "300px", height: "450px" }}>
@@ -106,7 +106,7 @@ class GeographicCoverage extends React.Component {
         )}
     <Checkbox  style={{marginTop: "6px"}} checked={includeGeographicCoverage} onChange={this.triggerChange} > Include Geographic Coverage in Metadata</Checkbox>
         
-          <MapContainer
+       {!hidden &&   <MapContainer
             style={css}
             center={[0, 0]}
             zoom={1}
@@ -123,7 +123,7 @@ class GeographicCoverage extends React.Component {
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-          </MapContainer>
+          </MapContainer>}
         
       </div>
     );
