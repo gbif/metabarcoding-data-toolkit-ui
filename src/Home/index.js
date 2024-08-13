@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
 import { Row, Col, Typography, Card } from "antd";
+import { SiRss } from "react-icons/si";
+import config from "../config"
 
 const { Title } = Typography;
 const { Meta } = Card;
@@ -81,6 +83,8 @@ function App() {
           </Col>
           <Col flex="auto"></Col>
         </Row>
+        <Row><Col flex="auto"></Col><Col><SiRss /> The most recently updated resources are available as an <a href={`${config.backend}/rss`}>RSS feed </a> </Col><Col flex="auto"></Col></Row>
+
         
       </PageContent>
     </Layout>
