@@ -309,13 +309,13 @@ const MetaDataForm = ({
             rules={[
               {
                 required: true,
-                message: "You mush enter a contact person for the dataset",
+                message: "You must enter a contact person for the dataset",
               },
             ]}
             
           >
             <AgentControl
-              requiredFields={["electronicMailAddress", "userId"]}
+              requiredFields={["electronicMailAddress"/* , "userId" */]}
               agentType="contact"
               label="New contact"
               removeAll={true}
