@@ -196,8 +196,8 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
     }
 
     const checkImportantTermsExist = () => {
-        const hasLatLon = (dataset?.sampleHeaders.includes('decimalLatitude') || Object.keys(state.samples).includes('decimalLatitude')) && (dataset?.sampleHeaders.includes('decimalLongitude') || Object.keys(state.samples).includes('decimalLongitude'));
-        const hasEventDate = dataset?.sampleHeaders.includes('eventDate') || Object.keys(state.samples).includes('eventDate');
+        const hasLatLon = (dataset?.sampleHeaders.includes('decimalLatitude') || Object.keys(state.samples).includes('decimalLatitude') || Object.keys(state.defaultValues).includes('decimalLatitude')) && (dataset?.sampleHeaders.includes('decimalLongitude') || Object.keys(state.samples).includes('decimalLongitude') || Object.keys(state.defaultValues).includes('decimalLongitude'));
+        const hasEventDate = dataset?.sampleHeaders.includes('eventDate') || Object.keys(state.samples).includes('eventDate') || Object.keys(state.defaultValues).includes('eventDate');
         
         const hasSequence = dataset?.files?.format.endsWith('_FASTA') || dataset?.taxonHeaders.includes('DNA_sequence') || Object.keys(state.taxa).includes('DNA_sequence');
 
