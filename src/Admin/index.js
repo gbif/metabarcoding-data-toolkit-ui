@@ -19,6 +19,7 @@ const { Meta } = Card;
 function Admin({user, setLoginFormVisible}) {
   const [datasets, setDatasets] = useState([]);
   const [userFilter, setUserFilter] = useState([])
+  const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -28,13 +29,15 @@ function Admin({user, setLoginFormVisible}) {
   const getDatasets = async () => {
 
     try {
+        setLoading(true)
         const res = await axiosWithAuth.get(`${config.backend}/datasets`)
 
         setDatasets(res?.data/* .sort((a,b) => (a.created < b.created) ? 1 : ((b.created < a.created) ? -1 : 0)) */)
+        setLoading(false)
        const grouped = _.groupBy(res?.data, 'user_name')
        setUserFilter(Object.keys(grouped).map(usr => ({text: `${usr} (${grouped[usr].length})`, value: usr})))
     } catch (error) {
-        
+      setLoading(false)
     }
 
   }
@@ -46,6 +49,7 @@ function Admin({user, setLoginFormVisible}) {
 {/*         <Title level={4}> All datasets in the tool </Title>
  */}
         <Table 
+        loading={loading}
         dataSource={datasets}
         rowKey="dataset_id"
         rowClassName={(record => !!record?.deleted ? 'deleted-record-row' : '')} 
