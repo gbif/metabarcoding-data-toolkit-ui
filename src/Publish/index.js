@@ -46,7 +46,7 @@ const Publish = ({ setDataset, dataset, user, installationSettings, networks }) 
   const [selectedPendingOrg, setSelectedPendingOrg] = useState(null)
   const [userAgreedToterms, setUserAgreedToterms] = useState(false)
   const [prodEnv, setProdEnv] = useState(null)
-  const [tab, setTab] = useState("1")
+  const [tab, setTab] = useState(!!dataset?.publishing?.gbifProdDatasetKey ? "2": "1")
 
   useEffect(() => {
     getOrganizations();
@@ -249,11 +249,14 @@ const Publish = ({ setDataset, dataset, user, installationSettings, networks }) 
             
             </Row>
           </Col>
-          <Col>
+          <Col span={6}>
           <Button onClick={() => registerData(dataset?.id) }  loading={registering} type="primary" disabled={!!installationSettings?.termsLink && !userAgreedToterms}>Publish to gbif.org</Button>
           {gbifProdKey && <Button  type="link" href={`https://www.${prodEnv}dataset/${gbifProdKey}`}>Dataset at gbif.org</Button>}
              <br /> 
-             {installationSettings?.termsLink && <Checkbox style={{marginTop: "10px"}} value={userAgreedToterms} onChange={e => setUserAgreedToterms(!!e?.target?.checked)}>I have read and agree to the <a target="_blank" href={installationSettings?.termsLink} rel="noreferrer">terms</a></Checkbox>}
+             <Checkbox style={{marginTop: "10px"}} value={userAgreedToterms} onChange={e => setUserAgreedToterms(!!e?.target?.checked)}>
+             </Checkbox> <span>Confirm that you have read and understood the <a target="_blank" href={`https://www.gbif.org/terms/data-publisher`} rel="noreferrer">GBIF data sharing agreement</a>.{" "}
+             You are about to register the dataset in GBIF. Be aware deletion from the GBIF Index is automatic, but cannot be undone without explicit email communication with the <a href="mailto:helpdesk@gbif.org">GBIF Help Desk</a>.
+             {installationSettings?.termsLink &&  <> <br/>I have also read and agree to the <a target="_blank" href={installationSettings?.termsLink} rel="noreferrer">terms</a> specific for this installation of the eDNA tool.</>}</span>
              <br /> 
              
 
