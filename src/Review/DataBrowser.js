@@ -297,7 +297,7 @@ const geoJsonFilterFn = (geoJsonFeature) => {
                         label: `PCoA/MDS plot`,
                         children: <TaxonomicSimilarity 
                                         datasetKey={dataset?.id} 
-                                        sampleHeaders={(sampleDataTypes || []).filter(e => e.type.startsWith("<")).map(e => e.key) } loading={!(metrics?.jaccard && metrics?.brayCurtis)} jaccard={metrics?.jaccard} brayCurtis={metrics?.brayCurtis} sampleLabels={samples?.id} onSampleClick={setSelectedSample} selectedSample={selectedSample} />,
+                                        sampleHeaders={(sampleDataTypes || []).filter(e => e.type.startsWith("<")).map(e => e.key) } loading={!(!!metrics?.jaccard && !!metrics?.brayCurtis && !!samples?.id)} jaccard={metrics?.jaccard} brayCurtis={metrics?.brayCurtis} sampleLabels={samples?.id} onSampleClick={setSelectedSample} selectedSample={selectedSample} />,
                     },
                     {
                         key: '3',
