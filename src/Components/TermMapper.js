@@ -180,7 +180,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
 
     const idsExistsOrHaveMapping = () => {
         const hasSampleID = dataset?.sampleHeaders?.includes('id') || Object.keys(state.samples).includes('id');
-        const hasTaxonID = dataset?.taxonHeaders?.includes('id') || Object.keys(state.taxa).includes('id');
+        const hasTaxonID = dataset?.taxonHeaders?.includes('id') || Object.keys(state.taxa).includes('id') || dataset?.files?.sequencesAsHeaders;
         if(!hasSampleID || !hasTaxonID ){
             notification.error({
                 duration: 0,
@@ -199,7 +199,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
         const hasLatLon = (dataset?.sampleHeaders.includes('decimalLatitude') || Object.keys(state.samples).includes('decimalLatitude') || Object.keys(state.defaultValues).includes('decimalLatitude')) && (dataset?.sampleHeaders.includes('decimalLongitude') || Object.keys(state.samples).includes('decimalLongitude') || Object.keys(state.defaultValues).includes('decimalLongitude'));
         const hasEventDate = dataset?.sampleHeaders.includes('eventDate') || Object.keys(state.samples).includes('eventDate') || Object.keys(state.defaultValues).includes('eventDate');
         
-        const hasSequence = dataset?.files?.format.endsWith('_FASTA') || dataset?.taxonHeaders.includes('DNA_sequence') || Object.keys(state.taxa).includes('DNA_sequence');
+        const hasSequence = dataset?.files?.format.endsWith('_FASTA') || dataset?.taxonHeaders?.includes('DNA_sequence') || Object.keys(state.taxa).includes('DNA_sequence') || dataset?.files?.sequencesAsHeaders;
 
         if(!hasSequence || !hasLatLon || !hasEventDate ){
             notification.warning({
