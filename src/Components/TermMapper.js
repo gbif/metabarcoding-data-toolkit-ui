@@ -250,7 +250,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
             const headerRow = file?.properties?.rows?.[0]
             if(headerRow){
                 let idx = headerRow.indexOf(field);
-                return file?.properties?.rows.slice(1,6).map(e => e[idx])
+                return file?.properties?.rows.slice(1,4).map(e => e[idx])
             } else {
                 return null
             }
