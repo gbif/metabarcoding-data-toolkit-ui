@@ -236,6 +236,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
             title:  <span ref={ref}>Standardised field name (DwC term)</span>,
             dataIndex: 'name',
             key: 'name',
+            className: "dwc-column",
             render: (text, term) => <>
                 <Popover placement="rightTop" trigger="click" title={text} content={term?.description || term?.['dc:description'] }>
                     <InfoCircleOutlined /> </Popover> {text} {!!term.isRequired ? <span style={{ color: token.colorError }}>*</span> : ""}
