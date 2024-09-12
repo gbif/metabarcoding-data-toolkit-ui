@@ -243,7 +243,23 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
         }
     )
 
-    const getMappingColumn = (headers,type, ref) => (
+    const getExampleData = (fileType, field) => {
+
+        try {
+            const file = dataset?.files?.files?.find(f => f?.type === fileType);
+            const headerRow = file?.properties?.rows?.[0]
+            if(headerRow){
+                let idx = headerRow.indexOf(field);
+                return file?.properties?.rows.slice(1,6).map(e => e[idx])
+            } else {
+                return null
+            }
+        } catch (error) {
+            return null
+        }
+    }
+
+    const getMappingColumn = ( headers,type, ref) => (
         {
             title: (<span ref={ref}>Map to field in your data</span>),
             dataIndex: 'mapping',
@@ -251,14 +267,17 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
             width: "30%",
             render: (text, term) => {
                 let val = null;
+                let exampleData;
                 if(type === 'taxon' && !!state?.taxa?.[term.name]){
-                    val =  state?.taxa?.[term.name]
+                    val =  state?.taxa?.[term.name];
+                    exampleData = getExampleData('taxa', val)
                 } else if(type === 'sample' && !!state?.samples?.[term.name]){
                     val =  state?.samples?.[term.name]
+                    exampleData = getExampleData('samples', val)
                 }
-
+                console.log(exampleData)
                 // first check special case when a fasta file is given
-                return dataset?.files?.format.endsWith('_FASTA') && term.name === 'DNA_sequence' ? "Retrieved from fasta file" : (<HeaderSelect term={term} headers={headers} value={val} onChange={ value => {
+                return dataset?.files?.format.endsWith('_FASTA') && term.name === 'DNA_sequence' ? "Retrieved from fasta file" : (<HeaderSelect term={term} exampleData={exampleData} headers={headers} value={val} onChange={ value => {
                     /*  console.log('update '+term.name)
                     console.log('Value '+val) */
                    
