@@ -8,22 +8,14 @@ import withContext from "../Components/hoc/withContext";
 import Logo from "./Logo";
 import UserMenu from "../Auth/UserMenu";
 import Workflow from "../Components/Workflow";
+
 const { Header, Content, Footer } = Layout;
 const {Title} = Typography;
-const { useToken } = theme;
 
 
 const AppLayout = ({ children, setDataset, user }) => {
   const navigate = useNavigate();
-  const location = useLocation();
 
-  const { token } = useToken();
- /*  const match = useMatch("/run/:id");
-  const [current, setCurrent] = useState("");
-  useEffect(() => {
-    console.log(location);
-    setCurrent(location?.pathname);
-  }, [location]); */
   
  
   return (
@@ -94,7 +86,8 @@ const AppLayout = ({ children, setDataset, user }) => {
     <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://github.com/gbif/edna-tool-ui/issues/new">Request a feature</Button>
   </Space>
         </Row>
-          
+        {config?.env === "uat" && <Row><Col style={{paddingLeft: "6px", marginTop: "4px"}}> <img src="/images/EN_Co-fundedbytheEU_RGB_POS.png"  alt="EU logo" style={{width: "140px"}}/> </Col><Col flex="auto"></Col></Row>}
+
           
           </Col>
           <Col flex="auto"></Col>
