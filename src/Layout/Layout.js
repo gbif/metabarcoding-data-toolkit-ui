@@ -11,7 +11,7 @@ import Workflow from "../Components/Workflow";
 
 const { Header, Content, Footer } = Layout;
 const {Title} = Typography;
-
+const {Text} = Typography
 
 const AppLayout = ({ children, setDataset, user }) => {
   const navigate = useNavigate();
@@ -80,19 +80,26 @@ const AppLayout = ({ children, setDataset, user }) => {
         </Row>
         <Row>
         <Space split={<Divider type="vertical" />}>
+        <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://www.gbif.org/dna" /* onClick={() => navigate("/faq")} */>About the DNA Programme</Button>
+
         <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://docs.gbif-uat.org/edna-tool-guide/en/" /* onClick={() => navigate("/faq")} */>How to use it?</Button>
         <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://docs.gbif-uat.org/edna-tool-guide/en/#faq" /* onClick={() => navigate("/faq")} */>FAQ</Button>
     <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://github.com/gbif/edna-tool-ui/issues/new">Report a bug</Button>
     <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://github.com/gbif/edna-tool-ui/issues/new">Request a feature</Button>
   </Space>
         </Row>
-        {config?.env === "uat" && <Row><Col style={{paddingLeft: "6px", marginTop: "4px"}}> <img src="/images/EN_Co-fundedbytheEU_RGB_POS.png"  alt="EU logo" style={{width: "140px"}}/> </Col><Col flex="auto"></Col></Row>}
+        {config?.env === "uat" && <>
+          
+          <Row><Col style={{paddingLeft: "6px", marginTop: "4px"}}> <img src="/images/EN_Co-fundedbytheEU_RGB_POS.png"  alt="EU logo" style={{width: "140px"}}/> </Col></Row>
+        </>}
 
           
           </Col>
           <Col flex="auto"></Col>
 
         </Row>
+        
+        {config?.env === "uat" && <Row style={{marginTop: "10px"}}><Col  flex="auto"></Col><Col ><Text style={{fontSize: "9px"}}>The development of this tool has received funding from the European Union's Horizon Europe research and innovation programme under grant agreement No 101057437 (BioDT project, <a href="https://doi.org/10.3030/101057437">https://doi.org/10.3030/101057437</a>)</Text></Col><Col flex="auto"></Col></Row>}
        
       </Footer>
     </Layout>
