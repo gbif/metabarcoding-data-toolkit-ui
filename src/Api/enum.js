@@ -46,3 +46,12 @@ export const getNetworks = async () => {
         throw error
     }
 }
+
+export const getFileTypes = async () => {
+    try {
+        const res = await axios(`${config.backend}/enum/file-types`)
+        return res
+    } catch (error) {
+        throw error
+    }
+}

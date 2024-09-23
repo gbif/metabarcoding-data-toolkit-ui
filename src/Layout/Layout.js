@@ -26,7 +26,7 @@ const AppLayout = ({ children, setDataset, user }) => {
           <Col  onClick={() => navigate("/")} span={1} style={{ padding: "4px" , cursor: "pointer"}} >
             <Logo />
           </Col>
-          <Col><Button onClick={() => navigate("/")} type={"link"}><Title level={4} style={{color: "white"}}>eDNA Tool {config?.env !== "prod" ? "- Test environment": ""}</Title> </Button> </Col> 
+          <Col><Button onClick={() => navigate("/")} type={"link"}><Title level={4} style={{color: "white"}}>Metabarcoding Data Toolkit {false && config?.env !== "prod" ? "- Test environment": ""}</Title> </Button> </Col> 
           <Col flex="auto">
            
           </Col>
@@ -75,7 +75,7 @@ const AppLayout = ({ children, setDataset, user }) => {
           <Row >
           
           <img src="/images/GBIF-2015-standard-ipt.png"  alt="GBIF logo" style={{width: "55px", marginTop: "-2px"}}/> 
-          <Typography.Text >eDNA Tool</Typography.Text>
+          <Typography.Text >Metabarcoding Data Toolkit</Typography.Text>
         
         </Row>
         <Row>

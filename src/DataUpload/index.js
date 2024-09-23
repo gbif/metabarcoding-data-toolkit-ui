@@ -1,10 +1,10 @@
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useReducer } from "react";
 import { useNavigate, useLocation, useMatch } from "react-router-dom";
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
 import _ from "lodash"
-import { Row, Col, Alert, Button, List, Typography, Popconfirm, Tag, Tour, theme, message, notification } from "antd"
+import { Row, Col, Alert, Button, List, Typography, Popconfirm, Tag, Tour, Select, theme, message, notification } from "antd"
 import {
     CheckCircleOutlined,
     CloseCircleOutlined,
@@ -25,12 +25,30 @@ const { useToken } = theme;
 
 const { Text } = Typography;
 
+const reducer = (state, action) => {
+   
+    switch (action.type) {
+        case 'mapFileToEntity':
+            let newState = {...state}
+            for (var property in newState) {
+                if (newState[property] === action.payload.entity) {
+                    delete newState[property];
+                }
+            }
+            return { ...newState, [action.payload.file]: action.payload.entity};
+        case 'initMapping':
+            return { ...action.payload};
+        default:
+          throw new Error(`Unknown action type: ${action.type}`);
+      }
+  }; 
+
 const DataUpload = ({ user,
     login,
     logout,
     format,
     dataset,
-    setDataset, setLoginFormVisible }) => {
+    setDataset, setLoginFormVisible, fileTypes }) => {
     const { token } = useToken();
 
     const match = useMatch('/dataset/:key/upload');
@@ -44,6 +62,9 @@ const DataUpload = ({ user,
     const ref1 = useRef(null);
     const ref2 = useRef(null);
     const ref3 = useRef(null);
+
+    const [state, dispatch] = useReducer(reducer, {});
+
  
     const steps = [
         {
@@ -86,7 +107,6 @@ const DataUpload = ({ user,
         if (!dataset && !!key) {
             // this should check that the backend thinks it understands the uploaded files
             validate(key)
-            // TODO fetch from backend, maybe it has already been processed, then show files etc
         }
 
         if (dataset?.files?.format && Object.keys(format).includes(dataset?.files?.format)) {
@@ -96,6 +116,15 @@ const DataUpload = ({ user,
             setValid(false)
             setDataFormat(null)
         }
+        const existingMapping =  !_.isEmpty(dataset?.files?.mapping) ? dataset?.files?.mapping : {}
+            if(_.isArray(dataset?.files?.files)){
+               const mapping = getMappingFromFileArray(dataset)
+                if(!_.isEqual(existingMapping, mapping)){
+                    dispatch({ type: 'initMapping', payload: mapping })
+                }
+                
+                
+            }
     }, [dataset, match?.params?.key]);
 
     useEffect(() => {
@@ -117,20 +146,48 @@ const DataUpload = ({ user,
         }
     }, [selectedFile])
 
+    useEffect(()=> {
+
+        const key = match?.params?.key;
+        if(!!key){
+            saveFileMapping(key)
+        }
+
+    }, [state])
+
+    const getMappingFromFileArray = (dataset) => {
+            return _.isArray(dataset?.files?.files) ? dataset?.files?.files.reduce((acc, cur) => {
+                 if(!!cur?.type){
+                     acc[cur?.name] = cur?.type
+                 };
+                 return acc;
+             }, {}) : {}
+            
+    }
+    const saveFileMapping = async (key) => {
+        try {
+           // /
+           await axiosWithAuth.post(`${config.backend}/dataset/${key}/file-types`, state)
+         //  await validate(key)
+        message.info({content: "Saved file mapping"})
+        } catch (error) {
+            message.warning({content: "Could not save file mapping"})
+        }
+    }
     const validate = async (key) => {
         try {
             setLoading(true)
             const res = await axiosWithAuth.get(`${config.backend}/validate/${key}`)
             if (res?.data?.files?.format && Object.keys(format).includes(res?.data?.files?.format)) {
-                //const processRes = await axiosWithAuth.post(`${config.backend}/dataset/${key}/process`)
+                const mapping = getMappingFromFileArray(res?.data?.files)
                 setValid(res?.data?.files?.format !== 'INVALID')
-                setDataset(res?.data)
+                setDataset({...res?.data, files: {...res.data.files, mapping}})
                 setDataFormat(format[res?.data?.files?.format])
             } else {
                 setValid(false)
                 setDataset(res?.data)
             }
-
+            
             setLoading(false)
         } catch (error) {
             if(error?.response?.status > 399 && error?.response?.status < 404){
@@ -240,10 +297,7 @@ const DataUpload = ({ user,
                             itemLayout="horizontal"
                             header={<Text>Files uploaded</Text>}
                             bordered
-                            dataSource={_.isArray(dataset?.files?.invalidErrors) ? dataset?.files?.files.map(f => {
-                                f.errors = [...(f.errors || []), ...dataset?.files?.invalidErrors?.filter(e => e.file === f?.name)]
-                                return f;
-                            }) : dataset?.files?.files}
+                            dataSource={_.isArray(dataset?.files?.invalidErrors) ? dataset?.files?.files.map(f => ({...f, errors: [...(f.errors || []), ...dataset?.files?.invalidErrors?.filter(e => e.file === f?.name)]})) : dataset?.files?.files}
                             renderItem={(file) => (
                                 <List.Item
                                     actions={[
@@ -258,10 +312,16 @@ const DataUpload = ({ user,
                                             cancelText="No"><Button type="link"><DeleteOutlined /></Button></Popconfirm>]}
                                 >
                                     <List.Item.Meta
-                                        title={<span style={file?.errors?.length >0 ? { color: token.colorWarning } : null}>{file.name}</span>}
+                                        title={<Row><Col span={6}><span style={file?.errors?.length >0 ? { color: token.colorWarning } : null}>{file.name}</span></Col><Col>
+                                        {dataFormat?.name === "Invalid format" && <Select placeholder="Select entity type" allowClear onChange={val => {
+                                             dispatch({ type: 'mapFileToEntity', payload: {file: file.name, entity: val} })
+                                        }} value={!!state[file?.name] ? state[file?.name] : null} style={{width: "200px"}} size={"small"} options={fileTypes.map(t => ({value: t, label: _.startCase(t)}))}></Select>}
+                                        </Col></Row>}
                                         description={<>
                                             {`${file?.mimeType} - ${Math.round(file.size * 10) / 10} mb`}
+                                            
                                             {file?.errors && file?.errors.map(e => <Alert message={e?.message} type="warning" showIcon style={{marginBottom: "8px"}} />)}
+                                            
                                         </>}
                                     />
                                 </List.Item>
@@ -275,11 +335,11 @@ const DataUpload = ({ user,
     );
 }
 
-const mapContextToProps = ({ user, login, logout, dataset, setDataset, format, loginFormVisible, setLoginFormVisible }) => ({
+const mapContextToProps = ({ user, login, logout, dataset, setDataset, format, loginFormVisible, setLoginFormVisible, fileTypes }) => ({
     user,
     login,
     logout,
-    dataset, setDataset, format, loginFormVisible, setLoginFormVisible 
+    dataset, setDataset, format, loginFormVisible, setLoginFormVisible , fileTypes
 });
 
 export default withContext(mapContextToProps)(DataUpload);

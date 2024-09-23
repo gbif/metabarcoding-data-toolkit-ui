@@ -19,7 +19,7 @@ function App() {
         <Col>
           <Row style={{ height: "35%" }}></Row>
           <Row>
-            <Title style={{ marginBottom: "0px" }}>eDNA data converter</Title>
+            <Title style={{ marginBottom: "0px" }}>Metabarcoding Data Toolkit</Title>
           </Row>
           <Row>
             <Title level={5} italic>
