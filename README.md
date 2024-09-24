@@ -1,11 +1,11 @@
-# GBIF eDNA Publishing Tool
+# GBIF Metabarcoding Data Toolkit
 
 This is the user interface for a tool that converts OTU/ASV tables in tsv and xlsx to [BIOM format](https://biom-format.org/).
 The generated BIOM files can be converted to [Darwin core](https://dwc.tdwg.org/) and published to https://www.gbif.org/.
-It works on top of [edna-tool-backend](https://github.com/gbif/edna-tool-backend).
+It works on top of [metabarcoding-data-toolkit-backend](https://github.com/gbif/metabarcoding-data-toolkit-backend).
 
 ## Overall idea
-* Web-based interface/tool that lets researchers (or other) publish an eDNA metabarcoding dataset to GBIF
+* Web-based interface/tool that lets researchers (or other) publish a Metabarcoding dataset to GBIF
 * Minimal preparation/reformatting required
 * Standardise and automate important steps to ensure interoperability with other datasets
 * Compliance with community standards
@@ -55,4 +55,4 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/t
 ### Funding
 The development of this tool has received funding from the European Union's Horizon Europe research and innovation programme under grant agreement No 101057437 (BioDT project, https://doi.org/10.3030/101057437)
 
-<img src="https://github.com/gbif/edna-tool-ui/blob/master/public/images/EN_Co-fundedbytheEU_RGB_POS.png" width="240">
+<img src="https://github.com/gbif/metabarcoding-data-toolkit-ui/blob/master/public/images/EN_Co-fundedbytheEU_RGB_POS.png" width="240">
