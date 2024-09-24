@@ -26,7 +26,7 @@ const AppLayout = ({ children, setDataset, user }) => {
           <Col  onClick={() => navigate("/")} span={1} style={{ padding: "4px" , cursor: "pointer"}} >
             <Logo />
           </Col>
-          <Col  style={{ padding: "16px" }}><Button style={{padding: "0px"}} onClick={() => navigate("/")} type={"link"}><Title level={4} style={{color: "white"}}>Metabarcoding Data Toolkit {config?.env === "uat" ? "- Test environment": ""}</Title> </Button> </Col> 
+          <Col  style={{ padding: "16px" }}><Button style={{padding: "0px"}} onClick={() => navigate("/")} type={"link"}><Title level={4} style={{color: "white"}}>Metabarcoding Data Toolkit</Title> </Button> </Col> 
           
          
           <Col flex="auto"></Col>
@@ -96,9 +96,12 @@ const AppLayout = ({ children, setDataset, user }) => {
         </Row>
         <Row>
         <Space split={<Divider type="vertical" />}>
+       
+        <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://www.gbif.org/metabarcoding-data-programme" /* onClick={() => navigate("/faq")} */> About the GBIF Metabarcoding data programme</Button>
+
         <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://www.gbif.org/dna" /* onClick={() => navigate("/faq")} */>About the DNA Programme</Button>
 
-        <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://docs.gbif-uat.org/edna-tool-guide/en/" /* onClick={() => navigate("/faq")} */>How to use it?</Button>
+        <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://docs.gbif-uat.org/edna-tool-guide/en/" /* onClick={() => navigate("/faq")} */>User guide</Button>
         <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://docs.gbif-uat.org/edna-tool-guide/en/#faq" /* onClick={() => navigate("/faq")} */>FAQ</Button>
     <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://github.com/gbif/metabarcoding-data-toolkit-ui/issues/new">Report a bug</Button>
     <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://github.com/gbif/metabarcoding-data-toolkit-ui/issues/new">Request a feature</Button>

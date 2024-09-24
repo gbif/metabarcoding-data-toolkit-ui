@@ -34,7 +34,7 @@ function App({installationSettingsHasLoaded,
           </div>
         </Col>
         <Col>
-          <img style={{ width: "400px" }} src="/images/gntAsset_1gnt_scaled.png" />
+          <img style={{ width: "400px" }} src="/images/tool-collage-opt.png" />
         </Col>
         <Col flex="auto"></Col>
       </Row>
