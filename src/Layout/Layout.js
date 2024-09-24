@@ -102,7 +102,7 @@ const AppLayout = ({ children, setDataset, user }) => {
        
         <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://www.gbif.org/metabarcoding-data-programme" /* onClick={() => navigate("/faq")} */> About the programme</Button>
 
-        <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://www.gbif.org/dna" /* onClick={() => navigate("/faq")} */>About the DNA Programme</Button>
+        <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://www.gbif.org/dna" /* onClick={() => navigate("/faq")} */>About GBIF & DNA </Button>
 
         <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://docs.gbif-uat.org/edna-tool-guide/en/" /* onClick={() => navigate("/faq")} */>User guide</Button>
         <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://docs.gbif-uat.org/edna-tool-guide/en/#faq" /* onClick={() => navigate("/faq")} */>FAQ</Button>
