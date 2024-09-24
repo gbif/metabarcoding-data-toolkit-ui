@@ -5,7 +5,7 @@ import { Row, Col, Typography, Card, Space } from "antd";
 import { SiRss } from "react-icons/si";
 import config from "../config"
 import withContext from "../Components/hoc/withContext"
-const { Title } = Typography;
+const { Title, Text } = Typography;
 const { Meta } = Card;
 
 const DEFAULT_TITLE = "Metabarcoding Data Toolkit"
@@ -26,15 +26,21 @@ function App({installationSettingsHasLoaded,
           <Row>
             <Title style={{ marginBottom: "0px" }}>{installationSettingsHasLoaded && !!installationSettings?.title ? installationSettings?.title : DEFAULT_TITLE}</Title>
           </Row>
-          <Row>
+          
+          <Row style={{marginTop: "10px"}}>
             <Title level={5} >
             {installationSettingsHasLoaded && !!installationSettings?.description ? installationSettings?.description : DEFAULT_DESCRIPTION}
             </Title>
           </Row>
+          <Row style={{marginTop: "16px"}}>
+            <Text italic >
+            This toolkit is being developed as part of the pilot phase of the <a href="https://www.gbif.org/metabarcoding-data-programme" target="_blank" rel="noreferrer">GBIF Meta-barcoding Data Programme</a>
+            </Text>
+          </Row>
           </div>
         </Col>
         <Col>
-          <img style={{ width: "400px" }} src="/images/tool-collage-opt.png" />
+          <img style={{ width: "400px" }} alt="collage" src="/images/tool-collage-opt.png" />
         </Col>
         <Col flex="auto"></Col>
       </Row>

@@ -100,7 +100,7 @@ const AppLayout = ({ children, setDataset, user }) => {
         <Row>
         <Space split={<Divider type="vertical" />}>
        
-        <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://www.gbif.org/metabarcoding-data-programme" /* onClick={() => navigate("/faq")} */> About the GBIF Metabarcoding data programme</Button>
+        <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://www.gbif.org/metabarcoding-data-programme" /* onClick={() => navigate("/faq")} */> About the programme</Button>
 
         <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://www.gbif.org/dna" /* onClick={() => navigate("/faq")} */>About the DNA Programme</Button>
 
