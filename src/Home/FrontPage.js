@@ -1,25 +1,25 @@
 import React, { useEffect, useState } from "react";
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
-import { Row, Col, Typography, Card } from "antd";
+import { Row, Col, Typography, Card, Tabs } from "antd";
 import { SiRss } from "react-icons/si";
+import withContext from "../Components/hoc/withContext";
+
 import config from "../config"
 
 const { Title } = Typography;
 const { Meta } = Card;
 
-function App() {
+export const FrontPage = () => {
 
-  
-  return (
-    <Layout>
-      <Row style={{ height: "48px" }}></Row>
+    return <>
+                   <Row style={{ height: "48px" }}></Row>
       <Row>
         <Col flex="auto"></Col>
         <Col>
           <Row style={{ height: "35%" }}></Row>
           <Row>
-            <Title style={{ marginBottom: "0px" }}>Metabarcoding Data Toolkit</Title>
+            <Title style={{ marginBottom: "0px" }}>Metabarcoding Data Publishing Toolkit</Title>
           </Row>
           <Row>
             <Title level={5} italic>
@@ -83,12 +83,11 @@ function App() {
           </Col>
           <Col flex="auto"></Col>
         </Row>
-        <Row><Col flex="auto"></Col><Col><SiRss /> The most recently updated resources are available as an <a href={`${config.backend}/rss`}>RSS feed </a> </Col><Col flex="auto"></Col></Row>
-
+{/*         <Row><Col flex="auto"></Col><Col><SiRss /> The most recently updated resources are available as an <a href={`${config.backend}/rss`}>RSS feed </a> </Col><Col flex="auto"></Col></Row>
+ */}
         
       </PageContent>
-    </Layout>
-  );
+    </>
 }
 
-export default App;
+export default FrontPage
