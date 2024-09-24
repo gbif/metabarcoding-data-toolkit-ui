@@ -110,16 +110,17 @@ const AppLayout = ({ children, setDataset, user }) => {
     <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://github.com/gbif/metabarcoding-data-toolkit-ui/issues/new">Request a feature</Button>
   </Space>
         </Row>
-        {config?.env === "uat" && <>
-          
-          <Row style={{marginTop: "16px"}}><Col span={6} style={{paddingLeft: "6px", marginTop: "4px"}}> <img src="/images/EN_Co-fundedbytheEU_RGB_POS.png"  alt="EU logo" style={{width: "140px"}}/> </Col> <Col span={18} ><Text style={{fontSize: "9px"}}>The development of this tool has received funding from the European Union's Horizon Europe research and innovation programme under grant agreement No 101057437 (BioDT project, <a href="https://doi.org/10.3030/101057437">https://doi.org/10.3030/101057437</a>)</Text></Col><Col flex="auto"></Col></Row>
-        </>}
+      
 
           
           </Col>
           <Col flex="auto"></Col>
 
         </Row>
+          { config?.env === "uat"  && <>
+          
+            <Row style={{marginTop: "16px"}}><Col flex="auto"></Col><Col style={{paddingLeft: "6px", marginTop: "4px"}}> <img src="/images/EN_Co-fundedbytheEU_RGB_POS.png"  alt="EU logo" style={{width: "140px"}}/> </Col> <Col span={10} ><Text style={{fontSize: "9px"}}>The development of this tool has received funding from the European Union's Horizon Europe research and innovation programme under grant agreement No 101057437 (BioDT project, <a href="https://doi.org/10.3030/101057437">https://doi.org/10.3030/101057437</a>)</Text></Col><Col flex="auto"></Col></Row>
+        </>}
         
 {/*         {config?.env === "uat" && <Row style={{marginTop: "10px"}}><Col  flex="auto"></Col><Col ><Text style={{fontSize: "9px"}}>The development of this tool has received funding from the European Union's Horizon Europe research and innovation programme under grant agreement No 101057437 (BioDT project, <a href="https://doi.org/10.3030/101057437">https://doi.org/10.3030/101057437</a>)</Text></Col><Col flex="auto"></Col></Row>}
  */}       
