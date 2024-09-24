@@ -30,11 +30,31 @@ const AppLayout = ({ children, setDataset, user }) => {
           
          
           <Col flex="auto"></Col>
+          
           <Col>
+          {(!!user && !!user?.isAdmin) && <Button
+              style={{ marginRight: "8px" }}
+             type={"link"}
+              onClick={() => {
+                navigate("/admin");
+              }}
+              
+            >
+             <span style={{ color: "white" }}> Administration</span>
+            </Button>}
+          {!!user &&  <Button
+              style={{ marginRight: "8px" }}
+             type={"link"}
+              onClick={() => {
+                navigate("/user-profile");
+              }}
+              
+            >
+             <span style={{ color: "white" }}> My datasets</span>
+            </Button>}
             <Button
               style={{ marginRight: "8px" }}
-/*               disabled={(location?.pathname !== "/dataset/new" ) || !user}
- */              type={"link"}
+             type={"link"}
               onClick={() => {
                 setDataset(null)
                 navigate("/dataset/new");
@@ -80,8 +100,8 @@ const AppLayout = ({ children, setDataset, user }) => {
 
         <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://docs.gbif-uat.org/edna-tool-guide/en/" /* onClick={() => navigate("/faq")} */>How to use it?</Button>
         <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://docs.gbif-uat.org/edna-tool-guide/en/#faq" /* onClick={() => navigate("/faq")} */>FAQ</Button>
-    <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://github.com/gbif/edna-tool-ui/issues/new">Report a bug</Button>
-    <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://github.com/gbif/edna-tool-ui/issues/new">Request a feature</Button>
+    <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://github.com/gbif/metabarcoding-data-toolkit-ui/issues/new">Report a bug</Button>
+    <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://github.com/gbif/metabarcoding-data-toolkit-ui/issues/new">Request a feature</Button>
   </Space>
         </Row>
         {config?.env === "uat" && <>

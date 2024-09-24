@@ -53,7 +53,7 @@ export const FrontPage = () => {
           </Col>
           <Col  style={{padding: "24px"}}>
             <Card
-              onClick={() => window.open('https://github.com/gbif/edna-tool-ui/issues/new', '_blank')}
+              onClick={() => window.open('https://github.com/gbif/metabarcoding-data-toolkit-ui/issues/new', '_blank')}
               className="home-card"
               style={{
                 width: 200,

@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from "react";
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
-import { Row, Col, Typography, Card } from "antd";
+import { Row, Col, Typography, Card, Space } from "antd";
 import { SiRss } from "react-icons/si";
 import config from "../config"
-
+import withContext from "../Components/hoc/withContext"
 const { Title } = Typography;
 const { Meta } = Card;
 
-function App() {
+const DEFAULT_TITLE = "Metabarcoding Data Toolkit"
+const DEFAULT_DESCRIPTION = "bridging metabarcoding and biodiversity"
+
+function App({installationSettingsHasLoaded,
+  installationSettings}) {
 
   
   return (
@@ -16,16 +20,18 @@ function App() {
       <Row style={{ height: "48px" }}></Row>
       <Row>
         <Col flex="auto"></Col>
-        <Col>
-          <Row style={{ height: "35%" }}></Row>
+        <Col span={12} style={{padding: "70px 0"}}>
+          {/* <Row style={{ height: "35%" }}></Row> */}
+          <div>
           <Row>
-            <Title style={{ marginBottom: "0px" }}>Metabarcoding Data Toolkit</Title>
+            <Title style={{ marginBottom: "0px" }}>{installationSettingsHasLoaded && !!installationSettings?.title ? installationSettings?.title : DEFAULT_TITLE}</Title>
           </Row>
           <Row>
-            <Title level={5} italic>
-              bridging metabarcoding and biodiversity
+            <Title level={5} >
+            {installationSettingsHasLoaded && !!installationSettings?.description ? installationSettings?.description : DEFAULT_DESCRIPTION}
             </Title>
           </Row>
+          </div>
         </Col>
         <Col>
           <img style={{ width: "400px" }} src="/images/gntAsset_1gnt_scaled.png" />
@@ -47,13 +53,14 @@ function App() {
               }}
               cover={<img alt="example" src="/images/dnatool-05_scaled.png" />}
             >
-              <Meta title="How to use it?" />
+              <Meta title="User guide" />
             </Card>
             
           </Col>
+
           <Col  style={{padding: "24px"}}>
             <Card
-              onClick={() => window.open('https://github.com/gbif/edna-tool-ui/issues/new', '_blank')}
+              onClick={() => window.location.href = `mailto:${installationSettings?.installationContactEmail}`}
               className="home-card"
               style={{
                 width: 200,
@@ -62,7 +69,7 @@ function App() {
               }}
               cover={<img alt="example" src="/images/dnatool-06_scaled.png" />}
             >
-              <Meta title="Got feedback?" />
+              <Meta title="Need help?" />
             </Card>
             
           </Col>
@@ -91,4 +98,9 @@ function App() {
   );
 }
 
-export default App;
+const mapContextToProps = ({ installationSettingsHasLoaded,
+  installationSettings }) => ({
+    installationSettingsHasLoaded,
+    installationSettings
+});
+export default withContext(mapContextToProps)(App);
