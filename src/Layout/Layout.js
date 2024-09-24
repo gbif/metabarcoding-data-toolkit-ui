@@ -26,13 +26,9 @@ const AppLayout = ({ children, setDataset, user }) => {
           <Col  onClick={() => navigate("/")} span={1} style={{ padding: "4px" , cursor: "pointer"}} >
             <Logo />
           </Col>
-          <Col><Button onClick={() => navigate("/")} type={"link"}><Title level={4} style={{color: "white"}}>Metabarcoding Data Toolkit {config?.env === "uat" ? "- Test environment": ""}</Title> </Button> </Col> 
-          <Col flex="auto">
-           
-          </Col>
-          <Col>
+          <Col  style={{ padding: "16px" }}><Button style={{padding: "0px"}} onClick={() => navigate("/")} type={"link"}><Title level={4} style={{color: "white"}}>Metabarcoding Data Toolkit {config?.env === "uat" ? "- Test environment": ""}</Title> </Button> </Col> 
           
-          </Col>
+         
           <Col flex="auto"></Col>
           <Col>
             <Button
