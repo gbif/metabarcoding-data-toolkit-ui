@@ -34,7 +34,7 @@ function App({installationSettingsHasLoaded,
           </Row>
           <Row style={{marginTop: "16px"}}>
             <Text italic >
-            This toolkit is being developed as part of the pilot phase of the <a href="https://www.gbif.org/metabarcoding-data-programme" target="_blank" rel="noreferrer">GBIF Meta-barcoding Data Programme</a>
+            This toolkit is being developed as part of the pilot phase of the <a href="https://www.gbif.org/metabarcoding-data-programme" target="_blank" rel="noreferrer">GBIF Metabarcoding Data Programme</a>
             </Text>
           </Row>
           </div>
