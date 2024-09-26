@@ -50,7 +50,7 @@ function App({installationSettingsHasLoaded,
           <Col flex="auto"></Col>
           <Col style={{padding: "24px"}}>
             <Card
-              onClick={() => window.open('https://docs.gbif-uat.org/edna-tool-guide/en/', '_blank')}
+              onClick={() => window.open('https://docs.gbif-uat.org/mdt-user-guide/en/', '_blank')}
               className="home-card"
               style={{
                 width: 200,
@@ -81,7 +81,7 @@ function App({installationSettingsHasLoaded,
           </Col>
           <Col style={{padding: "24px"}}>
             <Card
-              onClick={() => window.open('https://docs.gbif-uat.org/edna-tool-guide/en/#faq', '_blank')}
+              onClick={() => window.open('https://docs.gbif-uat.org/mdt-user-guide/en/#faq', '_blank')}
               className="home-card"
               style={{
                 width: 200,
