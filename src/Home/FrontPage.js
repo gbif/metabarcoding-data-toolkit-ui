@@ -38,7 +38,7 @@ export const FrontPage = () => {
           <Col flex="auto"></Col>
           <Col style={{padding: "24px"}}>
             <Card
-              onClick={() => window.open('https://docs.gbif-uat.org/edna-tool-guide/en/', '_blank')}
+              onClick={() => window.open('https://docs.gbif-uat.org/mdt-user-guide/en/', '_blank')}
               className="home-card"
               style={{
                 width: 200,
@@ -53,7 +53,7 @@ export const FrontPage = () => {
           </Col>
           <Col  style={{padding: "24px"}}>
             <Card
-              onClick={() => window.open('https://github.com/gbif/edna-tool-ui/issues/new', '_blank')}
+              onClick={() => window.open('https://github.com/gbif/metabarcoding-data-toolkit-ui/issues/new', '_blank')}
               className="home-card"
               style={{
                 width: 200,
@@ -68,7 +68,7 @@ export const FrontPage = () => {
           </Col>
           <Col style={{padding: "24px"}}>
             <Card
-              onClick={() => window.open('https://docs.gbif-uat.org/edna-tool-guide/en/#faq', '_blank')}
+              onClick={() => window.open('https://docs.gbif-uat.org/mdt-user-guide/en/#faq', '_blank')}
               className="home-card"
               style={{
                 width: 200,

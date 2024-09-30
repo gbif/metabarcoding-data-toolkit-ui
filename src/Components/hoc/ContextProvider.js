@@ -26,6 +26,7 @@ class ContextProvider extends React.Component {
     agentRoles: [],
     networks: [],
     fileTypes: [],
+    installationSettingsHasLoaded: false,
     installationSettings: {},
     license: {},
     format: {},
@@ -59,7 +60,9 @@ class ContextProvider extends React.Component {
         this.setState({user})
       })
     } */
-   Promise.all([getDwcTerms(), getRequiredTerms(), getLicense(), getFormat(), getDefault(), getSupportedMarkers(), getInstallationSettings(), getAgentRoles(), getNetworks(), getFileTypes()])
+    // Load installation settings first and separate
+    getInstallationSettings().then((res)=> this.setState({installationSettings: res?.data, installationSettingsHasLoaded: true}) ).catch(e => this.setState({installationSettingsHasLoaded: true}))
+   Promise.all([getDwcTerms(), getRequiredTerms(), getLicense(), getFormat(), getDefault(), getSupportedMarkers(), getAgentRoles(), getNetworks(), getFileTypes()])
     .then(responses => {
       this.setState({
         dwcTerms: responses[0]?.data,
@@ -68,10 +71,9 @@ class ContextProvider extends React.Component {
         format: responses[3]?.data,
         defaultTerms: responses[4]?.data,
         supportedMarkers: responses[5]?.data,
-        installationSettings: responses[6]?.data,
-        agentRoles: responses[7]?.data,
-        networks: responses[8]?.data,
-        fileTypes: responses[9]?.data
+        agentRoles: responses[6]?.data,
+        networks: responses[7]?.data,
+        fileTypes: responses[8]?.data
       })
     }) 
 

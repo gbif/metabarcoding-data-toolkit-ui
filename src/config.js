@@ -2,15 +2,15 @@ import environments from "./env.js";
 
 const domain = window.location.hostname;
 
-let env = environments.local;
+let env = environments.prod;
 if (
-  domain.endsWith("edna-tool.gbif-uat.org") 
+  domain.endsWith(".gbif-uat.org") 
 ) {
   env = environments.uat;
 } else if (
-  domain.endsWith("edna-tool.gbif.org") 
+  domain.startsWith("localhost") 
 ) {
-  env = environments.prod;
+  env = environments.local;
 } 
 
 export default env;

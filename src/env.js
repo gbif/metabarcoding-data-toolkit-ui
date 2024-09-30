@@ -7,11 +7,11 @@ const env =  {
     },
     "uat": {
         "env": "uat",
-        "backend": REACT_APP_API_URL || "https://edna-tool.gbif-uat.org/service"
+        "backend": REACT_APP_API_URL || "/service"
     },
     "prod": {
         "env": "prod",
-        "backend": REACT_APP_API_URL || "https://edna-tool.gbif.org/service"
+        "backend": REACT_APP_API_URL || "/service"
     }
     
 }

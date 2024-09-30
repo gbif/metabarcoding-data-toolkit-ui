@@ -119,7 +119,7 @@ const Uploader = ({onSuccess, onError, datasetKey, dataset}) => {
                 </p>
                 {!uploading && <>
                     <p className="ant-upload-text">Click or drag files to this area to upload</p>
-                    <Text type="secondary">Upload data in one of the <Button type="link" style={{ padding: "0px" }} onClick={() => window.open('https://docs.gbif-uat.org/edna-tool-guide/en/#templates', '_blank')}>four available templates</Button>.</Text>
+                    <Text type="secondary">Upload data in one of the <Button type="link" style={{ padding: "0px" }} onClick={() => window.open('https://docs.gbif-uat.org/mdt-user-guide/en/#templates', '_blank')}>four available templates</Button>.</Text>
                     </>}
                 {progress && <p className="ant-upload-text">Uploading ({`${bytesToReadable(progress.loaded)} of ${bytesToReadable(progress.total)}`})</p>}
                 {progress && <Progress

@@ -78,7 +78,7 @@ const DataUpload = ({ user,
                 <li>Study (Optional): Defaults for the whole study, e.g. primer information and target gene.</li>
                 <li>Seqs.fasta (Optional): Sequences provided as fasta instead on field in Taxonomy table.</li>
             </ul>
-             See <a href="https://docs.gbif-uat.org/edna-tool-guide/en/" target="_blank">the guide</a> for templates and information of how to prepare datasets.
+             See <a href="https://docs.gbif-uat.org/mdt-user-guide/en/" target="_blank">the guide</a> for templates and information of how to prepare datasets.
         </span></>,
                   target: () => ref1.current,
 
@@ -235,7 +235,7 @@ const DataUpload = ({ user,
                             </Col>
                             <Col flex="auto"></Col>
                             <Col>
-                            <Button ref={ref1} type="link" style={{ marginBottom: "10px" }} onClick={() => window.open('https://docs.gbif-uat.org/edna-tool-guide/en/#templates', '_blank')}>Templates <FileExcelOutlined /></Button> 
+                            <Button ref={ref1} type="link" style={{ marginBottom: "10px" }} onClick={() => window.open('https://docs.gbif-uat.org/mdt-user-guide/en/#templates', '_blank')}>Templates <FileExcelOutlined /></Button> 
 
                             </Col>
                         </Row>
@@ -249,7 +249,7 @@ const DataUpload = ({ user,
                                     <li>Study (Optional): Defaults for the whole study, e.g. primer information and target gene.</li>
                                     <li>Seqs.fasta (Optional): Sequences provided as fasta instead on field in Taxonomy table.</li>
                                 </ul>
-                                 See <a href="https://docs.gbif-uat.org/edna-tool-guide/en/" target="_blank">the guide</a> for templates and information of how to prepare datasets.
+                                 See <a href="https://docs.gbif-uat.org/mdt-user-guide/en/" target="_blank">the guide</a> for templates and information of how to prepare datasets.
                             </span></>}/> */}
 
                        <div ref={ref2}> <Uploader datasetKey={match?.params?.key}
