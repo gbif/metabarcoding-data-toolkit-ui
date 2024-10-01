@@ -10,7 +10,7 @@ const getRegistryUrl = registryBaseUrl => `https://registry.${registryBaseUrl.sp
 export const getExistingOrgEmailBody = ({ednaDatasetID, gbifUatKey, publishingOrganizationKey, publishingOrganizationTitle, toolBaseUrl, registryBaseUrl, user }) => `
 Dear administrator of ${toolBaseUrl}.
 
-I would like to publish my eDNA dataset: ${toolBaseUrl}/dataset/${ednaDatasetID} to GBIF.
+I would like to publish my metabarcoding dataset: ${toolBaseUrl}/dataset/${ednaDatasetID} to GBIF.
 ${getUatDatasetText(gbifUatKey)}
 I believe my institution/organization is already a GBIF data publisher: ${publishingOrganizationTitle} - ${getRegistryUrl(registryBaseUrl)}organization/${publishingOrganizationKey}.
 
@@ -28,7 +28,7 @@ ${getSignature(user)}
 export const getNewOrgEmailBody = ({ednaDatasetID, gbifUatKey, toolBaseUrl, user }) => `
 Dear administrator of ${toolBaseUrl}.
 
-I would like to publish my eDNA dataset: ${toolBaseUrl}/dataset/${ednaDatasetID} to GBIF.
+I would like to publish my metabarcoding dataset: ${toolBaseUrl}/dataset/${ednaDatasetID} to GBIF.
 ${getUatDatasetText(gbifUatKey)}
 My GBIF username is ${user?.userName}.
 
