@@ -35,9 +35,9 @@ const reducer = (state, action) => {
                     delete newState[property];
                 }
             }
-            return { ...newState, [action.payload.file]: action.payload.entity};
+            return { ...newState, [action.payload.file]: action.payload.entity, revalidationNeeded: true};
         case 'initMapping':
-            return { ...action.payload};
+            return { ...action.payload, revalidationNeeded: false};
         default:
           throw new Error(`Unknown action type: ${action.type}`);
       }
@@ -116,14 +116,15 @@ const DataUpload = ({ user,
             setValid(false)
             setDataFormat(null)
         }
-        const existingMapping =  !_.isEmpty(dataset?.files?.mapping) ? dataset?.files?.mapping : {}
-            if(_.isArray(dataset?.files?.files)){
-               const mapping = getMappingFromFileArray(dataset)
-                if(!_.isEqual(existingMapping, mapping)){
+
+            if(!! dataset?.files?.mapping && !_.isEmpty(dataset?.files?.mapping)){
+                    dispatch({ type: 'initMapping', payload: dataset?.files?.mapping })
+                            
+            } else {
+                const mapping = getMappingFromFileArray(dataset?.files?.files)
+                if(!!mapping){
                     dispatch({ type: 'initMapping', payload: mapping })
                 }
-                
-                
             }
     }, [dataset, match?.params?.key]);
 
@@ -150,38 +151,45 @@ const DataUpload = ({ user,
 
         const key = match?.params?.key;
         if(!!key){
-            saveFileMapping(key)
+            saveFileMapping(key, state?.revalidationNeeded)
         }
 
     }, [state])
 
-    const getMappingFromFileArray = (dataset) => {
-            return _.isArray(dataset?.files?.files) ? dataset?.files?.files.reduce((acc, cur) => {
+    const getMappingFromFileArray = (files) => {
+            return _.isArray(files) ? files.reduce((acc, cur) => {
                  if(!!cur?.type){
                      acc[cur?.name] = cur?.type
                  };
                  return acc;
-             }, {}) : {}
+             }, {}) : null
             
     }
-    const saveFileMapping = async (key) => {
-        try {
-           // /
-           await axiosWithAuth.post(`${config.backend}/dataset/${key}/file-types`, state)
-         //  await validate(key)
-        message.info({content: "Saved file mapping"})
-        } catch (error) {
-            message.warning({content: "Could not save file mapping"})
+    const saveFileMapping = async (key, mustRevalidate = false) => {
+
+        if(!_.isEmpty(state)){
+            try {
+                // We will not send the revalidationNeeded to the backend - this is pure frontend logic
+                const {revalidationNeeded, ...rest} = state;
+                await axiosWithAuth.post(`${config.backend}/dataset/${key}/file-types`, rest)
+                if (mustRevalidate){
+                    validate(key)
+                }
+             message.info({content: "Saved file mapping"})
+             } catch (error) {
+                 message.warning({content: "Could not save file mapping"})
+             }
         }
+        
     }
     const validate = async (key) => {
         try {
             setLoading(true)
             const res = await axiosWithAuth.get(`${config.backend}/validate/${key}`)
             if (res?.data?.files?.format && Object.keys(format).includes(res?.data?.files?.format)) {
-                const mapping = getMappingFromFileArray(res?.data?.files)
+                //const mapping = getMappingFromFileArray(res?.data?.files?.files)
                 setValid(res?.data?.files?.format !== 'INVALID')
-                setDataset({...res?.data, files: {...res.data.files, mapping}})
+                setDataset({...res?.data, files: {...res.data.files}})
                 setDataFormat(format[res?.data?.files?.format])
             } else {
                 setValid(false)
@@ -312,10 +320,10 @@ const DataUpload = ({ user,
                                             cancelText="No"><Button type="link"><DeleteOutlined /></Button></Popconfirm>]}
                                 >
                                     <List.Item.Meta
-                                        title={<Row><Col span={6}><span style={file?.errors?.length >0 ? { color: token.colorWarning } : null}>{file.name}</span></Col><Col>
-                                        {dataFormat?.name === "Invalid format" && <Select placeholder="Select entity type" allowClear onChange={val => {
+                                        title={<Row><Col span={12}><span style={file?.errors?.length >0 ? { color: token.colorWarning } : null}>{file.name}</span></Col><Col>
+                                        <Select placeholder="Select entity type" allowClear onChange={val => {
                                              dispatch({ type: 'mapFileToEntity', payload: {file: file.name, entity: val} })
-                                        }} value={!!state[file?.name] ? state[file?.name] : null} style={{width: "200px"}} size={"small"} options={fileTypes.map(t => ({value: t, label: _.startCase(t)}))}></Select>}
+                                        }} value={!!state[file?.name] ? state[file?.name] : null} style={{width: "120px"}} size={"small"} options={fileTypes.map(t => ({value: t, label: t === "taxa" ? "Taxonomy" : _.startCase(t)}))}></Select> 
                                         </Col></Row>}
                                         description={<>
                                             {`${file?.mimeType} - ${Math.round(file.size * 10) / 10} mb`}
