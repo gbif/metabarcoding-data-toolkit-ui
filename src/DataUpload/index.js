@@ -12,7 +12,8 @@ import {
     EyeOutlined,
     DownloadOutlined,
     FileExcelOutlined,
-    QuestionCircleOutlined
+    QuestionCircleOutlined,
+    CheckOutlined
 } from '@ant-design/icons';
 import Uploader from "./Upload"
 import FileView from "./FileView";
@@ -24,6 +25,12 @@ import { axiosWithAuth } from "../Auth/userApi";
 const { useToken } = theme;
 
 const { Text } = Typography;
+
+const fileMappingLabels = {
+    "taxa" : "Taxonomy",
+    "defaultValues": "Study",
+    "fasta": "Fasta"
+}
 
 const reducer = (state, action) => {
    
@@ -175,7 +182,7 @@ const DataUpload = ({ user,
                 if (mustRevalidate){
                     validate(key)
                 }
-             message.info({content: "Saved file mapping"})
+             
              } catch (error) {
                  message.warning({content: "Could not save file mapping"})
              }
@@ -320,11 +327,20 @@ const DataUpload = ({ user,
                                             cancelText="No"><Button type="link"><DeleteOutlined /></Button></Popconfirm>]}
                                 >
                                     <List.Item.Meta
-                                        title={<Row><Col span={12}><span style={file?.errors?.length >0 ? { color: token.colorWarning } : null}>{file.name}</span></Col><Col>
-                                        <Select placeholder="Select entity type" allowClear onChange={val => {
+                                        title={<Row><Col span={12}><span style={file?.errors?.length >0 ? { color: token.colorWarning } : null}>{file.name}</span></Col>
+                                        {(dataset?.files?.format.startsWith("TSV") ||dataset?.files?.format === "INVALID") && <Col>
+                                        <Select placeholder="Select entity type" 
+                                        allowClear 
+                                        onChange={val => {
                                              dispatch({ type: 'mapFileToEntity', payload: {file: file.name, entity: val} })
-                                        }} value={!!state[file?.name] ? state[file?.name] : null} style={{width: "120px"}} size={"small"} options={fileTypes.map(t => ({value: t, label: t === "taxa" ? "Taxonomy" : _.startCase(t)}))}></Select> 
-                                        </Col></Row>}
+                                        }} 
+                                        value={!!state[file?.name] ? state[file?.name] : null} style={{width: "120px"}} size={"small"} 
+                                        options={
+                                            fileTypes
+                                                .filter(t => !Object.keys(state).filter(k => k !== file?.name).map(k => state[k]).includes(t))
+                                                .map(t => ({value: t, label: fileMappingLabels?.[t] || _.startCase(t)}))}>
+                                        </Select> {!!state[file?.name]  && <CheckOutlined style={{color: token.colorSuccess}}  />}
+                                        </Col>}</Row>}
                                         description={<>
                                             {`${file?.mimeType} - ${Math.round(file.size * 10) / 10} mb`}
                                             
