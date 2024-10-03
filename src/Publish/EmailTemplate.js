@@ -1,7 +1,7 @@
 
 
 
-const getUatDatasetText = (gbifUatKey) => gbifUatKey ? `I have tested the dataset at GBIF UAT: https://www.gbif-uat.org/dataset/${gbifUatKey}` : "";
+const getUatDatasetText = (gbifUatKey) => gbifUatKey ? `I have published a test-version in the GBIF test environment (UAT): https://www.gbif-uat.org/dataset/${gbifUatKey}` : "";
 
 const getSignature = user => (user?.firstName && user?.lastName ) ? `${user?.firstName} ${user?.lastName}` : ''
 
@@ -10,7 +10,7 @@ const getRegistryUrl = registryBaseUrl => `https://registry.${registryBaseUrl.sp
 export const getExistingOrgEmailBody = ({ednaDatasetID, gbifUatKey, publishingOrganizationKey, publishingOrganizationTitle, toolBaseUrl, registryBaseUrl, user }) => `
 Dear administrator of ${toolBaseUrl}.
 
-I would like to publish my metabarcoding dataset: ${toolBaseUrl}/dataset/${ednaDatasetID} to GBIF.
+I would like to publish my DNA Metabarcoding dataset: ${toolBaseUrl}/dataset/${ednaDatasetID} to GBIF.
 ${getUatDatasetText(gbifUatKey)}
 I believe my institution/organization is already a GBIF data publisher: ${publishingOrganizationTitle} - ${getRegistryUrl(registryBaseUrl)}organization/${publishingOrganizationKey}.
 
@@ -28,7 +28,7 @@ ${getSignature(user)}
 export const getNewOrgEmailBody = ({ednaDatasetID, gbifUatKey, toolBaseUrl, user }) => `
 Dear administrator of ${toolBaseUrl}.
 
-I would like to publish my metabarcoding dataset: ${toolBaseUrl}/dataset/${ednaDatasetID} to GBIF.
+I would like to publish my DNA Metabarcoding dataset: ${toolBaseUrl}/dataset/${ednaDatasetID} to GBIF.
 ${getUatDatasetText(gbifUatKey)}
 My GBIF username is ${user?.userName}.
 
@@ -36,7 +36,7 @@ It seems my institution/organization is not yet a GBIF publisher.
 My institution contact details are:
 
 INSTITUTION NAME
-INSTTUTION ADDRESS
+INSTITUTION ADDRESS
 CONTACT EMAIL
 
 Could you please help with the steps needed in order for me to be able to publish under this institution/organization?
