@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { Input, Button, Checkbox, Alert, Form } from 'antd';
+import config from '../config'
 const FormItem = Form.Item;
 
 
@@ -31,11 +32,11 @@ const LoginForm = ({onLogin, invalid}) => {
         <Button  loading={loading} type="primary" htmlType="submit" style={{width: '100%'}}>
           Log in
         </Button>
-        Or <a href="https://www.gbif-uat.org/user/profile">register at gbif-uat.org now!</a>
+        Or <a href={`https://www.gbif${config.env !== "prod" ? "-uat" : ""}.org/user/profile`}>register at gbif-uat.org now!</a>
       </FormItem>
       {invalid && <FormItem style={{width: '100%'}}><Alert message={invalid} type="error" /></FormItem>}
 
-      <FormItem><a className="login-form-forgot" href="https://www.gbif-uat.org/user/profile">Forgot password?</a></FormItem>
+      <FormItem><a className="login-form-forgot" href={`https://www.gbif${config.env !== "prod" ? "-uat" : ""}.org/user/profile`}>Forgot password?</a></FormItem>
     </Form>
   );
 
