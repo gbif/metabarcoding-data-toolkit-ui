@@ -179,7 +179,7 @@ const defaultMenuItems = [
         )}
         
         <Modal
-          title={`Login with your GBIF{config.env !== "prod" ? " UAT" : ""} account`}
+          title={`Login with your GBIF${config.env !== "prod" ? " UAT" : ""} account`}
           open={loginFormVisible}
           onOk={handleLogin}
           onCancel={handleCancel}
