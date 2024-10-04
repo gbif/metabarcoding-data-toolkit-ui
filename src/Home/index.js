@@ -5,6 +5,8 @@ import { Row, Col, Typography, Card, Space } from "antd";
 import { SiRss } from "react-icons/si";
 import config from "../config"
 import withContext from "../Components/hoc/withContext"
+import linkifyStr from "linkify-string";
+
 const { Title, Text } = Typography;
 const { Meta } = Card;
 
@@ -29,7 +31,7 @@ function App({installationSettingsHasLoaded,
           
           <Row style={{marginTop: "10px"}}>
             <Title level={5} >
-            {installationSettingsHasLoaded && !!installationSettings?.description ? installationSettings?.description : DEFAULT_DESCRIPTION}
+            {installationSettingsHasLoaded && !!installationSettings?.description ? <span dangerouslySetInnerHTML={{__html: linkifyStr(installationSettings?.description)}}></span> : DEFAULT_DESCRIPTION}
             </Title>
           </Row>
           <Row style={{marginTop: "16px"}}>
