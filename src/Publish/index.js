@@ -171,7 +171,7 @@ const Publish = ({ setDataset, dataset, user, installationSettings, networks }) 
       display: 'flex',
     }}
   >
-                <div>{!!selectedPendingOrg &&  <a href={`mailto:${installationSettings?.installationContactEmail}?subject=${encodeURIComponent("eDNA dataset publishing")}&body=${
+                <div>{!!selectedPendingOrg &&  <a href={`mailto:${installationSettings?.installationContactEmail}?subject=${encodeURIComponent("DNA Metabarcoding dataset publishing")}&body=${
                     encodeURIComponent(getExistingOrgEmailBody(
                       {
                         ednaDatasetID: dataset?.id, 
@@ -185,7 +185,7 @@ const Publish = ({ setDataset, dataset, user, installationSettings, networks }) 
                         <br />
                         </div>
                         <div> <Text style={{marginTop: "24px"}} >Can´t find your institution/organisation?</Text><br />
-                        <a href={`mailto:${installationSettings?.installationContactEmail}?subject=${encodeURIComponent("eDNA dataset publishing")}&body=${
+                        <a href={`mailto:${installationSettings?.installationContactEmail}?subject=${encodeURIComponent("DNA Metabarcoding dataset publishing")}&body=${
                     encodeURIComponent(getNewOrgEmailBody(
                       {
                         ednaDatasetID: dataset?.id, 
