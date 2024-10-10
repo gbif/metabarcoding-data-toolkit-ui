@@ -16,6 +16,12 @@ const Uploader = ({onSuccess, onError, datasetKey, dataset}) => {
     const [progress, setProgress] = useState(null)
     const [datasetTitle, setDatasetTitle] = useState( dataset?.metadata?.title || "")
     useEffect(() => {}, [progress, uploading])
+
+    useEffect(() => {
+        if(!!dataset?.metadata?.title && datasetTitle !== dataset?.metadata?.title ){
+            setDatasetTitle(dataset?.metadata?.title)
+        }
+    }, [dataset?.metadata?.title])
     const handleUpload = () => {
 
         const formData = new FormData();

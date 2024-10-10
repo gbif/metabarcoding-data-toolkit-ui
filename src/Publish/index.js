@@ -171,7 +171,7 @@ const Publish = ({ setDataset, dataset, user, installationSettings, networks }) 
       display: 'flex',
     }}
   >
-                <div>{!!selectedPendingOrg &&  <a href={`mailto:${installationSettings?.installationContactEmail}?subject=${encodeURIComponent("eDNA dataset publishing")}&body=${
+                <div>{!!selectedPendingOrg &&  <a href={`mailto:${installationSettings?.installationContactEmail}?subject=${encodeURIComponent("DNA Metabarcoding dataset publishing")}&body=${
                     encodeURIComponent(getExistingOrgEmailBody(
                       {
                         ednaDatasetID: dataset?.id, 
@@ -185,7 +185,7 @@ const Publish = ({ setDataset, dataset, user, installationSettings, networks }) 
                         <br />
                         </div>
                         <div> <Text style={{marginTop: "24px"}} >Can´t find your institution/organisation?</Text><br />
-                        <a href={`mailto:${installationSettings?.installationContactEmail}?subject=${encodeURIComponent("eDNA dataset publishing")}&body=${
+                        <a href={`mailto:${installationSettings?.installationContactEmail}?subject=${encodeURIComponent("DNA Metabarcoding dataset publishing")}&body=${
                     encodeURIComponent(getNewOrgEmailBody(
                       {
                         ednaDatasetID: dataset?.id, 
@@ -256,7 +256,7 @@ const Publish = ({ setDataset, dataset, user, installationSettings, networks }) 
              <Checkbox style={{marginTop: "10px"}} value={userAgreedToterms} onChange={e => setUserAgreedToterms(!!e?.target?.checked)}>
              </Checkbox> <span>Confirm that you have read and understood the <a target="_blank" href={`https://www.gbif.org/terms/data-publisher`} rel="noreferrer">GBIF data sharing agreement</a>.{" "}
              You are about to register the dataset in GBIF. Be aware deletion from the GBIF Index is automatic, but cannot be undone without explicit email communication with the <a href="mailto:helpdesk@gbif.org">GBIF Help Desk</a>.
-             {installationSettings?.termsLink &&  <> <br/>I have also read and agree to the <a target="_blank" href={installationSettings?.termsLink} rel="noreferrer">terms</a> specific for this installation of the eDNA tool.</>}</span>
+             {installationSettings?.termsLink &&  <> <br/>I have also read and agree to the <a target="_blank" href={installationSettings?.termsLink} rel="noreferrer">terms</a> specific for this installation of the MDT.</>}</span>
              <br /> 
              
 

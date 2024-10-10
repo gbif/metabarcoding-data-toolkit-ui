@@ -93,7 +93,7 @@ const OrganizationAdmin = ({user, setLoginFormVisible, installationSettings}) =>
         notification.open({description: "The organization was saved"})
     } catch (error) {
         setError(error)
-        notification.error({description: "The organization could not be saved"})
+        notification.error({description: <>The organization could not be saved. Please file an issue <a target="_blank" href="https://github.com/gbif/metabarcoding-data-toolkit-ui/issues" rel="noreferrer">here.</a></>, duration: 0})
 
     }
   }
@@ -106,7 +106,7 @@ const OrganizationAdmin = ({user, setLoginFormVisible, installationSettings}) =>
         notification.open({description: "The organization was deleted"})
     } catch (error) {
         setError(error)
-        notification.error({description: "The organization could not be deleted"})
+        notification.error({description: <>The organization could not be deleted. Please file an issue <a target="_blank" href="https://github.com/gbif/metabarcoding-data-toolkit-ui/issues" rel="noreferrer">here.</a></>, duration: 0})
 
     }
   }

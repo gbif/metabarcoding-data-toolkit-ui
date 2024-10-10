@@ -12,7 +12,7 @@ import Help from "../Components/Help";
 import withContext from "../Components/hoc/withContext";
 import { axiosWithAuth } from "../Auth/userApi";
 const { Title, Text } = Typography;
-const Export = ({ setDataset, dataset }) => {
+const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -21,13 +21,9 @@ const Export = ({ setDataset, dataset }) => {
   const [registering, setRegistering] = useState(false);
   const [gbifUatKey, setGbifUatKey] = useState(dataset?.publishing?.gbifDatasetKey || dataset?.publishing?.gbifDatasetKey);
   const [showRegisterModal, setShowRegisterModal] = useState(false)
-  const [organisations, setOrganisations] = useState([])
   let hdl = useRef();
-  let refreshUserHdl = useRef();
 
-  useEffect(()=>{
-    getOrganizations()
-  },[])
+ 
   useEffect(() => {
     if (!!dataset) {
       setFailed(dataset?.dwc?.steps?.find(s => s.status === 'failed') || false)
@@ -47,24 +43,16 @@ const Export = ({ setDataset, dataset }) => {
       hdl.current = setInterval(() => getData(key, hdl.current), 1000);
 
     } catch (error) {
-      alert(error)
-      console.log(error)
-      setError(error)
+      if(error?.response?.status > 399 && error?.response?.status < 404){
+        setLoginFormVisible(true)
+      }
+    message.error(error?.message || error);     
+      //setError(error)
     }
 
 
   }
 
-  const getOrganizations = async () => {
-    try {
-      const res = await axiosWithAuth.get(`${config.backend}/user/organizations`)
-     
-      setOrganisations(res?.data)
-
-    } catch (error) {
-
-    }
-  }
 
   const getData = async (key, hdl) => {
     try {
@@ -84,6 +72,8 @@ const Export = ({ setDataset, dataset }) => {
 
     } catch (error) {
       setLoading(false)
+      console.log("getData error:")
+      console.log(error)
 
     }
   }
@@ -181,11 +171,11 @@ const Export = ({ setDataset, dataset }) => {
 }
 
 
-const mapContextToProps = ({ user, login, logout, dataset, setDataset }) => ({
+const mapContextToProps = ({ user, login, logout, dataset, setDataset, setLoginFormVisible }) => ({
   user,
   login,
   logout,
-  dataset, setDataset
+  dataset, setDataset, setLoginFormVisible
 });
 
 export default withContext(mapContextToProps)(Export);

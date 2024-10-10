@@ -6,7 +6,7 @@ import { Menu, Dropdown, Avatar, Modal, Button, theme } from "antd";
 import hashCode from "../Util/hashCode"
 import withContext from "../Components/hoc/withContext";
 import LoginForm from "./LoginForm"
-import {refreshLogin} from './userApi'
+import config from "../config"
 const { useToken } = theme;
  
 // we should have a role in the registry for this, however this is not sensitive information. Maybe all users should just have the link?
@@ -179,7 +179,7 @@ const defaultMenuItems = [
         )}
         
         <Modal
-          title="Login with your GBIF-UAT account"
+          title={`Login with your GBIF${config.env !== "prod" ? " UAT" : ""} account`}
           open={loginFormVisible}
           onOk={handleLogin}
           onCancel={handleCancel}
