@@ -157,11 +157,11 @@ const DataUpload = ({ user,
     useEffect(()=> {
 
         const key = match?.params?.key;
-        if(!!key){
+        if(!!key && !!user){
             saveFileMapping(key, state?.revalidationNeeded)
         }
 
-    }, [state])
+    }, [state, user])
 
     const getMappingFromFileArray = (files) => {
             return _.isArray(files) ? files.reduce((acc, cur) => {
