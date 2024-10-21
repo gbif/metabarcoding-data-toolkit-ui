@@ -33,7 +33,7 @@ const reducer = (state, action) => {
 
 const initialState = {taxa: {}, samples: {}, defaultValues: {}, measurements: {}};
 
-const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
+const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset, fileNameSynonyms }) => {
     const { token } = useToken();
     const navigate = useNavigate()
     const match = useMatch(`/dataset/:key/term-mapping`)
@@ -45,7 +45,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
     const [open, setOpen] = useState(false);
-    const [unMapped, setUnMapped] = useState([])
+    const [unMapped, setUnMapped] = useState([]);
 
   const ref1 = useRef(null);
   const ref2 = useRef(null);
@@ -132,6 +132,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
         }
     }, [dataset, state])
 
+  
    
     const saveMapping = async () => {
 
@@ -247,11 +248,11 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
     const getExampleData = (fileType, field) => {
 
         try {
-            const file = dataset?.files?.files?.find(f => f?.type === fileType);
-            const headerRow = file?.properties?.rows?.[0]
+            const file = dataset?.files?.files?.find(f => f?.type === fileType) || dataset?.files?.files?.[0]?.sheets.find(s => fileNameSynonyms[fileType].includes(s?.name?.replace(/[^0-9a-z]/gi, "").toLowerCase()));
+            const headerRow = file?.properties?.rows?.[0] || file?.rows?.[0]
             if(headerRow){
                 let idx = headerRow.indexOf(field);
-                return file?.properties?.rows.slice(1,4).map(e => e[idx])
+                return file?.properties?.rows.slice(1,4).map(e => e[idx]) || file?.rows.slice(1,4).map(e => e[idx])
             } else {
                 return null
             }
@@ -453,14 +454,15 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset }) => {
 
 }
 
-const mapContextToProps = ({ user, login, logout, dataset, dwcTerms, requiredTerms, defaultTerms }) => ({
+const mapContextToProps = ({ user, login, logout, dataset, dwcTerms, requiredTerms, defaultTerms, fileNameSynonyms }) => ({
     user,
     login,
     logout,
     dataset,
     dwcTerms,
     requiredTerms,
-    defaultTerms
+    defaultTerms,
+    fileNameSynonyms
 });
 
 export default withContext(mapContextToProps)(TermMapper);

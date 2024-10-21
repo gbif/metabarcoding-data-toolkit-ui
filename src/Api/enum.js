@@ -46,3 +46,12 @@ export const getNetworks = async () => {
         throw error
     }
 }
+
+export const getFileNameSynonyms = async () => {
+    try {
+        const res = await axios(`${config.backend}/file-name-synonyms`)
+        return res
+    } catch (error) {
+        throw error
+    }
+}
