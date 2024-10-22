@@ -51,7 +51,7 @@ const HeaderSelect = ({ exampleData, headers = [], style = { width: 300 }, onCha
             </div>}
             {!!exampleData && <div>
                 <Text type="secondary">Source sample: </Text><br/>
-                <Text style={{fontSize: "9px"}} type="danger" italic>{exampleData.map(e => exampleLengthLimit < e.length ? e.slice(0, exampleLengthLimit)+"..." : e).join(" | ")}
+                <Text style={{fontSize: "9px"}} type="danger" italic>{exampleData.map(e => !!e && exampleLengthLimit < e.toString().length ? e.toString().slice(0, exampleLengthLimit)+"..." : e).join(" | ")}
                </Text>
                 </div>}
     </>
