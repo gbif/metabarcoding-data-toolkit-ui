@@ -113,7 +113,7 @@ const ProcessDataset = ({
         if (!dataset) {
             return false
         } else {
-            return dataset?.files?.format === 'TSV' || dataset?.files?.format === 'TSV_WITH_FASTA' || dataset?.files?.format === 'XLSX' || dataset?.files?.format === 'XLSX_WITH_FASTA'
+            return  ['TSV', 'TSV_WITH_FASTA','XLSX' , 'XLSX_WITH_FASTA', 'BIOM_2_1' ].includes(dataset?.files?.format)  // dataset?.files?.format === 'TSV' || dataset?.files?.format === 'TSV_WITH_FASTA' || dataset?.files?.format === 'XLSX' || dataset?.files?.format === 'XLSX_WITH_FASTA' || dataset?.files?.format === 'XLSX_WITH_FASTA'
         }
     }
 

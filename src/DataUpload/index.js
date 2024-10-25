@@ -55,7 +55,7 @@ const DataUpload = ({ user,
     logout,
     format,
     dataset,
-    setDataset, setLoginFormVisible, fileTypes }) => {
+    setDataset, setLoginFormVisible, fileTypes, validFileExtensions }) => {
     const { token } = useToken();
 
     const match = useMatch('/dataset/:key/upload');
@@ -127,7 +127,7 @@ const DataUpload = ({ user,
             if(!! dataset?.files?.mapping && !_.isEmpty(dataset?.files?.mapping)){
                     dispatch({ type: 'initMapping', payload: dataset?.files?.mapping })
                             
-            } else {
+            } else if(dataset?.files?.files) {
                 const mapping = getMappingFromFileArray(dataset?.files?.files)
                 if(!!mapping){
                     dispatch({ type: 'initMapping', payload: mapping })
@@ -230,6 +230,11 @@ const DataUpload = ({ user,
         validate(match?.params?.key)
     }
 
+    const sortUploadedFiles = (fileA, fileB) => {
+
+        return validFileExtensions.indexOf(fileB.name.split('.').pop()) - validFileExtensions.indexOf(fileA.name.split('.').pop())
+    }
+
     return (
         <Layout>
             <PageContent>
@@ -312,11 +317,13 @@ const DataUpload = ({ user,
                             itemLayout="horizontal"
                             header={<Text>Files uploaded</Text>}
                             bordered
-                            dataSource={_.isArray(dataset?.files?.invalidErrors) ? dataset?.files?.files.map(f => ({...f, errors: [...(f.errors || []), ...dataset?.files?.invalidErrors?.filter(e => e.file === f?.name)]})) : dataset?.files?.files}
+                            dataSource={_.isArray(dataset?.files?.invalidErrors) ? dataset?.files?.files.map(f => ({...f, errors: [...(f.errors || []), ...dataset?.files?.invalidErrors?.filter(e => e.file === f?.name)]})).sort(sortUploadedFiles) : dataset?.files?.files.sort(sortUploadedFiles)}
                             renderItem={(file) => (
                                 <List.Item
                                     actions={[
-                                        <Button type="link" disabled={file.name.endsWith('fasta') || file.name.endsWith('.fa') || dataFormat?.name === "Invalid format" }  onClick={() => setSelectedFile(file)}><EyeOutlined /></Button>,
+                                        <Button type="link" 
+                                            disabled={file.name.endsWith('fasta') || file.name.endsWith('.fa') || dataFormat?.name === "Invalid format" || !validFileExtensions.includes(file?.name?.split(".").pop())}  
+                                            onClick={() => setSelectedFile(file)}><EyeOutlined /></Button>,
                                         <Button type="link"  download={file.name} href={`${config.backend}/dataset/${dataset?.id}/uploaded-file/${file.name}`}><DownloadOutlined /></Button>,
                                         <Popconfirm
                                             placement="leftTop"
@@ -327,8 +334,11 @@ const DataUpload = ({ user,
                                             cancelText="No"><Button type="link"><DeleteOutlined /></Button></Popconfirm>]}
                                 >
                                     <List.Item.Meta
-                                        title={<Row><Col span={12}><span style={file?.errors?.length >0 ? { color: token.colorWarning } : null}>{file.name}</span></Col>
-                                        {(dataset?.files?.format.startsWith("TSV") ||dataset?.files?.format === "INVALID") && <Col>
+                                        title={<Row><Col span={12}><span style={file?.errors?.length >0 ? { color: token.colorWarning } : !validFileExtensions.includes(file?.name?.split(".").pop()) ? {color: token.colorTextDisabled} : null}>{file.name}</span></Col>
+                                        {
+                                        (dataset?.files?.format.startsWith("TSV") || dataset?.files?.format.startsWith("BIOM_2_1") || dataset?.files?.format === "INVALID") 
+                                        && validFileExtensions.includes(file?.name?.split(".").pop())
+                                        && <Col>
                                         <Select placeholder="Select entity type" 
                                         allowClear 
                                         onChange={val => {
@@ -359,11 +369,11 @@ const DataUpload = ({ user,
     );
 }
 
-const mapContextToProps = ({ user, login, logout, dataset, setDataset, format, loginFormVisible, setLoginFormVisible, fileTypes }) => ({
+const mapContextToProps = ({ user, login, logout, dataset, setDataset, format, loginFormVisible, setLoginFormVisible, fileTypes, validFileExtensions }) => ({
     user,
     login,
     logout,
-    dataset, setDataset, format, loginFormVisible, setLoginFormVisible , fileTypes
+    dataset, setDataset, format, loginFormVisible, setLoginFormVisible , fileTypes, validFileExtensions
 });
 
 export default withContext(mapContextToProps)(DataUpload);

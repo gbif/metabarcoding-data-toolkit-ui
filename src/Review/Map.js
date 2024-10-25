@@ -122,6 +122,10 @@ const MapContent = ({ geoJson, onFeatureClick, selectedSample, setError, geoJson
       setError(error.message)
     }
 
+    if(geoJson?.metadata?.errors && geoJson?.metadata?.errors?.length > 0){
+      setError(<><p>{`${geoJson?.metadata?.errors?.length} samples have invalid coordinates:`}</p><ul>{geoJson?.metadata?.errors.slice(0,3).map(e => <li>{`${e?.properties?.id} : [${e?.geometry?.coordinates?.[0]}, ${e?.geometry?.coordinates?.[1]}]`}</li>)}</ul></>)
+    }
+
   }, [geoJson])
 
   useEffect(()=>{
@@ -175,8 +179,9 @@ useEffect(()=> {
 
 
 
-  return <div style={{ minWidth: "300px", height: "450px" }}>
-                    {error && <Alert type="error" message={error} style={{marginBottom: "10px"}}/>}
+  return  <>{error && <Alert type="error" message={error} style={{marginBottom: "10px"}} onClose={() => setError(null)} closable/>}
+  <div style={{ minWidth: "300px", height: "450px" }}>
+                    
 
     {extent.length > 0 &&
       <MapContainer  style={css} center={[0, 0]} zoom={1} maxZoom={18} scrollWheelZoom={false} whenReady={e => {
@@ -199,7 +204,7 @@ useEffect(()=> {
         />
 
 
-      </MapContainer>}</div>
+      </MapContainer>}</div></>
 
 }
 

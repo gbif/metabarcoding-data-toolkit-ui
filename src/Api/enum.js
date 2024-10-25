@@ -64,3 +64,12 @@ export const getFileNameSynonyms = async () => {
         throw error
     }
 }
+
+export const getValidFileExtensions = async () => {
+    try {
+        const res = await axios(`${config.backend}/valid-file-extensions`)
+        return res
+    } catch (error) {
+        throw error
+    }
+}

@@ -200,7 +200,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset, fileNameSy
         const hasLatLon = (dataset?.sampleHeaders.includes('decimalLatitude') || Object.keys(state.samples).includes('decimalLatitude') || Object.keys(state.defaultValues).includes('decimalLatitude')) && (dataset?.sampleHeaders.includes('decimalLongitude') || Object.keys(state.samples).includes('decimalLongitude') || Object.keys(state.defaultValues).includes('decimalLongitude'));
         const hasEventDate = dataset?.sampleHeaders.includes('eventDate') || Object.keys(state.samples).includes('eventDate') || Object.keys(state.defaultValues).includes('eventDate');
         
-        const hasSequence = dataset?.files?.format.endsWith('_FASTA') || dataset?.taxonHeaders?.includes('DNA_sequence') || Object.keys(state.taxa).includes('DNA_sequence') || dataset?.files?.sequencesAsHeaders;
+        const hasSequence = /* dataset?.files?.format.endsWith('_FASTA') */dataset?.files?.files.find(f => f.type === 'fasta') || dataset?.taxonHeaders?.includes('DNA_sequence') || Object.keys(state.taxa).includes('DNA_sequence') || dataset?.files?.sequencesAsHeaders;
 
         if(!hasSequence || !hasLatLon || !hasEventDate ){
             notification.warning({
@@ -279,7 +279,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset, fileNameSy
                 }
                 console.log(exampleData)
                 // first check special case when a fasta file is given
-                return dataset?.files?.format.endsWith('_FASTA') && term.name === 'DNA_sequence' ? "Retrieved from fasta file" : (<HeaderSelect term={term} exampleData={exampleData} headers={headers} value={val} onChange={ value => {
+                return /* dataset?.files?.format.endsWith('_FASTA') */dataset?.files?.files.find(f => f.type === 'fasta') && term.name === 'DNA_sequence' ? "Retrieved from fasta file" : (<HeaderSelect term={term} exampleData={exampleData} headers={headers} value={val} onChange={ value => {
                     /*  console.log('update '+term.name)
                     console.log('Value '+val) */
                    
