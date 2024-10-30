@@ -173,11 +173,12 @@ const DataUpload = ({ user,
             
     }
     const saveFileMapping = async (key, mustRevalidate = false) => {
-
-        if(!_.isEmpty(state)){
+       
+        const {revalidationNeeded, ...rest} = state;
+        if(!_.isEmpty(state) && !_.isEqual(rest, (dataset?.files?.mapping || {}))){
             try {
                 // We will not send the revalidationNeeded to the backend - this is pure frontend logic
-                const {revalidationNeeded, ...rest} = state;
+                
                 await axiosWithAuth.post(`${config.backend}/dataset/${key}/file-types`, rest)
                 if (mustRevalidate){
                     validate(key)
@@ -322,7 +323,7 @@ const DataUpload = ({ user,
                                 <List.Item
                                     actions={[
                                         <Button type="link" 
-                                            disabled={file.name.endsWith('fasta') || file.name.endsWith('.fa') || dataFormat?.name === "Invalid format" || !validFileExtensions.includes(file?.name?.split(".").pop())}  
+                                            disabled={file?.type === "fasta" || dataFormat?.name === "Invalid format" || !validFileExtensions.includes(file?.name?.split(".").pop()) || file?.mimeType === "application/x-hdf5" }  
                                             onClick={() => setSelectedFile(file)}><EyeOutlined /></Button>,
                                         <Button type="link"  download={file.name} href={`${config.backend}/dataset/${dataset?.id}/uploaded-file/${file.name}`}><DownloadOutlined /></Button>,
                                         <Popconfirm
@@ -341,6 +342,7 @@ const DataUpload = ({ user,
                                         && <Col>
                                         <Select placeholder="Select entity type" 
                                         allowClear 
+                                        disabled={file?.type === "fasta"}
                                         onChange={val => {
                                              dispatch({ type: 'mapFileToEntity', payload: {file: file.name, entity: val} })
                                         }} 
