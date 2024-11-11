@@ -116,14 +116,14 @@ const Workflow = ({ dataset, installationSettings, format }) => {
     return step !== null ? <Steps onChange={onChange} current={step} percent={step === 2 ? (percent || "") : ""}
         items={[
             {
-                title: 'Upload data',
+                title: 'Upload',
             },
             {
-                title: 'Map terms',
+                title: 'Map',
                 disabled: !dataset?.files?.format || dataset?.files?.format === 'INVALID'
             },
             {
-                title: 'Process data',
+                title: 'Process',
                 status: status,
                // description: message,
                 percent: percent ,
@@ -135,7 +135,7 @@ const Workflow = ({ dataset, installationSettings, format }) => {
                 disabled: !dataset?.filesAvailable?.find(f => f.format === 'BIOM 1.0')
             },
             {
-                title: dataset?.metadata ? 'Edit metadata' : 'Add metadata',
+                title:  'Metadata',
                 disabled: !dataset
             },
             {
