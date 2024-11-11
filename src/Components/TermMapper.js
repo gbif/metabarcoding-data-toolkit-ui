@@ -277,11 +277,12 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset, fileNameSy
                     val =  state?.samples?.[term.name]
                     exampleData = getExampleData('samples', val)
                 }
-                console.log(exampleData)
+
+                const unmappedSet = new Set(unMapped)                
+              //  console.log(exampleData)
                 // first check special case when a fasta file is given
-                return /* dataset?.files?.format.endsWith('_FASTA') */dataset?.files?.files.find(f => f.type === 'fasta') && term.name === 'DNA_sequence' ? "Retrieved from fasta file" : (<HeaderSelect term={term} exampleData={exampleData} headers={headers} value={val} onChange={ value => {
-                    /*  console.log('update '+term.name)
-                    console.log('Value '+val) */
+                return dataset?.files?.files.find(f => f.type === 'fasta') && term.name === 'DNA_sequence' ? "Retrieved from fasta file" : (<HeaderSelect term={term} exampleData={exampleData} headers={headers.filter(h => unmappedSet.has(h))} value={val} onChange={ value => {
+                    
                    
                     if(type === 'taxon'){
                         dispatch({ type: 'mapTaxonTerm', payload: {term: term.name, value: value} })

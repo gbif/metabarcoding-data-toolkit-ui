@@ -116,7 +116,7 @@ const Uploader = ({onSuccess, onError, datasetKey, dataset}) => {
             )}
              <div style={{marginBottom: "10px"}}>
             <Input  placeholder="Dataset title or nickname" value={datasetTitle} onChange={(e) => setDatasetTitle(e?.target?.value) } allowClear/> 
-                <Text type="secondary" style={{marginBottom: "10px"}}>The title can be changed later in the "Edit Metadata" form in step 5</Text>
+                <Text type="secondary" style={{marginBottom: "10px"}}>You may add or change the title later in the "Edit Metadata" form in step 5</Text>
                 </div>
             <Dragger {...props} style={{minWidth: "400px", padding: "10px"}} disabled={uploading}>
             
