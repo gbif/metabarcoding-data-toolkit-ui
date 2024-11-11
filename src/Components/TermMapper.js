@@ -363,7 +363,8 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset, fileNameSy
                 style={{width: 500, marginTop: "10px"}} 
                 placeholder={"Add mapping for another sample field"} 
                 dwcTerms={dwcTerms} 
-                omitGroups={['Taxon']} 
+                omitGroups={['Taxon']}
+                omitTerms={['DNA_sequence']}
                 onSelect={val => {
                     if(!defaultTermMap.has(val)){
                         defaultTermMap.set(val, termMap.get(val))

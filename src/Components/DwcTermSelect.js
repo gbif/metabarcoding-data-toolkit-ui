@@ -5,7 +5,7 @@ import linkifyHtml from 'linkify-html';
 const { Text } = Typography;
 
 const DwcTermSelect = forwardRef((props, ref) => {
-  const { dwcTerms, filterToGroups, omitGroups, onSelect, placeholder, style } = props
+  const { dwcTerms, filterToGroups, omitGroups, omitTerms, onSelect, placeholder, style } = props
   const [selected, setSelected] = useState(null)
  
   return <div ref={ref}
@@ -37,6 +37,7 @@ options={
             group: dwcTerms[k]?.group
         }))
         .filter(o => _.isArray(omitGroups) ? !omitGroups.includes(o?.group) : true)
+        .filter(o => _.isArray(omitTerms) ? !omitTerms.includes(o?.label) : true)
         .filter(o => _.isArray(filterToGroups) ? filterToGroups.includes(o?.group) : true)}
 />
   <Button disabled={!selected} onClick={() => {
