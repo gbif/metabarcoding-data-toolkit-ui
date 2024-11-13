@@ -281,7 +281,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset, fileNameSy
                 const unmappedSet = new Set(unMapped)                
               //  console.log(exampleData)
                 // first check special case when a fasta file is given
-                return dataset?.files?.files.find(f => f.type === 'fasta') && term.name === 'DNA_sequence' ? "Retrieved from fasta file" : (<HeaderSelect term={term} exampleData={exampleData} headers={headers.filter(h => unmappedSet.has(h))} value={val} onChange={ value => {
+                return dataset?.files?.files.find(f => f.type === 'fasta') && term.name === 'DNA_sequence' ? "Retrieved from fasta file" : (<HeaderSelect term={term} exampleData={exampleData} headers={headers.filter(h =>  h === term?.name || unmappedSet.has(h))} value={val} onChange={ value => {
                     
                    
                     if(type === 'taxon'){
