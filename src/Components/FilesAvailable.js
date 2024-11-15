@@ -18,11 +18,11 @@ const FilesAvailable = ({ dataset, showTitle = true }) => <div style={{maxWidth:
     {showTitle && <Title level={3}>Files available</Title>}
     <List
         itemLayout="horizontal"
-        dataSource={dataset?.filesAvailable}
+        dataSource={[...dataset?.filesAvailable, {fileName: 'log.txt', format: 'Log file', mimeType: 'text/plain', size: 0}]}
         header={<Row><Col flex="auto"></Col><Col>{help}</Col></Row>}
         renderItem={(file) => (
             <List.Item
-                actions={[<Button type="link" download={file.fileName} href={`${config.backend}/dataset/${dataset?.id}/file/${file.fileName}`}><DownloadOutlined color="yellow"/></Button>]}
+                actions={[<Button type="link" download={file.fileName} href={file?.fileName === 'log.txt'? `${config.backend}/dataset/${dataset?.id}/log.txt`: `${config.backend}/dataset/${dataset?.id}/file/${file.fileName}`}><DownloadOutlined color="yellow"/></Button>]}
             >
                 <List.Item.Meta
                     title={<>{file.fileName} {file.format === 'BIOM 2.1' 

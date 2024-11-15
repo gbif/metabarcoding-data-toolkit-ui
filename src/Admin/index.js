@@ -61,6 +61,12 @@ function Admin({user, setLoginFormVisible}) {
                 sorter: (a,b) => (a.title < b.title) ? 1 : ((b.title < a.title) ? -1 : 0),
             },
             {
+              title: "",
+              dataIndex: "log",
+              key: "log",
+              render: (text, record) => <a href={`${config.backend}/dataset/${record.dataset_id}/log.txt`} target="_blank" rel="noreferrer" >Log</a>,
+          },
+            {
                 title: "Created",
                 dataIndex: "created",
                 key: "created",
