@@ -122,11 +122,18 @@ const MetaDataForm = ({
     if(project){
       metadata.project = project
     }
-    if(values.includeGeographicCoverage){
-      metadata.geographicCoverage = dataset?.metrics?.geographicScope
+    if(values.includeGeographicCoverage || !!values.geographicDescription){
+      metadata.geographicCoverage = values.includeGeographicCoverage ? {...dataset?.metrics?.geographicScope} : {}
+      if(!!values.geographicDescription){
+        metadata.geographicCoverage.geographicDescription = values.geographicDescription
+      }
     }
-    if(values.includeTaxonomicCoverage){
-      metadata.taxonomicCoverage = dataset?.metrics?.taxonomicScope
+    if(values.includeTaxonomicCoverage || !!values.generalTaxonomicCoverage){
+      
+      metadata.taxonomicCoverage = values.includeTaxonomicCoverage ? {...dataset?.metrics?.taxonomicScope} : {};
+      if(!!values.generalTaxonomicCoverage){
+        metadata.taxonomicCoverage.generalTaxonomicCoverage = values.generalTaxonomicCoverage
+      }
     }
     if(values.includeTemporalCoverage){
       metadata.temporalCoverage = dataset?.metrics?.temporalScope
@@ -150,8 +157,8 @@ const MetaDataForm = ({
   const initialValues = dataset?.metadata || {};
 
   const reuseAgent = (agent, type) => {
-    if(isArray(values[type])){
-        form.setFieldsValue({[type]: [...values[type], agent]})
+    if(isArray(form.getFieldValue(type))){
+        form.setFieldsValue({[type]: [...form.getFieldValue(type), agent]})
 
     } else {
         form.setFieldsValue({[type]: agent})
@@ -516,21 +523,38 @@ const MetaDataForm = ({
 
 
 {/*****************************************/}
+        <FormItem
+          hidden={section !== "geographic_coverage"} 
+            {...formItemLayout}
+            label={<>Description {help?.geographicDescription && <Help title="Geographic description"  style={{marginLeft: "6px"}} content={help?.geographicDescription} />}</>}
+            name="geographicDescription"
+            help={showHelp && (help?.geographicDescription || null)}
+          >
+            <Input.TextArea />
+          </FormItem>
           <FormItem
           hidden={section !== "geographic_coverage"} 
             {...formItemLayout}
-            label={<>Geographic coverage {help?.geographicCoverage && <Help title="Geographic coverage"  style={{marginLeft: "6px"}} content={help?.geographicCoverage} />}</>}
+            label={<>Geographic coverage inferred from data {help?.geographicCoverage && <Help title="Geographic coverage inferred from data "  style={{marginLeft: "6px"}} content={help?.geographicCoverage} />}</>}
             name="includeGeographicCoverage"
             help={showHelp && (help?.geographicCoverage || null)}
           >
             <GeographicCoverage geographicCoverage={dataset?.metrics?.geographicScope}  hidden={section !== "geographic_coverage"} />
           </FormItem>
         
-
           <FormItem
           hidden={section !== "taxonomic_coverage"} 
             {...formItemLayout}
-            label={<>Taxonomic coverage {help?.taxonomicCoverage && <Help title="Taxonomic coverage"  style={{marginLeft: "6px"}} content={help?.taxonomicCoverage} />}</>}
+            label={<>Description {help?.generalTaxonomicCoverage && <Help title="Taxonomic coverage description"  style={{marginLeft: "6px"}} content={help?.generalTaxonomicCoverage} />}</>}
+            name="generalTaxonomicCoverage"
+            help={showHelp && (help?.generalTaxonomicCoverage || null)}
+          >
+            <Input.TextArea />
+          </FormItem>
+          <FormItem
+          hidden={section !== "taxonomic_coverage"} 
+            {...formItemLayout}
+            label={<>Taxonomic coverage inferred from data {help?.taxonomicCoverage && <Help title="Taxonomic coverage inferred from data"  style={{marginLeft: "6px"}} content={help?.taxonomicCoverage} />}</>}
             name="includeTaxonomicCoverage"
             help={showHelp && (help?.taxonomicCoverage || null)}
           >
