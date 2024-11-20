@@ -132,8 +132,18 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
         });
         setValidating(false)
       } catch (error) {
-        console.log(error)
-        setValidating(false)
+        try {
+          console.log(error)
+          notification.error({
+            message: 'Error',
+            description:
+              error?.response?.data || error?.message,
+          })
+          setValidating(false)
+        } catch (error_) {
+          console.log(error_)
+        }
+        
 
       }
   }

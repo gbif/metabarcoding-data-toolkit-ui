@@ -4,7 +4,7 @@ const domain = window.location.hostname;
 
 let env = environments.prod;
 if (
-  domain.endsWith(".gbif-uat.org") 
+  domain.endsWith(".gbif-test.org") || domain.endsWith(".gbif-test.org")
 ) {
   env = environments.uat;
 } else if (

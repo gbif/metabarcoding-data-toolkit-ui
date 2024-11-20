@@ -1,4 +1,4 @@
-import { Layout, Button, Row, Col, Typography, Space, Divider, theme } from "antd";
+import { Layout, Button, Row, Col, Typography, Space, Divider, theme, Watermark } from "antd";
 import config from "../config";
 
 import { LoadingOutlined } from "@ant-design/icons";
@@ -16,62 +16,64 @@ const {Text} = Typography
 const AppLayout = ({ children, setDataset, user }) => {
   const navigate = useNavigate();
 
-  
+  const header = <Header>
+  <Row>
+    <Col  onClick={() => navigate("/")} span={1} style={{ padding: "4px" , cursor: "pointer"}} >
+      <Logo />
+    </Col>
+    <Col  style={{ padding: "16px" }}><Button style={{padding: "0px"}} onClick={() => navigate("/")} type={"link"}><Title level={4} style={{color: "white"}}>Metabarcoding Data Toolkit</Title> </Button> </Col> 
+    
+   
+    <Col flex="auto"></Col>
+    
+    <Col>
+    {(!!user && !!user?.isAdmin) && <Button
+        style={{ marginRight: "8px" }}
+       type={"link"}
+        onClick={() => {
+          navigate("/admin");
+        }}
+        
+      >
+       <span style={{ color: "white" }}> Administration</span>
+      </Button>}
+    {!!user &&  <Button
+        style={{ marginRight: "8px" }}
+       type={"link"}
+        onClick={() => {
+          navigate("/user-profile");
+        }}
+        
+      >
+       <span style={{ color: "white" }}> My datasets</span>
+      </Button>}
+      <Button
+        style={{ marginRight: "8px" }}
+       type={"link"}
+        onClick={() => {
+          setDataset(null)
+          navigate("/dataset/new");
+        }}
+        
+      >
+       <span style={{ color: "white" }}> New dataset</span>
+      </Button>
+      <Button 
+        type={"link"} 
+        onClick={() => window.open('https://docs.gbif-uat.org/mdt-user-guide/en/#faq', '_blank')}
+        > 
+        <span style={{  color: "white"  }}>FAQ </span></Button>
+      <UserMenu />
+    </Col>
+  </Row>
+</Header>
  
   return (
     <Layout className="layout">
-      
-      <Header>
-        <Row>
-          <Col  onClick={() => navigate("/")} span={1} style={{ padding: "4px" , cursor: "pointer"}} >
-            <Logo />
-          </Col>
-          <Col  style={{ padding: "16px" }}><Button style={{padding: "0px"}} onClick={() => navigate("/")} type={"link"}><Title level={4} style={{color: "white"}}>Metabarcoding Data Toolkit</Title> </Button> </Col> 
-          
-         
-          <Col flex="auto"></Col>
-          
-          <Col>
-          {(!!user && !!user?.isAdmin) && <Button
-              style={{ marginRight: "8px" }}
-             type={"link"}
-              onClick={() => {
-                navigate("/admin");
-              }}
-              
-            >
-             <span style={{ color: "white" }}> Administration</span>
-            </Button>}
-          {!!user &&  <Button
-              style={{ marginRight: "8px" }}
-             type={"link"}
-              onClick={() => {
-                navigate("/user-profile");
-              }}
-              
-            >
-             <span style={{ color: "white" }}> My datasets</span>
-            </Button>}
-            <Button
-              style={{ marginRight: "8px" }}
-             type={"link"}
-              onClick={() => {
-                setDataset(null)
-                navigate("/dataset/new");
-              }}
-              
-            >
-             <span style={{ color: "white" }}> New dataset</span>
-            </Button>
-            <Button 
-              type={"link"} 
-              onClick={() => window.open('https://docs.gbif-uat.org/mdt-user-guide/en/#faq', '_blank')}
-              > 
-              <span style={{  color: "white"  }}>FAQ </span></Button>
-            <UserMenu />
-          </Col>
-        </Row>
-      </Header>
+      {config.env === "uat" ? <Watermark gap={[30,30]} content={['Test']}>
+        {header}
+      </ Watermark> : <>{header}</>}
+    
       <Content
         style={{
           padding: "10px 50px",
