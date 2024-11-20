@@ -5,7 +5,7 @@ import PageContent from "../Layout/PageContent";
 import { Table, Typography, Card, Result, Button} from "antd";
 import { useNavigate } from "react-router-dom";
 import { axiosWithAuth } from "../Auth/userApi";
-import DataBrowser from "../Review/DataBrowser";
+import { LuExternalLink } from "react-icons/lu";
 import {dateFormatter, numberFormatter} from '../Util/formatters'
 import AdminTabs from "./AdminTabs"
 import _ from "lodash";
@@ -64,7 +64,7 @@ function Admin({user, setLoginFormVisible}) {
               title: "",
               dataIndex: "log",
               key: "log",
-              render: (text, record) => <a href={`${config.backend}/dataset/${record.dataset_id}/log.txt`} target="_blank" rel="noreferrer" >Log</a>,
+              render: (text, record) => <><Button type="link" href={`${config.backend}/dataset/${record.dataset_id}/log.txt`} target="_blank" rel="noreferrer" >Log</Button>{record?.validation_id && <>|<Button type="link" href={`https://www.gbif.org/tools/data-validator/${record.validation_id}`} target="_blank" rel="noreferrer" >Validation report</Button></> }</>,
           },
             {
                 title: "Created",
@@ -118,7 +118,7 @@ function Admin({user, setLoginFormVisible}) {
                     {text: "Not published", value: false},
                 ],
                 onFilter: (value, record) => value ? !!record.gbif_uat_key : !record.gbif_uat_key,
-                render: (text, record) => !!text ? <a href={`https://www.gbif-uat.org/dataset/${text}`} target="_blank" rel="noreferrer" >{text}</a> : ""
+                render: (text, record) => !!text ? <Button type="link" href={`https://www.gbif-uat.org/dataset/${text}`} target="_blank" rel="noreferrer" ><LuExternalLink /></Button> : ""
 
             },
             {
@@ -130,7 +130,7 @@ function Admin({user, setLoginFormVisible}) {
                   {text: "Not published", value: false},
               ],
               onFilter: (value, record) => value ? !!record.gbif_prod_key : !record.gbif_prod_key,
-              render: (text, record) => !!text ? <a href={`https://www.gbif${config.env !== "prod" ? "-uat" : ""}.org/dataset/${text}`} target="_blank" rel="noreferrer" >{text}</a> : ""
+              render: (text, record) => !!text ? <Button href={`https://www.gbif${config.env !== "prod" ? "-uat" : ""}.org/dataset/${text}`} target="_blank" rel="noreferrer" ><LuExternalLink /></Button> : ""
 
           },
             {

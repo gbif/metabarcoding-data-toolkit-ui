@@ -4,7 +4,7 @@ import axios from "axios"
 import { useNavigate, useLocation, useMatch } from "react-router-dom";
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
-import { Row, Col, Alert, Button, Progress, Timeline, Typography, Modal, message } from "antd"
+import { Row, Col, Alert, Button, Progress, Timeline, Typography, Modal, message, notification } from "antd"
 import { CheckCircleOutlined, ClockCircleOutlined, DownloadOutlined,  } from '@ant-design/icons';
 import config from "../config";
 import FilesAvailable from '../Components/FilesAvailable'
@@ -21,6 +21,8 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
   const [registering, setRegistering] = useState(false);
   const [gbifUatKey, setGbifUatKey] = useState(dataset?.publishing?.gbifDatasetKey || dataset?.publishing?.gbifDatasetKey);
   const [showRegisterModal, setShowRegisterModal] = useState(false)
+  const [validating, setValidating] = useState(false)
+  const [validationId, setValidationId] = useState(dataset?.publishing?.validationId || null)
   let hdl = useRef();
 
  
@@ -115,6 +117,27 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
     }
   }
 
+  const validateDWCa = async (key) => {
+      
+    try {
+      setValidating(true)
+      const validateRes = await axiosWithAuth.post(`${config.backend}/dataset/${key}/data-validator`);
+        console.log(validateRes)
+        setValidationId(validateRes?.data?.key)
+        setDataset({...dataset, publishing: {...dataset.publishing || {}, validationId: validateRes?.data?.key}})
+        notification.open({
+          message: 'Validation started',
+          description:
+            'You will receieve an email when the validation has finished.',
+        });
+        setValidating(false)
+      } catch (error) {
+        console.log(error)
+        setValidating(false)
+
+      }
+  }
+
   return (
     <Layout><PageContent>
       {error && <Alert type="error" >{error}</Alert>}
@@ -153,16 +176,16 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
                     </Col>}
         <Col flex="auto"></Col>
         <Col>
-          <Button  loading={registering}  disabled={ registering || !finished  } type="primary" onClick={() => registerData(dataset?.id) } >Publish to GBIF test environment (UAT)</Button><Help style={{marginLeft: "8px"}} title="Publishing" content={<Text>You can "publish" your Darwin Core Archive to the GBIF test environment, also known as the User Acceptance Testing (UAT) environment. In UAT, the data will be indexed and processed almost exactly as on GBIF.org, and it allows you to verify that the data looks as you expect and is being indexed correctly. The indexing takes some time, and not all elements are added immediately (e.g. the map of the samples).</Text>} />
-{/*           <Alert type="warning" style={{marginTop: "10px"}} description={`Publishing to the test environment is currently disabled as GBIF is updating core software parts`}/>
- */}        </Col>
+          <Row><Button  loading={registering}  disabled={ registering || !finished  } type="primary" onClick={() => registerData(dataset?.id) } >Publish to GBIF test environment (UAT)</Button><Help style={{marginLeft: "8px"}} title="Publishing" content={<Text>You can "publish" your Darwin Core Archive to the GBIF test environment, also known as the User Acceptance Testing (UAT) environment. In UAT, the data will be indexed and processed almost exactly as on GBIF.org, and it allows you to verify that the data looks as you expect and is being indexed correctly. The indexing takes some time, and not all elements are added immediately (e.g. the map of the samples).</Text>} /></Row>
+          <Row><Button style={{marginTop: "10px"}} loading={validating} onClick={() => validateDWCa(dataset?.id)} >Validate DWC archive</Button><Help style={{marginLeft: "8px", marginTop: "10px"}} title="Publishing" content={<Text>You can validate the Darwin Core Archive using the GBIF data validator. The GBIF data validator is a service that allows anyone with a GBIF-relevant dataset to receive a report on the syntactical correctness and the validity of the content contained within the dataset. By submitting a dataset to the validator, you can go through the validation and interpretation procedures usually associated with publishing in GBIF and quickly determine potential issues in data - without having to publish it.</Text>} /></Row>
+       </Col>
         <Col>
-          {gbifUatKey && <Button  type="link" href={`https://www.gbif-uat.org/dataset/${gbifUatKey}`}>Dataset at gbif-uat.org</Button>}
-          
+        <Row> {gbifUatKey && <Button  type="link" target="_blank" href={`https://www.gbif-uat.org/dataset/${gbifUatKey}`}>Dataset at gbif-uat.org</Button>}</Row>
+        <Row> {validationId && <Button  type="link" target="_blank" href={`https://www.gbif.org/tools/data-validator/${validationId}`}>Validation report</Button>}</Row> 
         </Col>
       </Row>
       <Modal title="Info" open={showRegisterModal && gbifUatKey} onOk={() => setShowRegisterModal(false)} onCancel={() => setShowRegisterModal(false)}>
-        <p>Your data is being processed and "published" on the test environment.. Depending on the data volume, it may take from 15 minutes to a an hour before it is finished. This means that you may initally see "0 occurrences" on the new <a  href={`https://www.gbif-uat.org/dataset/${gbifUatKey}`}>dataset page</a> if it is accessed before the processing has finished. You can also find the link to the dataset on the test environment (gbif-uat) in the list of datasets in your user profile.</p>
+        <p>Your data is being processed and "published" on the test environment. Depending on the data volume, it may take from 15 minutes to a an hour before it is finished. This means that you may initally see "0 occurrences" on the new <a  href={`https://www.gbif-uat.org/dataset/${gbifUatKey}`}>dataset page</a> if it is accessed before the processing has finished. You can also find the link to the dataset on the test environment (gbif-uat) in the list of datasets in your user profile.</p>
         
       </Modal>
 
