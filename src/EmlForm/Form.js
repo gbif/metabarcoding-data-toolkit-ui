@@ -157,8 +157,9 @@ const MetaDataForm = ({
   const initialValues = dataset?.metadata || {};
 
   const reuseAgent = (agent, type) => {
-    if(isArray(form.getFieldValue(type))){
-        form.setFieldsValue({[type]: [...form.getFieldValue(type), agent]})
+    // contact is the only non-arrary agent
+    if(type !== "contact"){
+        form.setFieldsValue({[type]: [...(form.getFieldValue(type) || []), agent]})
 
     } else {
         form.setFieldsValue({[type]: agent})
@@ -406,7 +407,7 @@ const MetaDataForm = ({
               agentType="creator"
               label="New creator"
               removeAll={true}
-              
+              array={true}
             />
           </FormItem>
         
@@ -422,7 +423,7 @@ const MetaDataForm = ({
               agentType="metadataProvider"
               label="New Metadata Provider"
               removeAll={true}
-              
+              array={true}
             />
           </FormItem>
         
@@ -440,7 +441,7 @@ const MetaDataForm = ({
               label="New associated party"
               hasRole={true}
               removeAll={true}
-              
+              array={true}
             />
           </FormItem>
           
@@ -517,7 +518,7 @@ const MetaDataForm = ({
               label="New project personnel"
               hasRole={true}
               removeAll={true}
-              
+              array={true}
             />
           </FormItem>
 
