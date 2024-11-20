@@ -41,11 +41,12 @@ const LoginForm = ({onLogin, invalid}) => {
         <Button  loading={loading} type="primary" htmlType="submit" style={{width: '100%'}}>
           Log in
         </Button>
-        Or <a href={`https://www.gbif${config.env !== "prod" ? "-uat" : ""}.org/user/profile`}>register at gbif{config.env !== "prod" ? "-uat" : ""}.org now!</a>
+        Or <a href={`https://www.gbif.org/user/profile`}>register at gbif.org now.</a>
       </FormItem>
       {invalid && <FormItem style={{width: '100%'}}><Alert message={messages?.[invalid] || invalid} type="error" /></FormItem>}
 
-      <FormItem><a className="login-form-forgot" href={`https://www.gbif${config.env !== "prod" ? "-uat" : ""}.org/user/profile`}>Forgot password?</a></FormItem>
+      <FormItem><a className="login-form-forgot" href={`https://www.gbif.org/user/profile`}>Forgot password?</a></FormItem>
+      <Alert description="To use the MDT, you need a password for your GBIF account. If you signed up with GitHub or Google, click 'Forgot password' to set one up."/>
     </Form>
   );
 
