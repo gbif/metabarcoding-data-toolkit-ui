@@ -402,12 +402,20 @@ const MetaDataForm = ({
             label={<>Creators {help?.creator && <Help title="Creators"  style={{marginLeft: "6px"}} content={help?.creator} />}</>}
             name="creator"
             help={showHelp && (help?.creator || null)}
+            rules={[
+              {
+                required: true,
+                min: 1,
+                message: "You must enter at least one creator of the dataset",
+              },
+            ]}
           >
             <AgentControl
               agentType="creator"
               label="New creator"
               removeAll={true}
               array={true}
+              
             />
           </FormItem>
         
