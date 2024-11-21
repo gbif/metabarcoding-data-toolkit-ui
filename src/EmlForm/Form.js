@@ -6,7 +6,7 @@ import {
   Alert,
   message,
   Form,
-  Switch,
+  Skeleton,
   Row,
   Col,
   Typography,
@@ -169,7 +169,7 @@ const MetaDataForm = ({
 
   return (
     <>
-      <Form
+     {!!dataset ? <Form
         initialValues={initialValues}
         onFinish={submitData}
         onFinishFailed={onFinishFailed}
@@ -405,7 +405,6 @@ const MetaDataForm = ({
             rules={[
               {
                 required: true,
-                min: 1,
                 message: "You must enter at least one creator of the dataset",
               },
             ]}
@@ -627,7 +626,7 @@ const MetaDataForm = ({
             <Citation removeAll={true} label="Add reference" />
           </FormItem>
      
-      </Form>
+      </Form> : <Skeleton  />}
     </>
   );
 };
