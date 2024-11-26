@@ -234,8 +234,9 @@ const MetaDataForm = ({
               type="primary"
               onClick={async () => {
                 try {
-                  
-                  await submitData(values);
+                  if(isTouched){
+                    await submitData(values);
+                  }
                   navigate(`/dataset/${dataset?.id}/export`);
                 } catch (err) {
                     console.log(err)

@@ -29,7 +29,6 @@ import {getExistingOrgEmailBody, getNewOrgEmailBody} from "./EmailTemplate";
 const { Text } = Typography;
 
 const Publish = ({ setDataset, dataset, user, installationSettings, networks }) => {
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const [registering, setRegistering] = useState(false);
@@ -39,7 +38,6 @@ const Publish = ({ setDataset, dataset, user, installationSettings, networks }) 
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [organisations, setOrganisations] = useState([]);
   const [organisationsResolved, setOrganisationsResolved] = useState(false);
-  const [installationContactEmail, setInstallationContactEmail] = useState(null)
   const [selectedOrg, setSelectedOrg] = useState(null);
   const [selectedNetwork, setSelectedNetwork] = useState(dataset?.publishing?.netWorkKey)
   const [addingNetwork, setAddingNetwork] = useState(false)
@@ -96,7 +94,7 @@ const Publish = ({ setDataset, dataset, user, installationSettings, networks }) 
       message.info("Registering dataset in GBIF");
 
       const registerRes = await axiosWithAuth.post(
-        `${config.backend}/dataset/${key}/register-in-gbif-prod?organizationKey=${selectedOrg?.key}`
+        `${config.backend}/dataset/${key}/register-in-gbif-prod?organizationKey=${selectedOrg}`
       );
       // Legacy: the key was just called gbifDatasetKey before
       if (registerRes?.data?.publishing?.gbifProdDatasetKey) {
