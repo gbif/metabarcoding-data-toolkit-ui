@@ -108,6 +108,7 @@ const AppLayout = ({ children, setDataset, user }) => {
 
         <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://docs.gbif-uat.org/mdt-user-guide/en/" /* onClick={() => navigate("/faq")} */>User guide</Button>
         <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://docs.gbif-uat.org/mdt-user-guide/en/#faq" /* onClick={() => navigate("/faq")} */>FAQ</Button>
+        <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://github.com/gbif/metabarcoding-data-toolkit-backend?tab=readme-ov-file#api" /* onClick={() => navigate("/faq")} */>API</Button>
     <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://github.com/gbif/metabarcoding-data-toolkit-ui/issues/new">Report a bug</Button>
     <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://github.com/gbif/metabarcoding-data-toolkit-ui/issues/new">Request a feature</Button>
   </Space>
@@ -119,13 +120,12 @@ const AppLayout = ({ children, setDataset, user }) => {
           <Col flex="auto"></Col>
 
         </Row>
-          { config?.env === "uat"  && <>
+          { ['mdt.gbif-test.org', 'mdt.gbif.org'].includes(window?.location?.hostname) && <>
           
             <Row style={{marginTop: "16px"}}><Col flex="auto"></Col><Col style={{paddingLeft: "6px", marginTop: "4px"}}> <img src="/images/EN_Co-fundedbytheEU_RGB_POS.png"  alt="EU logo" style={{width: "140px"}}/> </Col> <Col span={10} ><Text style={{fontSize: "9px"}}>The development of this tool has received funding from the European Union's Horizon Europe research and innovation programme under grant agreement No 101057437 (BioDT project, <a href="https://doi.org/10.3030/101057437">https://doi.org/10.3030/101057437</a>)</Text></Col><Col flex="auto"></Col></Row>
         </>}
         
-{/*         {config?.env === "uat" && <Row style={{marginTop: "10px"}}><Col  flex="auto"></Col><Col ><Text style={{fontSize: "9px"}}>The development of this tool has received funding from the European Union's Horizon Europe research and innovation programme under grant agreement No 101057437 (BioDT project, <a href="https://doi.org/10.3030/101057437">https://doi.org/10.3030/101057437</a>)</Text></Col><Col flex="auto"></Col></Row>}
- */}       
+       
       </Footer>
     </Layout>
   );
