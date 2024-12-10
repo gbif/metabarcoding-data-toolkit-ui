@@ -310,7 +310,7 @@ const MetaDataForm = ({
 
    
           <FormItem
-            hidden={section !== "basic"}
+            hidden={section !== "contacts"}
             {...formItemLayout}
             label={<>Contact {help?.contact && <Help title="Contact"  style={{marginLeft: "6px"}} content={help?.contact} />}</>}
             name="contact"
@@ -398,7 +398,7 @@ const MetaDataForm = ({
       )} */}
        
           <FormItem
-          hidden={section !== "basic"}
+          hidden={section !== "contacts"}
             {...formItemLayout}
             label={<>Creators {help?.creator && <Help title="Creators"  style={{marginLeft: "6px"}} content={help?.creator} />}</>}
             name="creator"
@@ -421,7 +421,7 @@ const MetaDataForm = ({
         
        
           <FormItem
-          hidden={section !== "basic"}
+          hidden={section !== "contacts"}
             {...formItemLayout}
             label={<>Metadata providers {help?.metadataProvider && <Help title="Metadata providers"  style={{marginLeft: "6px"}} content={help?.metadataProvider} />}</>}
             name="metadataProvider"
@@ -438,7 +438,7 @@ const MetaDataForm = ({
 
 
           <FormItem
-          hidden={section !== "associated_parties"}
+          hidden={section !== "contacts"}
             {...formItemLayout}
             label={<>Associated parties {help?.associatedParty && <Help title="Associated parties"  style={{marginLeft: "6px"}} content={help?.associatedParty} />}</>}
             name="associatedParty"

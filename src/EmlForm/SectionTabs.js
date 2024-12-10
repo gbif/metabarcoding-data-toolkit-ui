@@ -11,6 +11,10 @@ const SectionTabs = ({onChange}) => {
             key: "basic"
         },
         {
+            label: "Contacts",
+            key: "contacts"
+        },
+        {
             label: "Geographic Coverage",
             key: "geographic_coverage"
         },
@@ -26,10 +30,10 @@ const SectionTabs = ({onChange}) => {
             label: "Keywords",
             key: "keywords"
         },
-        {
+       /*  {
             label: "Associated Parties",
             key: "associated_parties"
-        },
+        }, */
         {
             label: "Project Data",
             key: "project_data"
