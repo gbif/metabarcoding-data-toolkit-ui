@@ -59,7 +59,14 @@ function Admin({user, setLoginFormVisible}) {
                 dataIndex: "title",
                 key: "title",
                 sorter: (a,b) => (a.title < b.title) ? 1 : ((b.title < a.title) ? -1 : 0),
+                render: (text, record) => !!text ? <a href="" onClick={()=> navigate(`/dataset/${record.dataset_id}/upload`)}>{text}</a> : ""
             },
+            {
+              title: "",
+              dataIndex: "",
+              key: "publish",
+              render: (text, record) => <>{!!record.dwc_generated && !!record?.occurrence_count && <Button type="primary" size="small" onClick={() => navigate(`/dataset/${record.dataset_id}/publish`)} >Publishing</Button> }</>,
+          },
             {
               title: "",
               dataIndex: "log",
