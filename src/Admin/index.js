@@ -59,7 +59,7 @@ function Admin({user, setLoginFormVisible}) {
                 dataIndex: "title",
                 key: "title",
                 sorter: (a,b) => (a.title < b.title) ? 1 : ((b.title < a.title) ? -1 : 0),
-                render: (text, record) => !!text ? <a href="" onClick={()=> navigate(`/dataset/${record.dataset_id}/upload`)}>{text}</a> : ""
+                render: (text, record) =>  <a href="" onClick={()=> navigate(`/dataset/${record.dataset_id}/upload`)}>{text || <LuExternalLink />}</a> 
             },
             {
               title: "",
