@@ -94,7 +94,7 @@ const Publish = ({ setDataset, dataset, user, installationSettings, networks }) 
       message.info("Registering dataset in GBIF");
 
       const registerRes = await axiosWithAuth.post(
-        `${config.backend}/dataset/${key}/register-in-gbif-prod?organizationKey=${selectedOrg}`
+        `${config.backend}/dataset/${key}/register-in-gbif-prod?organizationKey=${selectedOrg?.key || selectedOrg}`
       );
       // Legacy: the key was just called gbifDatasetKey before
       if (registerRes?.data?.publishing?.gbifProdDatasetKey) {

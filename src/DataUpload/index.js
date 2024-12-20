@@ -277,10 +277,15 @@ const DataUpload = ({ user,
                            
                             
                             onError={(e) => { 
-                                if(e?.response?.status > 399 && e?.response?.status < 500){
+                                if(e?.response?.status > 400 && e?.response?.status < 404){
                                     setLoginFormVisible(true)
                                     notification.warning({
                                         description: "You must login to upload data."
+                                    })
+                                } else if(e?.response?.status === 415){
+                                    notification.warning({
+                                        duration: 0,
+                                        description: "Unsupported file format. Text files (tsv, csv, fasta etc), BIOM and Excel files are supported. Please check the guide for more information.",
                                     })
                                 } else {
                                     message.error(e?.message) }

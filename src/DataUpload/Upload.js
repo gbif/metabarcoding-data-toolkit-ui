@@ -68,6 +68,7 @@ const Uploader = ({onSuccess, onError, datasetKey, dataset}) => {
             });
     };
     const props = {
+       /*  accept: ".biom,.csv,.tsv,.txt,.zip,.qza,.biom,.h5", */
         multiple: true,
         onRemove: (file) => {
             const index = fileList.indexOf(file);
