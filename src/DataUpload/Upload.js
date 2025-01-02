@@ -68,7 +68,7 @@ const Uploader = ({onSuccess, onError, datasetKey, dataset}) => {
             });
     };
     const props = {
-        accept: ".xlsx,.csv,.tsv,.txt,.zip,.qza,.biom,.h5,.hdf5,.he5",
+        accept: ".xlsx,.csv,.tsv,.txt,.zip,.qza,.biom,.h5,.hdf5,.he5,.fasta,.fa,.fas",
         multiple: true,
         onRemove: (file) => {
             const index = fileList.indexOf(file);
