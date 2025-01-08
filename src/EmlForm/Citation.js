@@ -135,7 +135,7 @@ class CitationControl extends React.Component {
               ref={this.saveInputKeyRef}
               type="text"
               size="small"
-              style={{ width: 200 }}
+              style={{ width: 200,  marginRight: "10px" }}
               value={inputKey}
               placeholder={this.props.keyPlaceHolder || "DOI"}
               onChange={this.handleInputKeyChange}
@@ -146,6 +146,7 @@ class CitationControl extends React.Component {
                 alt=""
               ></img>}
             />
+            <Button size="small" style={{marginBottom: "22px"}} onClick={this.handleInputConfirm}>Save</Button>
           </React.Fragment>
         )}
         {!inputVisible && (
