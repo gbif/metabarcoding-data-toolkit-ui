@@ -431,6 +431,20 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset, fileNameSy
                     key: "measurementMethod",
                     render: (text, record) => <Input value={record?.measurementMethod} onChange={(e) => dispatch({ type: 'createMeasurement', payload: {term: record.measurementType, value: {...record, measurementMethod: e?.target?.value }} })}/>
                     
+                  },{
+                    title: "Measurement Type ID (optional)",
+                    dataIndex: "measurementTypeID",
+                    key: "measurementTypeId",
+                    render: (text, record) => <Input value={record?.measurementTypeID} onChange={(e) => dispatch({ type: 'createMeasurement', payload: {term: record.measurementType, value: {...record, measurementTypeID: e?.target?.value }} })}/>
+
+                    
+                  }, {
+                    title: "Measurement Unit ID (optional)",
+                    dataIndex: "measurementUnitID",
+                    key: "measurementUnitID",
+                    render: (text, record) => <Input value={record?.measurementUnitID} onChange={(e) => dispatch({ type: 'createMeasurement', payload: {term: record.measurementType, value: {...record, measurementUnitID: e?.target?.value }} })}/>
+
+                    
                   }, {
                     title:"",
                     dataIndex: "",
