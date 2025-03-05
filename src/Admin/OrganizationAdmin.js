@@ -145,7 +145,8 @@ const OrganizationAdmin = ({user, setLoginFormVisible, installationSettings}) =>
                 title: "Token",
                 dataIndex: "token",
                 key: "token",
-                width: 300
+                width: 300,
+                render : (text, record) =>  new Array(text?.length || 0).fill('•').join('')
             },
             /* {
                 title: "Created",

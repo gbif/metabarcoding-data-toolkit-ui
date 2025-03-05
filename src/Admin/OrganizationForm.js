@@ -140,7 +140,7 @@ const OrganizationForm = ({initialValues, submitData}) => {
         extra={tokenError ? <Alert style={ {marginTop: "10px"}}type="error" description={tokenError} /> : null}
         >
             
-      <Input addonAfter={ <span style={{cursor: "pointer"}} onClick={retrieveToken}>Retrieve</span>} />
+      <Input.Password addonAfter={ <span style={{cursor: "pointer"}} onClick={retrieveToken}>Retrieve</span>} />
      
    
         </FormItem>
