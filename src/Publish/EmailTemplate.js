@@ -78,4 +78,15 @@ Kind regards,
 
 ${getSignature(user)}`
 
+export const getEmailBodyForTokenRequest = ({organizationKey, toolBaseUrl, user}) => `Dear GBIF helpdesk,
+
+A user of ${toolBaseUrl} would like to publish data from this organization: https://registry.gbif.org/organization/${organizationKey}.
+
+Can you provide us with the shared token for this organization?
+
+Kind regards,
+
+${getSignature(user)}
+`
+
 export default {getExistingOrgEmailBody};

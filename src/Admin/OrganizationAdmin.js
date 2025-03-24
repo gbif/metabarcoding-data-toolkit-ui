@@ -179,7 +179,7 @@ const OrganizationAdmin = ({user, setLoginFormVisible, installationSettings}) =>
         <Modal footer={null} title={"Add or edit oganization"} destroyOnClose={true} open={formVisible}  onCancel={() => {setOrganisationForEdit(null); setFormVisible(false)}}
            
         >
-            <OrganizationForm initialValues={organisationForEdit} submitData={addOrUpdateOrganization} />
+            <OrganizationForm initialValues={organisationForEdit} submitData={addOrUpdateOrganization} user={user}/>
         </Modal></>}
         { !user?.isAdmin && <Result
     status="403"

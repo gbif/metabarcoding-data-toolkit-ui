@@ -18,11 +18,12 @@ import { useNavigate, useLocation, useMatch } from "react-router-dom";
 import { axiosWithAuth } from "../Auth/userApi";
 import OrganizationControl from "./OrganizationControl";
 import TagControl from "../EmlForm/TagControl";
+import {getEmailBodyForTokenRequest} from "../Publish/EmailTemplate";
 const FormItem = Form.Item;
 
 
 
-const OrganizationForm = ({initialValues, submitData}) => {
+const OrganizationForm = ({initialValues, submitData, user}) => {
 
     const [submissionError, setSubmissionError] = useState(null);
     const [showHelp, setShowHelp] = useState(false);
@@ -75,7 +76,8 @@ const OrganizationForm = ({initialValues, submitData}) => {
         } catch (error) {
 
             if(error?.response?.status === 403){
-                setTokenError("You don´t have permissions to see the token for this organisation")
+                setTokenError(<>You don´t have permissions to see the token for this organisation. Please contact <a target="_blank" href={`mailto:helpdesk@gbif.org?subject=${encodeURIComponent("Organization token")}&body=${encodeURIComponent(getEmailBodyForTokenRequest({organizationKey: values?.key, toolBaseUrl: window.location.protocol +"//"+ window.location.hostname, user
+                }))}`} rel="noreferrer">GBIF Helpdesk</a>.</>)
 
             } else if(error?.message)(
                 setTokenError(error?.message)
