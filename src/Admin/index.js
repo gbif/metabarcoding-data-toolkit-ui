@@ -2,10 +2,11 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
-import { Table, Typography, Card, Result, Button} from "antd";
+import { Table, Typography, Card, Result, Button, Popconfirm} from "antd";
 import { useNavigate } from "react-router-dom";
 import { axiosWithAuth } from "../Auth/userApi";
 import { LuExternalLink } from "react-icons/lu";
+import { DeleteOutlined } from '@ant-design/icons';
 import {dateFormatter, numberFormatter} from '../Util/formatters'
 import AdminTabs from "./AdminTabs"
 import _ from "lodash";
@@ -20,6 +21,7 @@ function Admin({user, setLoginFormVisible}) {
   const [datasets, setDatasets] = useState([]);
   const [userFilter, setUserFilter] = useState([])
   const [loading, setLoading] = useState(false)
+  const [deleteInProgress, setDeleteInProgress] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -41,6 +43,21 @@ function Admin({user, setLoginFormVisible}) {
     }
 
   }
+
+  const deleteDataset = async (id) => {
+    try {
+        setDeleteInProgress(true)
+        await axiosWithAuth.delete(`${config.backend}/dataset/${id}`);
+        setDeleteInProgress(false)
+        const datasetToDelete = datasets.find(d => d.dataset_id === id)
+        datasetToDelete.deleted = new Date().toISOString()
+        setDatasets([...datasets])
+    } catch (error) {
+        setDeleteInProgress(false)
+        console.log(error)
+    }
+}
+
   return (
     <Layout>
       
@@ -137,7 +154,7 @@ function Admin({user, setLoginFormVisible}) {
                   {text: "Not published", value: false},
               ],
               onFilter: (value, record) => value ? !!record.gbif_prod_key : !record.gbif_prod_key,
-              render: (text, record) => !!text ? <Button href={`https://www.gbif${config.env !== "prod" ? "-uat" : ""}.org/dataset/${text}`} target="_blank" rel="noreferrer" ><LuExternalLink /></Button> : ""
+              render: (text, record) => !!text ? <Button type="link" href={`https://www.gbif${config.env !== "prod" ? "-uat" : ""}.org/dataset/${text}`} target="_blank" rel="noreferrer" ><LuExternalLink /></Button> : ""
 
           },
             {
@@ -152,7 +169,11 @@ function Admin({user, setLoginFormVisible}) {
 
 
               sorter: (a,b) => (a.deleted < b.deleted) ? 1 : ((b?.deleted < a?.deleted) ? -1 : 0),
-              render: (text, record) => !!record.deleted ? <Text type="danger">{dateFormatter.format(new Date(record.deleted))}</Text> : null
+              render: (text, record) => !!record.deleted ? <Text type="danger">{dateFormatter.format(new Date(record.deleted))}</Text> : <Popconfirm 
+              onConfirm={() => deleteDataset(record.dataset_id)}
+              description={`Delete dataset: ${record?.metadata?.title || record?.title || record.id}`}>
+              <Button loading={deleteInProgress} danger disabled={!!record?.gbif_prod_key} type="link" size="small" ><DeleteOutlined /></Button>
+          </Popconfirm>
 
           }
         ]}
