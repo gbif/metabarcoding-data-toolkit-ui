@@ -404,6 +404,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset, fileNameSy
         <Title level={5} style={{ marginTop: '10px' }}>Fields for inclusion in the <a href="https://rs.gbif.org/extension/obis/extended_measurement_or_fact_2023-08-28.xml" target="_blank">Extended Measurement Or Facts</a> extension:  </Title> 
     
         <Table
+        scroll={{ x: 1600 }}
                 dataSource={state?.measurements ? Object.keys(state?.measurements).map(t => state?.measurements[t]) : []} 
                 columns={[{
                     title: "Measurement Type",
@@ -445,6 +446,34 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset, fileNameSy
 
                     
                   }, {
+                    title: "Measurement Value ID (optional)",
+                    dataIndex: "measurementValueID",
+                    key: "measurementValueID",
+                    render: (text, record) => <Input value={record?.measurementValueID} onChange={(e) => dispatch({ type: 'createMeasurement', payload: {term: record.measurementType, value: {...record, measurementValueID: e?.target?.value }} })}/>
+                    
+                  },
+                  {
+                    title: "Measurement Determined Date (optional)",
+                    dataIndex: "measurementDeterminedDate",
+                    key: "measurementDeterminedDate",
+                    render: (text, record) => <Input value={record?.measurementDeterminedDate} onChange={(e) => dispatch({ type: 'createMeasurement', payload: {term: record.measurementType, value: {...record, measurementDeterminedDate: e?.target?.value }} })}/>
+                    
+                  },
+                  {
+                    title: "Measurement Determined By (optional)",
+                    dataIndex: "measurementDeterminedBy",
+                    key: "measurementDeterminedBy",
+                    render: (text, record) => <Input value={record?.measurementDeterminedBy} onChange={(e) => dispatch({ type: 'createMeasurement', payload: {term: record.measurementType, value: {...record, measurementDeterminedBy: e?.target?.value }} })}/>
+                    
+                  },
+                  {
+                    title: "Measurement Remarks (optional)",
+                    dataIndex: "measurementRemarks",
+                    key: "measurementRemarks",
+                    render: (text, record) => <Input.TextArea value={record?.measurementRemarks} onChange={(e) => dispatch({ type: 'createMeasurement', payload: {term: record.measurementType, value: {...record, measurementRemarks: e?.target?.value }} })}/>
+                    
+                  },
+                   {
                     title:"",
                     dataIndex: "",
                     key: "__actions",
