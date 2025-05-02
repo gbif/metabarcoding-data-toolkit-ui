@@ -36,6 +36,7 @@ const Publish = ({ setDataset, dataset, user, installationSettings, networks }) 
     dataset?.publishing?.gbifProdDatasetKey
   );
   const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
   const [organisations, setOrganisations] = useState([]);
   const [organisationsResolved, setOrganisationsResolved] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState(null);
@@ -169,7 +170,7 @@ const Publish = ({ setDataset, dataset, user, installationSettings, networks }) 
       display: 'flex',
     }}
   >
-                <div>{!!selectedPendingOrg &&  <a href={`mailto:${installationSettings?.installationContactEmail}?subject=${encodeURIComponent("DNA Metabarcoding dataset publishing")}&body=${
+                <div>{!!selectedPendingOrg &&  <>Ask for access to publish under this institution/organisation: <br/> <Button type="link" href={`mailto:${installationSettings?.installationContactEmail}?subject=${encodeURIComponent("DNA Metabarcoding dataset publishing")}&body=${
                     encodeURIComponent(getExistingOrgEmailBody(
                       {
                         ednaDatasetID: dataset?.id, 
@@ -179,11 +180,25 @@ const Publish = ({ setDataset, dataset, user, installationSettings, networks }) 
                         user: user,
                         publishingOrganizationTitle: selectedPendingOrg?.title,
                         publishingOrganizationKey: selectedPendingOrg?.key,
-                        }))}`} target="_blank" rel="noreferrer" >Ask for access to publish under this institution/organisation</a> }
+                        }))}`} target="_blank" rel="noreferrer" >Send email</Button> or
+                        <Button type="link" onClick={() => setShowEmailModal(getExistingOrgEmailBody(
+                          {
+                            ednaDatasetID: dataset?.id, 
+                            gbifUatKey: dataset?.publishing?.gbifUatDatasetKey || dataset?.publishing?.gbifDatasetKey, 
+                            toolBaseUrl: window.location.protocol +"//"+ window.location.hostname, 
+                            registryBaseUrl: installationSettings?.gbifRegistryBaseUrl,
+                            user: user,
+                            publishingOrganizationTitle: selectedPendingOrg?.title,
+                            publishingOrganizationKey: selectedPendingOrg?.key,
+                            }))} >Copy email text</Button></>
+                        
+                        }
                         <br />
+                        
                         </div>
                         <div> <Text style={{marginTop: "24px"}} >Can´t find your institution/organisation?</Text><br />
-                        <a href={`mailto:${installationSettings?.installationContactEmail}?subject=${encodeURIComponent("DNA Metabarcoding dataset publishing")}&body=${
+                        Ask for help with registering your institution/organisation: <br/>
+                        <Button type="link" href={`mailto:${installationSettings?.installationContactEmail}?subject=${encodeURIComponent("DNA Metabarcoding dataset publishing")}&body=${
                     encodeURIComponent(getNewOrgEmailBody(
                       {
                         ednaDatasetID: dataset?.id, 
@@ -191,13 +206,23 @@ const Publish = ({ setDataset, dataset, user, installationSettings, networks }) 
                         toolBaseUrl: window.location.protocol +"//"+ window.location.hostname, 
                         registryBaseUrl: installationSettings?.gbifRegistryBaseUrl,
                         user: user
-                        }))}`} target="_blank" rel="noreferrer" >Ask for help with registering your institution/organisation</a> </div>
+                        }))}`} target="_blank" rel="noreferrer" >Send email</Button> or <Button type="link" onClick={() => setShowEmailModal(getNewOrgEmailBody(
+                          {
+                            ednaDatasetID: dataset?.id, 
+                            gbifUatKey: dataset?.publishing?.gbifUatDatasetKey || dataset?.publishing?.gbifDatasetKey, 
+                            toolBaseUrl: window.location.protocol +"//"+ window.location.hostname, 
+                            registryBaseUrl: installationSettings?.gbifRegistryBaseUrl,
+                            user: user
+                            }))}>Copy email text</Button> </div>
                         </Space>
                 </Col>
                 <Col style={{paddingLeft: "10px"}}>
                   
                 </Col>
             </Row>
+            <Modal footer={null} title={`Copy this text and send it to ${installationSettings?.installationContactEmail}`} open={!!showEmailModal} onOk={() => setShowEmailModal("")} onCancel={() => setShowEmailModal("")}>
+              <p>{showEmailModal}</p>
+              </Modal>
             </>,
           },
           {
