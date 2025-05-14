@@ -18,13 +18,17 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
   const [error, setError] = useState(null)
   const [failed, setFailed] = useState(dataset?.dwc?.steps?.find(s => s.status === 'failed') || false);
   const [finished, setFinished] = useState(dataset?.dwc?.steps?.find(s => s.status === 'finished') || false);
+  const [dwcdpFinished, setDwcDpFinished] = useState(dataset?.dwcdp?.steps?.find(s => s.status === 'finished') || false);
+  const [dwcdpFailed, setDwcDpFailed] = useState(dataset?.dwcdp?.steps?.find(s => s.status === 'failed') || false);
+  const [dwcdpLoading, setDwcDpLoading] = useState(false)
+
   const [registering, setRegistering] = useState(false);
   const [gbifUatKey, setGbifUatKey] = useState(dataset?.publishing?.gbifDatasetKey || dataset?.publishing?.gbifDatasetKey);
   const [showRegisterModal, setShowRegisterModal] = useState(false)
   const [validating, setValidating] = useState(false)
   const [validationId, setValidationId] = useState(dataset?.publishing?.validationId || null)
   let hdl = useRef();
-
+  let dwcdpHdl  = useRef();
  
   useEffect(() => {
     if (!!dataset) {
@@ -43,6 +47,20 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
       message.info("Processing data");
 
       hdl.current = setInterval(() => getData(key, hdl.current), 1000);
+
+    } catch (error) {
+      if(error?.response?.status > 399 && error?.response?.status < 404){
+        setLoginFormVisible(true)
+      }
+    message.error(error?.message || error);     
+      //setError(error)
+    }
+
+    try {
+      const processRes = await axiosWithAuth.post(`${config.backend}/dataset/${key}/dwc-dp`);
+     // message.info("Processing data");
+
+      dwcdpHdl.current = setInterval(() => getDwcDpData(key, dwcdpHdl.current), 1000);
 
     } catch (error) {
       if(error?.response?.status > 399 && error?.response?.status < 404){
@@ -74,6 +92,30 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
 
     } catch (error) {
       setLoading(false)
+      console.log("getData error:")
+      console.log(error)
+
+    }
+  }
+
+  const getDwcDpData = async (key, dwcdpHdl) => {
+    try {
+      setDwcDpLoading(true)
+      const res = await axiosWithAuth.get(`${config.backend}/dataset/${key}/dwc-dp`)
+      setDataset(res?.data)
+
+      setDwcDpLoading(false)
+      const isFinished = res?.data?.dwcdp?.steps[res?.data?.dwcdp?.steps.length - 1].status === 'finished';
+      const isFailed = !!res?.data?.dwcdp?.steps.find(s => s.status === 'failed');
+      if (isFinished || isFailed) {
+        clearInterval(dwcdpHdl);
+      }
+      setDwcDpFailed(isFailed)
+      setDwcDpFinished(isFinished)
+
+
+    } catch (error) {
+      setDwcDpLoading(false)
       console.log("getData error:")
       console.log(error)
 
@@ -167,6 +209,28 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
                 children: (s.status === "finished" && idx === dataset?.dwc?.steps?.length - 1) ? "Finished" :
                   <>
                     {`${s.status === "processing" ? s.message : s.messagePending}${s.subTask && idx === dataset?.dwc?.steps.length - 1 ? " - " + s.subTask : ""}`}
+                    {s.total && s.progress && s.status === "processing" &&
+                      <div
+                        style={{
+                          width: 200,
+                        }}
+                      >
+                        <Progress size="small" percent={Math.round(s.progress / s.total * 100)} />
+                      </div>}
+                  </>
+
+              }))
+            }
+          />}
+{dataset?.dwcdp?.steps && dataset?.dwcdp?.steps?.length > 0 && <Title level={5}>Darwin Core Data Package</Title>}
+{dataset?.dwcdp?.steps && dataset?.dwcdp?.steps?.length > 0 && <Timeline
+            items={
+              dataset?.dwcdp?.steps.map((s, idx) => ({
+                dot: s.status === "finished" ? <CheckCircleOutlined /> : s.status === "pending" ? <ClockCircleOutlined /> : null,
+                color: getStatusColor(s.status),
+                children: (s.status === "finished" && idx === dataset?.dwcdp?.steps?.length - 1) ? "Finished" :
+                  <>
+                    {`${s.status === "processing" ? s.message : s.messagePending}${s.subTask && idx === dataset?.dwcdp?.steps.length - 1 ? " - " + s.subTask : ""}`}
                     {s.total && s.progress && s.status === "processing" &&
                       <div
                         style={{

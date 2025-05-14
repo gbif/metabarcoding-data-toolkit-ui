@@ -326,6 +326,7 @@ const DataUpload = ({ user,
                             dataSource={_.isArray(dataset?.files?.invalidErrors) ? dataset?.files?.files.map(f => ({...f, errors: [...(f.errors || []), ...dataset?.files?.invalidErrors?.filter(e => e.file === f?.name)]})).sort(sortUploadedFiles) : dataset?.files?.files.sort(sortUploadedFiles)}
                             renderItem={(file) => (
                                 <List.Item
+                                key={file.name}
                                     actions={[
                                         <Button type="link" 
                                             disabled={file?.type === "fasta" || dataFormat?.name === "Invalid format" || !validFileExtensions.includes(file?.name?.split(".").pop()) || file?.mimeType === "application/x-hdf5" }  
