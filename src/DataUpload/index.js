@@ -107,7 +107,15 @@ const DataUpload = ({ user,
           description: <>Uploaded files are listed here. Some basic consistency and formatting checks are performed. A “green signal” will indicate detected format and if your data looks OK. Uploaded files can be inspected in a simple viewer by clicking the eye icon.</>,
           target: () => ref3.current,
         }]
-
+    const getCleanMapping = (files, mapping) => {
+        const fileNames = files.map(f => f.name)
+        return Object.keys(mapping || {}).reduce((acc, cur) => {
+            if(fileNames.includes(cur)){
+                acc[cur] = mapping[cur];
+            }
+            return acc
+        }, {})
+    }
     useEffect(() => {
         const key = match?.params?.key;
         console.log(match?.params?.key)
@@ -125,7 +133,7 @@ const DataUpload = ({ user,
         }
 
             if(!! dataset?.files?.mapping && !_.isEmpty(dataset?.files?.mapping)){
-                    dispatch({ type: 'initMapping', payload: dataset?.files?.mapping })
+                    dispatch({ type: 'initMapping', payload: getCleanMapping(dataset?.files?.files, dataset?.files.mapping) })
                             
             } else if(dataset?.files?.files) {
                 const mapping = getMappingFromFileArray(dataset?.files?.files)
@@ -179,7 +187,7 @@ const DataUpload = ({ user,
             try {
                 // We will not send the revalidationNeeded to the backend - this is pure frontend logic
                 
-                await axiosWithAuth.post(`${config.backend}/dataset/${key}/file-types`, rest)
+                await axiosWithAuth.post(`${config.backend}/dataset/${key}/file-types`, getCleanMapping(dataset.files?.files, rest))
                 if (mustRevalidate){
                     validate(key)
                 }
