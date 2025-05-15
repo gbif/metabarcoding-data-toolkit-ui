@@ -328,12 +328,14 @@ const DataUpload = ({ user,
                         </Row>
                         { <div ref={ref3}><List
                             loading={loading}
+                            
                             itemLayout="horizontal"
                             header={<Text>Files uploaded</Text>}
                             bordered
                             dataSource={_.isArray(dataset?.files?.invalidErrors) ? dataset?.files?.files.map(f => ({...f, errors: [...(f.errors || []), ...dataset?.files?.invalidErrors?.filter(e => e.file === f?.name)]})).sort(sortUploadedFiles) : dataset?.files?.files.sort(sortUploadedFiles)}
                             renderItem={(file) => (
                                 <List.Item
+                                className="fileUploadList"
                                 key={file.name}
                                     actions={[
                                         <Button type="link" 
@@ -349,12 +351,13 @@ const DataUpload = ({ user,
                                             cancelText="No"><Button type="link"><DeleteOutlined /></Button></Popconfirm>]}
                                 >
                                     <List.Item.Meta
-                                        title={<Row><Col span={12}><span style={file?.errors?.length >0 ? { color: token.colorWarning } : !validFileExtensions.includes(file?.name?.split(".").pop()) ? {color: token.colorTextDisabled} : null}>{file.name}</span></Col>
+                                        title={<Row><Col span={16}><div style={{wordBreak: 'break-word'}}><span style={file?.errors?.length >0 ? { color: token.colorWarning } : !validFileExtensions.includes(file?.name?.split(".").pop()) ? {color: token.colorTextDisabled} : null}>{file.name}</span></div></Col>
                                         {
                                         (dataset?.files?.format.startsWith("TSV") || dataset?.files?.format.startsWith("BIOM_2_1") || dataset?.files?.format === "INVALID") 
                                         && validFileExtensions.includes(file?.name?.split(".").pop())
-                                        && <Col>
-                                        <Select placeholder="Select entity type" 
+                                        && <Col span={8} style={{paddingLeft: "8px"}}>
+                                        <Select  placeholder="Select entity type" 
+                                        
                                         allowClear 
                                         disabled={file?.type === "fasta"}
                                         onChange={val => {

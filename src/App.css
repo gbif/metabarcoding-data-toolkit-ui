@@ -37,3 +37,7 @@
 .dwc-column {
   vertical-align: top
 }
+
+li.fileUploadList > ul.ant-list-item-action {
+  margin-inline-start: 0 !important
+}
