@@ -148,7 +148,7 @@ const ProcessDataset = ({
             setFailed(false)
             setFinished(false)
             try {
-                const processRes = await axiosWithAuth.post(`${config.backend}/dataset/${dataset?.id}/process?skipSimiliarityPlots=true${(showAssignTaxonomyCheckbox && assignTaxonomy) ? '?assignTaxonomy=true' : ''}`);
+                const processRes = await axiosWithAuth.post(`${config.backend}/dataset/${dataset?.id}/process${(showAssignTaxonomyCheckbox && assignTaxonomy) ? '?assignTaxonomy=true' : ''}`);
                 message.info("Processing data");
 
 
