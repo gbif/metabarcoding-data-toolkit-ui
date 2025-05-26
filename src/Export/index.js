@@ -60,7 +60,7 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
       const processRes = await axiosWithAuth.post(`${config.backend}/dataset/${key}/dwc-dp`);
      // message.info("Processing data");
 
-      dwcdpHdl.current = setInterval(() => getDwcDpData(key, dwcdpHdl.current), 1000);
+      /* dwcdpHdl.current = setInterval(() => getDwcDpData(key, dwcdpHdl.current), 1000); */
 
     } catch (error) {
       if(error?.response?.status > 399 && error?.response?.status < 404){
@@ -73,6 +73,22 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
 
   }
 
+  const shouldClearInterval = (data) => {
+    const isFinished = data?.dwc?.steps[data?.dwc?.steps.length - 1].status === 'finished';
+    const isFailed = !!data?.dwc?.steps.find(s => s.status === 'failed');
+    const hasDwcDp = !!data?.dwcdp?.steps && data?.dwcdp?.steps.length > 0;
+    const isDwcDpFinished = hasDwcDp && data?.dwcdp?.steps[data?.dwcdp?.steps.length - 1].status === 'finished';
+    const isDwcDpFailed = hasDwcDp && !!data?.dwcdp?.steps.find(s => s.status === 'failed');
+    if ((isFinished || isFailed) && (!hasDwcDp || (isDwcDpFinished || isDwcDpFailed))) {
+      clearInterval(hdl.current);
+      return true;
+    }
+    setFailed(isFailed)
+      setFinished(isFinished)
+      setDwcDpFailed(isDwcDpFailed)
+      setDwcDpFinished(isDwcDpFinished)
+    return false;
+  }
 
   const getData = async (key, hdl) => {
     try {
@@ -81,13 +97,14 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
       setDataset(res?.data)
 
       setLoading(false)
-      const isFinished = res?.data?.dwc?.steps[res?.data?.dwc?.steps.length - 1].status === 'finished';
+      shouldClearInterval(res?.data)
+      /* const isFinished = res?.data?.dwc?.steps[res?.data?.dwc?.steps.length - 1].status === 'finished';
       const isFailed = !!res?.data?.dwc?.steps.find(s => s.status === 'failed');
       if (isFinished || isFailed) {
         clearInterval(hdl);
       }
       setFailed(isFailed)
-      setFinished(isFinished)
+      setFinished(isFinished) */
 
 
     } catch (error) {
@@ -98,7 +115,7 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
     }
   }
 
-  const getDwcDpData = async (key, dwcdpHdl) => {
+ /*  const getDwcDpData = async (key, dwcdpHdl) => {
     try {
       setDwcDpLoading(true)
       const res = await axiosWithAuth.get(`${config.backend}/dataset/${key}/dwc-dp`)
@@ -120,7 +137,7 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
       console.log(error)
 
     }
-  }
+  } */
 
   const registerData = async key => {
 
