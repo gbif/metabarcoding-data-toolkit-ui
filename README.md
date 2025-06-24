@@ -12,9 +12,12 @@ It works on top of [metabarcoding-data-toolkit-backend](https://github.com/gbif/
 * Include as many immediate benefits as long as they are easily implemented
 * Prioritize fast and easy publication and online visibility (and later curation, correction) as opposed to a tedious publishing process with many steps and choices
 
+## Installations and Guide
+* [MDT user guide](https://doi.org/10.35035/doc-wkpc-m352)
+* [GBIF test installation](https://mdt.gbif-test.org/)
+* [More installations](https://docs.gbif-uat.org/mdt-user-guide/en/#mdt_installations)
 
-# Tecnical details
-
+# Technical details
 
 In the project directory, you can run:
 
@@ -25,7 +28,6 @@ Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 The page will reload when you make changes.\
 You may also see any lint errors in the console.\
 In development mode, the backend service is configured in the `.env` file through the `REACT_APP_API_URL` variable.
-
 
 ### `npm test`
 
