@@ -332,7 +332,7 @@ const DataUpload = ({ user,
                             itemLayout="horizontal"
                             header={<Text>Files uploaded</Text>}
                             bordered
-                            dataSource={_.isArray(dataset?.files?.invalidErrors) ? dataset?.files?.files.map(f => ({...f, errors: [...(f.errors || []), ...dataset?.files?.invalidErrors?.filter(e => e.file === f?.name)]})).sort(sortUploadedFiles) : dataset?.files?.files.sort(sortUploadedFiles)}
+                            dataSource={_.isArray(dataset?.files?.invalidErrors) ? dataset?.files?.files.map(f => ({...f, errors: [...(f.errors || []), ...dataset?.files?.invalidErrors?.filter(e => e.file === f?.name)]}))?.sort(sortUploadedFiles) : dataset?.files?.files.sort(sortUploadedFiles)}
                             renderItem={(file) => (
                                 <List.Item
                                 className="fileUploadList"
