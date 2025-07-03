@@ -40,6 +40,7 @@ const ProcessDataset = ({
     const [validationIssues, setValidationIssues] = useState([])
     const [showProcessingErrors, setShowProcessingErrors] = useState(false)
     const [assignTaxonomy, setAssignTaxonomy] = useState(dataset?.assignTaxonomy || false)
+    const [skipSimiliarityPlots, setSkipSimiliarityPlots] = useState(false)
     const [showAssignTaxonomyCheckbox, setShowAssignTaxonomyCheckbox] = useState(false)
     const [metrics, setMetrics] = useState(null)
     const { token } = useToken();
@@ -148,7 +149,7 @@ const ProcessDataset = ({
             setFailed(false)
             setFinished(false)
             try {
-                const processRes = await axiosWithAuth.post(`${config.backend}/dataset/${dataset?.id}/process${(showAssignTaxonomyCheckbox && assignTaxonomy) ? '?assignTaxonomy=true' : ''}`);
+                const processRes = await axiosWithAuth.post(`${config.backend}/dataset/${dataset?.id}/process${(showAssignTaxonomyCheckbox && assignTaxonomy) ? '?assignTaxonomy=true' : ''}${(skipSimiliarityPlots) ? '?skipSimiliarityPlots=true' : ''}`);
                 message.info("Processing data");
 
 
@@ -319,7 +320,10 @@ const ProcessDataset = ({
                             <ul>
                                 {supportedMarkers.map(e => <li>{e.name} : {e.database}</li>)}
                             </ul>
-                            </>}/></>
+                            </>}/>
+{/*                             <Checkbox style={{ marginLeft: "10px" }} checked={skipSimiliarityPlots} onChange={(e) => setSkipSimiliarityPlots(e?.target?.checked)}>Skip similarity plots </Checkbox>
+ */}
+                            </>
 
                         {dataset?.steps && dataset?.steps?.length > 0 && <Timeline
                             items={

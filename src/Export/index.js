@@ -27,6 +27,7 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
   const [showRegisterModal, setShowRegisterModal] = useState(false)
   const [validating, setValidating] = useState(false)
   const [validationId, setValidationId] = useState(dataset?.publishing?.validationId || null)
+  const [processingButtonClicked, setProcessingButtonClicked] = useState(false);
   let hdl = useRef();
   let dwcdpHdl  = useRef();
  
@@ -38,8 +39,17 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
     }
   }, [dataset])
 
-  const processData = async key => {
+  useEffect(() => {
+    if(processingButtonClicked && finished && !!dataset?.id) {
+      setDwcDpFailed(false)
+    setDwcDpFinished(false)
+     axiosWithAuth.post(`${config.backend}/dataset/${dataset?.id}/dwc-dp`);
+      dwcdpHdl.current = setInterval(() => getDwcDpData(dataset?.id, dwcdpHdl.current), 1000);
+    }
+  }, [processingButtonClicked,finished, dataset?.id]);
 
+  const processData = async key => {
+    setProcessingButtonClicked(true);
     setFailed(false)
     setFinished(false)
     try {
@@ -56,22 +66,12 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
       //setError(error)
     }
 
-    try {
-      const processRes = await axiosWithAuth.post(`${config.backend}/dataset/${key}/dwc-dp`);
-     // message.info("Processing data");
 
-      /* dwcdpHdl.current = setInterval(() => getDwcDpData(key, dwcdpHdl.current), 1000); */
-
-    } catch (error) {
-      if(error?.response?.status > 399 && error?.response?.status < 404){
-        setLoginFormVisible(true)
-      }
-    message.error(error?.message || error);     
-      //setError(error)
-    }
 
 
   }
+
+   
 
   const shouldClearInterval = (data) => {
     const isFinished = data?.dwc?.steps[data?.dwc?.steps.length - 1].status === 'finished';
@@ -81,16 +81,17 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
     const isDwcDpFailed = hasDwcDp && !!data?.dwcdp?.steps.find(s => s.status === 'failed');
     if ((isFinished || isFailed) && (!hasDwcDp || (isDwcDpFinished || isDwcDpFailed))) {
       clearInterval(hdl.current);
-      return true;
+    }
+    if (processingButtonClicked && (isDwcDpFinished || isDwcDpFailed)) {
+      clearInterval(dwcdpHdl.current);
     }
     setFailed(isFailed)
       setFinished(isFinished)
       setDwcDpFailed(isDwcDpFailed)
       setDwcDpFinished(isDwcDpFinished)
-    return false;
   }
 
-  const getData = async (key, hdl) => {
+  const getData = async (key) => {
     try {
       setLoading(true)
       const res = await axiosWithAuth.get(`${config.backend}/dataset/${key}/dwc`)
@@ -98,13 +99,7 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
 
       setLoading(false)
       shouldClearInterval(res?.data)
-      /* const isFinished = res?.data?.dwc?.steps[res?.data?.dwc?.steps.length - 1].status === 'finished';
-      const isFailed = !!res?.data?.dwc?.steps.find(s => s.status === 'failed');
-      if (isFinished || isFailed) {
-        clearInterval(hdl);
-      }
-      setFailed(isFailed)
-      setFinished(isFinished) */
+    
 
 
     } catch (error) {
@@ -115,20 +110,15 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
     }
   }
 
- /*  const getDwcDpData = async (key, dwcdpHdl) => {
+    const getDwcDpData = async (key) => {
     try {
       setDwcDpLoading(true)
       const res = await axiosWithAuth.get(`${config.backend}/dataset/${key}/dwc-dp`)
       setDataset(res?.data)
 
       setDwcDpLoading(false)
-      const isFinished = res?.data?.dwcdp?.steps[res?.data?.dwcdp?.steps.length - 1].status === 'finished';
-      const isFailed = !!res?.data?.dwcdp?.steps.find(s => s.status === 'failed');
-      if (isFinished || isFailed) {
-        clearInterval(dwcdpHdl);
-      }
-      setDwcDpFailed(isFailed)
-      setDwcDpFinished(isFinished)
+      shouldClearInterval(res?.data)
+   
 
 
     } catch (error) {
@@ -137,7 +127,9 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
       console.log(error)
 
     }
-  } */
+  }
+
+
 
   const registerData = async key => {
 

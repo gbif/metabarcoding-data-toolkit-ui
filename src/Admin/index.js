@@ -1,16 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
-import { Table, Typography, Card, Result, Button, Popconfirm} from "antd";
+import { Table, Typography, Card, Result, Button, Popconfirm, Input, Space} from "antd";
 import { useNavigate } from "react-router-dom";
 import { axiosWithAuth } from "../Auth/userApi";
 import { LuExternalLink } from "react-icons/lu";
-import { DeleteOutlined } from '@ant-design/icons';
+import { DeleteOutlined, SearchOutlined } from '@ant-design/icons';
 import {dateFormatter, numberFormatter} from '../Util/formatters'
 import AdminTabs from "./AdminTabs"
 import _ from "lodash";
 import withContext from "../Components/hoc/withContext";
+import Highlighter from 'react-highlight-words';
 
 
 import config from "../config";
@@ -22,6 +23,94 @@ function Admin({user, setLoginFormVisible}) {
   const [userFilter, setUserFilter] = useState([])
   const [loading, setLoading] = useState(false)
   const [deleteInProgress, setDeleteInProgress] = useState(false)
+   const [searchText, setSearchText] = useState('');
+  const [searchedColumn, setSearchedColumn] = useState('');
+  const searchInput = useRef(null);
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+  };
+  const handleReset = clearFilters => {
+    clearFilters();
+    setSearchText('');
+  };
+  const getColumnSearchProps = dataIndex => ({
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
+      <div style={{ padding: 8 }} onKeyDown={e => e.stopPropagation()}>
+        <Input
+          ref={searchInput}
+          placeholder={`Search ${dataIndex}`}
+          value={selectedKeys[0]}
+          onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+          style={{ marginBottom: 8, display: 'block' }}
+        />
+        <Space>
+          <Button
+            type="primary"
+            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+            icon={<SearchOutlined />}
+            size="small"
+            style={{ width: 90 }}
+          >
+            Search
+          </Button>
+          <Button
+            onClick={() => clearFilters && handleReset(clearFilters)}
+            size="small"
+            style={{ width: 90 }}
+          >
+            Reset
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              confirm({ closeDropdown: false });
+              setSearchText(selectedKeys[0]);
+              setSearchedColumn(dataIndex);
+            }}
+          >
+            Filter
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              close();
+            }}
+          >
+            close
+          </Button>
+        </Space>
+      </div>
+    ),
+    filterIcon: filtered => <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />,
+    onFilter: (value, record) =>
+      record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
+    filterDropdownProps: {
+      onOpenChange(open) {
+        if (open) {
+          setTimeout(() => {
+            var _a;
+            return (_a = searchInput.current) === null || _a === void 0 ? void 0 : _a.select();
+          }, 100);
+        }
+      },
+    },
+    render: text =>
+      searchedColumn === dataIndex ? (
+        <Highlighter
+          highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
+          searchWords={[searchText]}
+          autoEscape
+          textToHighlight={text ? text.toString() : ''}
+        />
+      ) : (
+        text
+      ),
+  });
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -76,7 +165,8 @@ function Admin({user, setLoginFormVisible}) {
                 dataIndex: "title",
                 key: "title",
                 sorter: (a,b) => (a.title < b.title) ? 1 : ((b.title < a.title) ? -1 : 0),
-                render: (text, record) =>  <a href="" onClick={()=> navigate(`/dataset/${record.dataset_id}/upload`)}>{text || <LuExternalLink />}</a> 
+                render: (text, record) =>  <a href="" onClick={()=> navigate(`/dataset/${record.dataset_id}/upload`)}>{text || <LuExternalLink />}</a> ,
+                ...getColumnSearchProps('title'),
             },
             {
               title: "",
