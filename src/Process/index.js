@@ -3,8 +3,8 @@ import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
-import { Table, Descriptions, Row, Col, Alert, Button, Timeline, Progress, Statistic, Space, Typography, Tooltip, Checkbox, message, theme, Tabs } from "antd"
-import { CheckCircleOutlined, ClockCircleOutlined, WarningOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { Table, Descriptions, Row, Col, Alert, Button, Timeline, Progress, Statistic, Space, Typography, Tooltip, Checkbox, message, theme, Popover } from "antd"
+import { CheckCircleOutlined, ClockCircleOutlined, WarningOutlined, ExclamationCircleOutlined, SettingOutlined } from '@ant-design/icons';
 import {dateFormatter, numberFormatter} from '../Util/formatters'
 import FilesAvailable from '../Components/FilesAvailable'
 import _ from "lodash"
@@ -290,17 +290,17 @@ const ProcessDataset = ({
                         </ul>} />}
                 <Row justify="space-evenly">
                     <Col span={6}>
+                    <div  style={{ marginBottom: "24px" }} >
                         <Button 
                             type="primary" 
-                            style={{ marginBottom: "24px" }} 
+                           style={{marginRight: "10px", marginBottom: "6px"}}
                             onClick={() => processData(dataset?.id)} 
                             disabled={!isValidForProcessing() || (!!dataset?.steps && !(failed || finished))} 
                             loading={!!dataset?.steps && !(failed || finished)}>
                                {!!dataset?.steps && (failed || finished) ? 'Re-process data':'Process data'} 
                                 </Button>
-                         <>   
-                            <Checkbox disabled={!showAssignTaxonomyCheckbox || (!!dataset?.steps && !(failed || finished))} style={{ marginLeft: "10px" }} checked={assignTaxonomy} onChange={(e) => setAssignTaxonomy(e?.target?.checked)}>Assign taxonomy </Checkbox>
-                            <Help title="Taxonomic assigment" content={showAssignTaxonomyCheckbox ? <>
+
+                            <div style={{display: 'inline'}}><Checkbox disabled={!showAssignTaxonomyCheckbox || (!!dataset?.steps && !(failed || finished))}  checked={assignTaxonomy} onChange={(e) => setAssignTaxonomy(e?.target?.checked)}>Assign taxonomy <Help trigger="hover" style={{display: 'inline'}} title="Taxonomic assigment" content={showAssignTaxonomyCheckbox ? <>
                             <p>
                             This will blast the ASVs against <strong> {`${supportedMarkers.find(m => m?.name === dataset?.mapping?.defaultValues?.target_gene?.toLowerCase())?.database}`}</strong>
                             </p>
@@ -320,10 +320,12 @@ const ProcessDataset = ({
                             <ul>
                                 {supportedMarkers.map(e => <li>{e.name} : {e.database}</li>)}
                             </ul>
-                            </>}/>
+                            </>}/></Checkbox>
+
 {/*                             <Checkbox style={{ marginLeft: "10px" }} checked={skipSimiliarityPlots} onChange={(e) => setSkipSimiliarityPlots(e?.target?.checked)}>Skip similarity plots </Checkbox>
  */}
-                            </>
+                           <Checkbox  checked={skipSimiliarityPlots} onChange={(e) => setSkipSimiliarityPlots(e?.target?.checked)}>Skip similarity plots <Help trigger="hover" title="Similarity plots" content="If checked, similarity plots (Ordinations) will be skipped during the processing. For large datasets, this lowers processing time significantly." /></Checkbox></div>
+                           </div>
 
                         {dataset?.steps && dataset?.steps?.length > 0 && <Timeline
                             items={
