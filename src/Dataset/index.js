@@ -5,6 +5,7 @@ import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
 import DataBrowser from "../Review/DataBrowser";
 import MetaDataView from "./MetaDataView";
+import DashBoardContent from "../DashBoard/DashBoardContent";
 import withContext from "../Components/hoc/withContext";
 const { Title } = Typography;
 const Dataset = ({ dataset }) => {
@@ -24,6 +25,11 @@ const Dataset = ({ dataset }) => {
               key: "1",
               label: `Browse`,
               children: <DataBrowser />,
+            },
+            {
+              key: "explore",
+              label: `Explore`,
+              children: <DashBoardContent />,
             },
             {
               key: "2",
