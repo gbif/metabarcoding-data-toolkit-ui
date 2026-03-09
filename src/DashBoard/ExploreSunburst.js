@@ -55,7 +55,7 @@ const buildSunburstData = (rows) => {
  *   rows           – all aggregated taxonomy rows from the current query
  *   selectedSample – optional eventID string; when omitted, all rows are aggregated
  */
-const ExploreSunburst = ({ rows, selectedSample }) => {
+const ExploreSunburst = ({ rows, selectedSample, eventCount: eventCountProp }) => {
     const { chartData, title, subtitle } = useMemo(() => {
         if (!rows?.length) return { chartData: null };
 
@@ -68,15 +68,15 @@ const ExploreSunburst = ({ rows, selectedSample }) => {
             };
         }
 
-        const eventCount = new Set(rows.map(r => r.eventID)).size;
         const chartData = buildSunburstData(rows);
         const totalAsvs = chartData.find(d => d.id === '0')?.value ?? 0;
+        const count = eventCountProp ?? new Set(rows.map(r => r.eventID)).size;
         return {
             chartData,
-            title: `${eventCount} event${eventCount !== 1 ? 's' : ''}`,
+            title: `${count} event${count !== 1 ? 's' : ''}`,
             subtitle: `Combined taxonomic composition — ${totalAsvs.toLocaleString()} ASVs`,
         };
-    }, [rows, selectedSample]);
+    }, [rows, selectedSample, eventCountProp]);
 
     if (!chartData) return null;
 

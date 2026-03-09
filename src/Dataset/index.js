@@ -26,11 +26,11 @@ const Dataset = ({ dataset }) => {
               label: `Browse`,
               children: <DataBrowser />,
             },
-            {
+           /*  {
               key: "explore",
               label: `Explore`,
               children: <DashBoardContent />,
-            },
+            }, */
             {
               key: "2",
               label: `Metadata`,

@@ -160,7 +160,7 @@ const AssertionFilter = ({ datasetId, assertionTypes, filters, onFiltersChange }
         }}>
             <Row align="middle" style={{ marginBottom: filters.length > 0 ? 12 : 0 }}>
                 <Col flex="auto">
-                    <Text strong>Filter by site characteristics</Text>
+                    <Text strong>Filter by event assertions</Text>
                     {filters.length === 0 && (
                         <Text type="secondary" style={{ marginLeft: 10 }}>— showing all events</Text>
                     )}
