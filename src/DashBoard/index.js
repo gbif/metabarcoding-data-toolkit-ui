@@ -23,7 +23,7 @@ const DashBoard = ({dataset}) => {
     <Layout><PageContent>
         
           <Row justify="space-between" align="middle" style={{ marginBottom: '20px' }}>
-            <Title level={3}>Explore DWC Datapackage</Title>
+            <Title level={3}>Explore Darwin Core Data Package (DwC-DP)</Title>
           </Row>
       
        <DashBoardContent />

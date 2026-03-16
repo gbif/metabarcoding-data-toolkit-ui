@@ -223,6 +223,12 @@ const DashBoardContent = ({ dataset }) => {
     const readCountFilterRef = useRef(EMPTY_RC_FILTER);
     useEffect(() => { readCountFilterRef.current = readCountFilter; }, [readCountFilter]);
 
+    const filtersRef = useRef([]);
+    useEffect(() => { filtersRef.current = filters; }, [filters]);
+
+    const dateFilterRef = useRef(EMPTY_DATE_FILTER);
+    useEffect(() => { dateFilterRef.current = dateFilter; }, [dateFilter]);
+
     // ── Derive map filter function ────────────────────────────────────────────
     const geoJsonFilter = useMemo(() => {
         if (!filteredEventIds) return null;
@@ -293,7 +299,6 @@ const DashBoardContent = ({ dataset }) => {
         if (!datasetId) return;
         setLoading(true);
         setError(null);
-        setSelectedSample(null);
         try {
             const post = (sql, opts = {}) =>
                 axios.post(`${config.backend}/dataset/${datasetId}/explore/query`, { sql, ...opts });
@@ -392,17 +397,10 @@ const DashBoardContent = ({ dataset }) => {
         // On-demand fetch for events outside the top N (e.g. clicked on map)
         let cancelled = false;
         const escaped = selectedSample.replace(/'/g, "''");
-        const rcf = readCountFilterRef.current;
 
-        const rcClauses = [];
-        if (rcf.minAbsolute != null)
-            rcClauses.push(`CAST(na.readCount AS INTEGER) >= ${rcf.minAbsolute}`);
-        if (rcf.minRelative != null)
-            rcClauses.push(
-                `CAST(na.readCount AS DOUBLE) / NULLIF(CAST(na.totalReadCount AS DOUBLE), 0)` +
-                ` >= ${rcf.minRelative}`
-            );
-        const rcWhere = rcClauses.length > 0 ? `\n  AND ${rcClauses.join('\n  AND ')}` : '';
+        const baseWhere = buildWhereClause(filtersRef.current, readCountFilterRef.current, dateFilterRef.current);
+        const eventCondition = `na.eventID = '${escaped}'`;
+        const fullWhere = baseWhere ? `${baseWhere}\nAND ${eventCondition}` : `WHERE ${eventCondition}`;
 
         const sql = `
 SELECT
@@ -417,7 +415,7 @@ SELECT
   SUM(CAST(na.readCount AS INTEGER))     AS readCount
 FROM "nucleotide-analysis" na
 JOIN "identification" i ON na.nucleotideSequenceID = i.nucleotideSequenceID
-WHERE na.eventID = '${escaped}'${rcWhere}
+${fullWhere}
 GROUP BY na.eventID, i.kingdom, i.phylum, i."class", i."order", i.family, i.genus`.trim();
 
         axios.post(`${config.backend}/dataset/${datasetId}/explore/query`, { sql })
@@ -425,7 +423,7 @@ GROUP BY na.eventID, i.kingdom, i.phylum, i."class", i."order", i.family, i.genu
             .catch(() => { if (!cancelled) setSampleRows([]); });
 
         return () => { cancelled = true; };
-    }, [selectedSample, datasetId]);
+    }, [selectedSample, datasetId, perEventRows]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // ─────────────────────────────────────────────────────────────────────────
     if (!hasDataPackage) {
