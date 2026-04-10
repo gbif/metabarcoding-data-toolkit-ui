@@ -20,8 +20,9 @@ const detectNumeric = (values) => values.length > 0 && values.every(isNumericStr
 const deriveStep = (values) => {
     const maxDecimals = Math.max(
         ...values.map(v => {
-            const dot = v.indexOf('.');
-            return dot === -1 ? 0 : v.length - dot - 1;
+            const asStr = String(v);
+            const dot = asStr.indexOf('.');
+            return dot === -1 ? 0 : asStr.length - dot - 1;
         })
     );
     return maxDecimals === 0 ? 1 : Math.pow(10, -maxDecimals);
