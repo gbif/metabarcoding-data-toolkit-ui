@@ -66,6 +66,8 @@ const DataUpload = ({ user,
     const [dataFormat, setDataFormat] = useState(null)
     const [selectedFile, setSelectedFile] = useState(null)
     const [open, setOpen] = useState(false)
+    const [assayNames, setAssayNames] = useState([])
+    const [selectedAssay, setSelectedAssay] = useState(null)
     const ref1 = useRef(null);
     const ref2 = useRef(null);
     const ref3 = useRef(null);
@@ -127,6 +129,13 @@ const DataUpload = ({ user,
         if (dataset?.files?.format && Object.keys(format).includes(dataset?.files?.format)) {
             setDataFormat(format[dataset?.files?.format])
             setValid(dataset?.files?.format !== 'INVALID')
+
+             if(dataset?.files?.format === "FAIRe" && dataset?.files?.assayNames?.length > 0){
+                    setAssayNames(dataset?.files?.assayNames)
+                }
+             if(dataset?.files?.format === "FAIRe" && dataset?.files?.selectedAssay){
+                setSelectedAssay(dataset?.files?.selectedAssay)
+             }
         } else {
             setValid(false)
             setDataFormat(null)
@@ -145,6 +154,7 @@ const DataUpload = ({ user,
 
     useEffect(() => {
         setSelectedFile(null)
+        setSelectedAssay(null)
     },[dataset?.id])
 
     useEffect(() => { }, [dataFormat])
@@ -170,6 +180,23 @@ const DataUpload = ({ user,
         }
 
     }, [state, user])
+
+    useEffect(() => {
+        const key = match?.params?.key;
+        if (!key || !user || selectedAssay === null) return;
+        setLoading(true)
+        axiosWithAuth.post(`${config.backend}/dataset/${key}/assay`, { assay: selectedAssay })
+            .then(res => {
+                if (res?.data) {
+                    setDataset(res.data);
+                    setLoading(false)
+                }
+            })
+            .catch(() => {
+                message.warning({ content: "Could not save assay selection" })
+                setLoading(false)
+            });
+    }, [selectedAssay])
 
     const getMappingFromFileArray = (files) => {
             return _.isArray(files) ? files.reduce((acc, cur) => {
@@ -207,6 +234,9 @@ const DataUpload = ({ user,
                 setValid(res?.data?.files?.format !== 'INVALID')
                 setDataset({...res?.data, files: {...res.data.files}})
                 setDataFormat(format[res?.data?.files?.format])
+                if(res?.data?.files?.format === "FAIRe" && res?.data?.files?.assayNames?.length > 0){
+                    setAssayNames(res?.data?.files?.assayNames)
+                }
             } else {
                 setValid(false)
                 setDataset(res?.data)
@@ -319,7 +349,14 @@ const DataUpload = ({ user,
                                 {dataFormat?.name && dataFormat?.name === "Invalid format" && <Tag icon={<CloseCircleOutlined />} color="error">
                                     {dataFormat?.name}{dataset?.files?.invalidMessage ? ` - ${dataset?.files?.invalidMessage}`:""}
                                 </Tag>}
+
+                                {assayNames?.length > 0 &&
+                               <>{"Assay: "} <Select size="small" placeholder="Select Assay" style={{width: "200px"}} value={selectedAssay} onChange={(val) => setSelectedAssay(val)}>
+                                    {assayNames.map(assay => <Select.Option key={assay} value={assay}>{assay}</Select.Option>)}
+                                </Select></>
+                            }
                             </Col>
+                            
                             <Col>
                                 <Button onClick={() => navigate(`/dataset/${match?.params?.key}/term-mapping`)} type={valid ? 'primary': 'dashed'} disabled={!valid}>
                                     Proceed
