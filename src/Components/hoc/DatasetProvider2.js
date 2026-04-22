@@ -29,11 +29,12 @@ const DatasetProvider = ({setDataset, user, setLoginFormVisible }) => {
     const metadataMatch = useMatch('/dataset/:key/metadata');
     const exportMatch = useMatch('/dataset/:key/export');
     const publishMatch = useMatch('/dataset/:key/publish');
+     const dashboardMatch = useMatch('/dataset/:key/dashboard');
     const [state, dispatch] = useReducer(reducer, initialState);
 
     useEffect(() => {
 
-        const datasetRouteChange = processMatch || reviewMatch || metadataMatch || exportMatch || publishMatch || uploadMatch || mappingMatch || datasetMatch;
+        const datasetRouteChange = processMatch || reviewMatch || metadataMatch || exportMatch || publishMatch || uploadMatch || mappingMatch || dashboardMatch || datasetMatch;
         if(datasetRouteChange && datasetRouteChange.params.key !== "new"){
             dispatch({ type: 'routeChange', payload: {route: datasetRouteChange.pathname, key: datasetRouteChange.params.key} })
         } else if(!user && datasetRouteChange.params.key === "new") {
@@ -43,7 +44,7 @@ const DatasetProvider = ({setDataset, user, setLoginFormVisible }) => {
             dispatch({ type: 'resetDataset', payload: null })
         }
        
-    }, [datasetMatch, mappingMatch, metadataMatch, processMatch,exportMatch, publishMatch, reviewMatch, uploadMatch, user])
+    }, [datasetMatch, mappingMatch, metadataMatch, processMatch,exportMatch, publishMatch, reviewMatch, uploadMatch, dashboardMatch, user])
    
     useEffect(()=>{
     console.log(`Dataset ${state?.key}`)

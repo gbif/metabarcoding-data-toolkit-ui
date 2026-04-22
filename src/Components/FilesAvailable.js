@@ -2,7 +2,8 @@
 
 import React from "react";
 import { Button, List, Typography, Popover, Alert, Row, Col } from "antd"
-import { DownloadOutlined, WarningOutlined } from '@ant-design/icons';
+import { DownloadOutlined, WarningOutlined, BarChartOutlined } from '@ant-design/icons';
+import { Link } from 'react-router-dom';
 import Help from "./Help";
 import config from "../config";
 const { Title, Text } = Typography;
@@ -22,7 +23,14 @@ const FilesAvailable = ({ dataset, showTitle = true }) => <div style={{maxWidth:
         header={<Row><Col flex="auto"></Col><Col>{help}</Col></Row>}
         renderItem={(file) => (
             <List.Item
-                actions={[<Button type="link" download={file.fileName} href={file?.fileName === 'log.txt'? `${config.backend}/dataset/${dataset?.id}/log.txt`: `${config.backend}/dataset/${dataset?.id}/file/${file.fileName}`}><DownloadOutlined color="yellow"/></Button>]}
+                actions={[
+                    file.format === 'DWCDP_PARQUET' && (
+                        <Link to={`/dataset/${dataset?.id}/dashboard`}>
+                            <Button type="link" icon={<BarChartOutlined />} title="Explore data" />
+                        </Link>
+                    ),
+                    <Button type="link" download={file.fileName} href={file?.fileName === 'log.txt'? `${config.backend}/dataset/${dataset?.id}/log.txt`: `${config.backend}/dataset/${dataset?.id}/file/${file.fileName}`}><DownloadOutlined color="yellow"/></Button>
+                ].filter(Boolean)}
             >
                 <List.Item.Meta
                     title={<>{file.fileName} {file.format === 'BIOM 2.1' 
