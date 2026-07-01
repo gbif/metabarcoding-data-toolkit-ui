@@ -8,18 +8,31 @@ import Help from "./Help";
 import config from "../config";
 const { Title, Text } = Typography;
 
-const help = <Help title="Files available" content={<Text>Here you can download the Darwin Core Archive (archive.zip) and BIOM files in two versions.
+const help = <Help title="Files available" content={<Text>
+    <p>Only the files that have actually been generated for this dataset are listed. Depending on how far the dataset has been processed, some of these may not yet be available:</p>
+    <ul>
+        <li><b>Darwin Core Archive</b> (archive.zip) can be indexed by biodiversity databases like GBIF and OBIS. You may download and publish it to e.g. GBIF in a way that you prefer.</li>
+        <li><b>Darwin Core Data Package</b> (dwc-dp.zip and dwc-dp.parquet.zip) is the newer GBIF publishing format, available as CSV and Parquet.</li>
+        <li><b>BIOM files</b> (data.biom.json and data.biom.h5) use a general-use format for representing biological sample by observation contingency tables. BIOM is a Genomics Standards Consortium supported project (<a target="_blank" href="https://biom-format.org/" rel="noreferrer" >https://biom-format.org/</a>). Here it is used as a practical intermediate file format. You may wish to download the BIOM files and use them for other applications.</li>
+        <li><b>Log file</b> (log.txt) contains the processing log for this dataset.</li>
+    </ul>
+</Text>} />
 
-    The Darwin Core Archive (archive.zip) can be indexed by biodiversity databases like GBIF and OBIS. You may download and publish it to e.g. GBIF in a way that you prefer.
-    
-    The BIOM file format is a general-use format for representing biological sample by observation contingency tables. BIOM is a Genomics Standards Consortium supported project. <a target="_blank" href="https://biom-format.org/" rel="noreferrer" >[https://biom-format.org/]</a>. 
-    Here the BIOM file format is used as a practical intermediate file format. You may wish to download the BIOM files and use them for other applications.</Text>} />
+// Human-readable labels for the internal format codes stored in filesAvailable.
+const formatLabels = {
+    'BIOM 1.0': 'BIOM 1.0 (JSON)',
+    'BIOM 2.1': 'BIOM 2.1 (HDF5)',
+    'DWC': 'Darwin Core Archive',
+    'DWCDP': 'Darwin Core Data Package',
+    'DWCDP_PARQUET': 'Darwin Core Data Package (Parquet)',
+    'Log file': 'Log file',
+};
 
 const FilesAvailable = ({ dataset, showTitle = true }) => <div style={{maxWidth: "400px"}}>
     {showTitle && <Title level={3}>Files available</Title>}
     <List
         itemLayout="horizontal"
-        dataSource={[...dataset?.filesAvailable, {fileName: 'log.txt', format: 'Log file', mimeType: 'text/plain', size: 0}]}
+        dataSource={[...(dataset?.filesAvailable ?? []), {fileName: 'log.txt', format: 'Log file', mimeType: 'text/plain', size: 0}]}
         header={<Row><Col flex="auto"></Col><Col>{help}</Col></Row>}
         renderItem={(file) => (
             <List.Item
@@ -40,7 +53,7 @@ const FilesAvailable = ({ dataset, showTitle = true }) => <div style={{maxWidth:
                         content={<Alert style={{width: "500px"}} type="warning" message={<ul> 
                             {dataset?.processingErrors?.hdf5.map(i => <li>{i}</li>)}
                         </ul>} ></Alert>}><WarningOutlined /></Popover> } </>}
-                    description={`${file?.format} - ${file?.mimeType} - ${Math.round(file.size * 10) / 10} mb`}
+                    description={`${formatLabels[file?.format] ?? file?.format} - ${file?.mimeType} - ${Math.round(file.size * 10) / 10} mb`}
                 />
             </List.Item>
         )}

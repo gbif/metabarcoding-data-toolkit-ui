@@ -28,6 +28,7 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
   const [validating, setValidating] = useState(false)
   const [validationId, setValidationId] = useState(dataset?.publishing?.validationId || null)
   const [processingButtonClicked, setProcessingButtonClicked] = useState(false);
+  const navigate = useNavigate()
   let hdl = useRef();
   let dwcdpHdl  = useRef();
  
@@ -198,7 +199,7 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
 
       }
   }
-
+  const hasDWC = dataset?.filesAvailable?.find(f => f?.format === "DWC")
   return (
     <Layout><PageContent>
       {error && <Alert type="error" >{error}</Alert>}
@@ -206,7 +207,7 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
         <Col span={6}>
           <Button style={{ marginBottom: "24px" }} onClick={() => processData(dataset?.id)} type="primary" >Create Darwin Core Archive</Button> 
           <Help style={{marginLeft: '8px'}} title="Darwin Core" content={<>
-          <div>The Darwin Core Standard (DwC) offers a stable, straightforward and flexible framework for compiling biodiversity data from varied and variable sources. The majority of the datasets shared through GBIF.org are published using the Darwin Core Archive format (DwC-A).
+          <div>This will create a Darwin Core Archive – the file archive that can be published to GBIF. The Darwin Core Standard (DwC) offers a stable, straightforward and flexible framework for compiling biodiversity data from varied and variable sources. The majority of the datasets shared through GBIF.org are published using the Darwin Core Archive format (DwC-A).
           </div>
                                   <a href="https://gcube.wiki.gcube-system.org/gcube/Darwin_Core_Terms" target="_blank" rel="noreferrer">More about Darwin Core Archives.</a>
                             </>}/>
@@ -259,11 +260,18 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
                     </Col>}
         <Col flex="auto"></Col>
         <Col>
-          <Row><Button  loading={registering}  disabled={ registering || !finished  } type="primary" onClick={() => registerData(dataset?.id) } >Publish to GBIF test environment (UAT)</Button><Help style={{marginLeft: "8px"}} title="Publishing" content={<Text>You can "publish" your Darwin Core Archive to the GBIF test environment, also known as the User Acceptance Testing (UAT) environment. In UAT, the data will be indexed and processed almost exactly as on GBIF.org, and it allows you to verify that the data looks as you expect and is being indexed correctly. The indexing takes some time, and not all elements are added immediately (e.g. the map of the samples).</Text>} /></Row>
-          <Row><Button style={{marginTop: "10px"}} loading={validating} onClick={() => validateDWCa(dataset?.id)} >Validate DWC archive</Button><Help style={{marginLeft: "8px", marginTop: "10px"}} title="Publishing" content={<Text>You can validate the Darwin Core Archive using the GBIF data validator. The GBIF data validator is a service that allows anyone with a GBIF-relevant dataset to receive a report on the syntactical correctness and the validity of the content contained within the dataset. By submitting a dataset to the validator, you can go through the validation and interpretation procedures usually associated with publishing in GBIF and quickly determine potential issues in data - without having to publish it.</Text>} /></Row>
+           {<Row><Button
+                         disabled={!hasDWC}
+                         type="primary"
+                         onClick={ () => navigate(`/dataset/${dataset?.id}/publish`)}
+                       >
+                         Proceed
+                       </Button></Row> }
+          <Row><Button  style={{marginTop: "10px"}} loading={registering}  disabled={ registering || !finished  } onClick={() => registerData(dataset?.id) } >TEST publication</Button><Help style={{marginLeft: "8px"}} title="Publishing" content={<Text>You can "publish" your Darwin Core Archive to the GBIF test environment. In TEST, the data will be indexed and processed almost exactly as on GBIF.org, and it allows you to verify that the data looks as you expect and is being indexed correctly. The indexing takes some time, and not all elements are added immediately (e.g. the map of the samples).</Text>} /></Row>
+          <Row><Button style={{marginTop: "10px"}} loading={validating} disabled={!hasDWC} onClick={() => validateDWCa(dataset?.id)} >Validate DWC archive</Button><Help style={{marginLeft: "8px", marginTop: "10px"}} title="Publishing" content={<Text>You can validate the Darwin Core Archive using the GBIF data validator. The GBIF data validator is a service that allows anyone with a GBIF-relevant dataset to receive a report on the syntactical correctness and the validity of the content contained within the dataset. By submitting a dataset to the validator, you can go through the validation and interpretation procedures usually associated with publishing in GBIF and quickly determine potential issues in data - without having to publish it.</Text>} /></Row>
        </Col>
         <Col>
-        <Row> {gbifUatKey && <Button  type="link" target="_blank" href={`https://www.gbif-uat.org/dataset/${gbifUatKey}`}>Dataset at gbif-uat.org</Button>}</Row>
+        <Row> {gbifUatKey && <Button  type="link" target="_blank" href={`https://www.gbif-test.org/dataset/${gbifUatKey}`}>See test publication</Button>}</Row>
         <Row> {validationId && <Button  type="link" target="_blank" href={`https://www.gbif.org/tools/data-validator/${validationId}`}>Validation report</Button>}</Row> 
         </Col>
       </Row>
