@@ -101,6 +101,10 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset, fileNameSy
                     return t
                 }
             }), ...[...otherFieldsAndDefaultVals].filter(h => !reqSampleTerms.has(h) && termMap.has(h)).map(h => termMap.get(h))])
+        } else if (!dataset?.sampleHeaders) {
+            // The dataset has no sample headers - drop any rows built from a previous dataset,
+            // they would render a mapping select with nothing to map to
+            setSampleTerms(prev => prev.length > 0 ? [] : prev)
         }
         if (termMap.size > 0 && requiredTerms?.taxon && dataset?.taxonHeaders) {
             const reqTaxonTerms = new Set(requiredTerms?.taxon.map(t => t.name))
@@ -111,6 +115,8 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset, fileNameSy
                     return t
                 }
             }), ...dataset?.taxonHeaders?.filter(h => !reqTaxonTerms.has(h) && termMap.has(h)).map(h => termMap.get(h))])
+        } else if (!dataset?.taxonHeaders) {
+            setTaxonTerms(prev => prev.length > 0 ? [] : prev)
         }
 
         if(defaultTerms || dataset?.mapping?.defaultValues){
@@ -197,10 +203,10 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset, fileNameSy
     }
 
     const checkImportantTermsExist = () => {
-        const hasLatLon = (dataset?.sampleHeaders.includes('decimalLatitude') || Object.keys(state.samples).includes('decimalLatitude') || Object.keys(state.defaultValues).includes('decimalLatitude')) && (dataset?.sampleHeaders.includes('decimalLongitude') || Object.keys(state.samples).includes('decimalLongitude') || Object.keys(state.defaultValues).includes('decimalLongitude'));
-        const hasEventDate = dataset?.sampleHeaders.includes('eventDate') || Object.keys(state.samples).includes('eventDate') || Object.keys(state.defaultValues).includes('eventDate');
-        
-        const hasSequence = /* dataset?.files?.format.endsWith('_FASTA') */dataset?.files?.files.find(f => f.type === 'fasta') || dataset?.taxonHeaders?.includes('DNA_sequence') || Object.keys(state.taxa).includes('DNA_sequence') || dataset?.files?.sequencesAsHeaders;
+        const hasLatLon = (dataset?.sampleHeaders?.includes('decimalLatitude') || Object.keys(state.samples).includes('decimalLatitude') || Object.keys(state?.defaultValues || {}).includes('decimalLatitude')) && (dataset?.sampleHeaders?.includes('decimalLongitude') || Object.keys(state.samples).includes('decimalLongitude') || Object.keys(state?.defaultValues || {}).includes('decimalLongitude'));
+        const hasEventDate = dataset?.sampleHeaders?.includes('eventDate') || Object.keys(state.samples).includes('eventDate') || Object.keys(state?.defaultValues || {}).includes('eventDate');
+
+        const hasSequence = /* dataset?.files?.format.endsWith('_FASTA') */dataset?.files?.files?.find(f => f.type === 'fasta') || dataset?.taxonHeaders?.includes('DNA_sequence') || Object.keys(state.taxa).includes('DNA_sequence') || dataset?.files?.sequencesAsHeaders;
 
         if(!hasSequence || !hasLatLon || !hasEventDate ){
             notification.warning({
@@ -281,7 +287,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset, fileNameSy
                 const unmappedSet = new Set(unMapped)                
               //  console.log(exampleData)
                 // first check special case when a fasta file is given
-                return dataset?.files?.files.find(f => f.type === 'fasta') && term.name === 'DNA_sequence' ? "Retrieved from fasta file" : (<HeaderSelect term={term} exampleData={exampleData} headers={headers.filter(h =>  h === term?.name || unmappedSet.has(h))} value={val} onChange={ value => {
+                return dataset?.files?.files?.find(f => f.type === 'fasta') && term.name === 'DNA_sequence' ? "Retrieved from fasta file" : (<HeaderSelect term={term} exampleData={exampleData} headers={(headers || []).filter(h =>  h === term?.name || unmappedSet.has(h))} value={val} onChange={ value => {
                     
                    
                     if(type === 'taxon'){
@@ -319,13 +325,13 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset, fileNameSy
                 } else if(type === 'sample'){
                     setSampleTerms(sampleTerms.filter(t => t?.name !== term?.name))
                 }
-                if(state.taxa[term?.name]){
+                if(state?.taxa?.[term?.name]){
                     dispatch({ type: 'mapTaxonTerm', payload: {term: term.name, value: null} })
                 }
-                if(state.samples[term?.name]){
+                if(state?.samples?.[term?.name]){
                     dispatch({ type: 'mapSampleTerm', payload: {term: term.name, value: null} })
                 }
-                if(state.defaultValues[term?.name]){
+                if(state?.defaultValues?.[term?.name]){
                     dispatch({ type: 'createDefaultValue', payload: {term: term.name, value: null} })
                 }
             }}>Delete</Button>,
