@@ -4,7 +4,7 @@ import { useNavigate, useLocation, useMatch } from "react-router-dom";
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
 import _ from "lodash"
-import { Row, Col, Alert, Button, List, Typography, Popconfirm, Tag, Tour, Select, theme, message, notification } from "antd"
+import { Row, Col, Alert, Button, List, Typography, Popconfirm, Tag, Tour, Select, Space, Spin, theme, message, notification } from "antd"
 import {
     CheckCircleOutlined,
     CloseCircleOutlined,
@@ -356,7 +356,16 @@ const DataUpload = ({ user,
                                 </Select></>
                             }
                             </Col>
-                            
+
+                            {/* the field names are only written to the report once this finishes,
+                                so it is worth saying that something is still going on */}
+                            <Col>
+                                {loading && <Space style={{ marginRight: "10px" }}>
+                                    <Spin size="small" />
+                                    <Text type="secondary">Validating...</Text>
+                                </Space>}
+                            </Col>
+
                             <Col>
                                 <Button onClick={() => navigate(`/dataset/${match?.params?.key}/term-mapping`)} type={valid ? 'primary': 'dashed'} disabled={!valid}>
                                     Proceed
