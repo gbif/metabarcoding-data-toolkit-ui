@@ -144,7 +144,9 @@ const ProcessDataset = ({
 
     const processData = async () => {
         if (isValidForProcessing()) {
-            setDataset({steps: [], processingErrors: null})
+            // keep the rest of the dataset - replacing it drops sampleHeaders,
+            // taxonHeaders, files and mapping until the first poll comes back
+            setDataset({...dataset, steps: [], processingErrors: null})
             setShowProcessingErrors(false)
             setFailed(false)
             setFinished(false)
@@ -333,6 +335,8 @@ const ProcessDataset = ({
                                     dot:  getStepDot(s),//s.status === "finished" ? <CheckCircleOutlined /> : s.status === "failed" ? <ExclamationCircleOutlined /> : s.status === "pending" ? <ClockCircleOutlined /> : null,
                                     color: getStatusColor(s.status),
                                     children: (s.status === "finished" && idx === dataset?.steps?.length - 1) ? "Finished" :
+                                        // the queued step has no name or messages, it is dropped once the job starts
+                                        (s.status === "queued") ? "Preparing" :
                                         (s.status === "failed") ? `${s.messagePending} - Failed${s?.message ? ": " + s.message + ( typeof s.message === "string" && s.message?.includes('This data matrix has out of bounds value') ? ' - Check that column names in the OTU table corresponds to the IDs in the sample file.':'') : ""}` :
                                             <>
                                                 {`${s.status === "processing" ? s.message : s.messagePending}${(s.subTask && idx === dataset?.steps.length - 1) ? " - " + s.subTask : ""}`}
