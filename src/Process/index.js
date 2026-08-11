@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
-import { Table, Descriptions, Row, Col, Alert, Button, Timeline, Progress, Statistic, Space, Typography, Tooltip, Checkbox, message, theme, Popover } from "antd"
+import { Table, Descriptions, Row, Col, Alert, Button, Timeline, Progress, Statistic, Space, Spin, Typography, Tooltip, Checkbox, message, theme, Popover } from "antd"
 import { CheckCircleOutlined, ClockCircleOutlined, WarningOutlined, ExclamationCircleOutlined, SettingOutlined } from '@ant-design/icons';
 import {dateFormatter, numberFormatter} from '../Util/formatters'
 import FilesAvailable from '../Components/FilesAvailable'
@@ -42,6 +42,10 @@ const ProcessDataset = ({
     const [assignTaxonomy, setAssignTaxonomy] = useState(dataset?.assignTaxonomy || false)
     const [skipSimiliarityPlots, setSkipSimiliarityPlots] = useState(false)
     const [showAssignTaxonomyCheckbox, setShowAssignTaxonomyCheckbox] = useState(false)
+    // The POST returns as soon as the job is queued, but the job only shows up in the status
+    // response once the backend has read the report and cleaned up the previous run. Until
+    // then there are no steps to show at all, which looks like nothing happened.
+    const [preparing, setPreparing] = useState(false)
     const [metrics, setMetrics] = useState(null)
     const { token } = useToken();
     //    let hdl = useRef();
@@ -150,6 +154,7 @@ const ProcessDataset = ({
             setShowProcessingErrors(false)
             setFailed(false)
             setFinished(false)
+            setPreparing(true)
             try {
                 const processRes = await axiosWithAuth.post(`${config.backend}/dataset/${dataset?.id}/process${(showAssignTaxonomyCheckbox && assignTaxonomy) ? '?assignTaxonomy=true' : ''}${(skipSimiliarityPlots) ? '?skipSimiliarityPlots=true' : ''}`);
                 message.info("Processing data");
@@ -157,6 +162,7 @@ const ProcessDataset = ({
 
                 subscribe()
             } catch (error) {
+                setPreparing(false)
                 setError(error)
             }
 
@@ -205,6 +211,10 @@ const ProcessDataset = ({
                 }
                 setFailed(isFailed)
                 setFinished(isFinished)
+                // the backend has picked the job up, its own steps take over from here
+                if (res?.data?.steps?.length > 0) {
+                    setPreparing(false)
+                }
                 setDataset(res?.data)
                 if (!(isFinished || isFailed)) {
                     await new Promise(resolve => setTimeout(resolve, interval));
@@ -328,6 +338,16 @@ const ProcessDataset = ({
  */}
                            <Checkbox  checked={skipSimiliarityPlots} onChange={(e) => setSkipSimiliarityPlots(e?.target?.checked)}>Skip similarity plots <Help trigger="hover" title="Similarity plots" content="If checked, similarity plots (Ordinations) will be skipped during the processing. For large datasets, this lowers processing time significantly." /></Checkbox></div>
                            </div>
+
+                        {/* stands in until the backend reports steps of its own, so pressing
+                            Process does not look like nothing happened */}
+                        {preparing && !(dataset?.steps?.length > 0) && <Timeline
+                            items={[{
+                                dot: <Spin size="small" />,
+                                color: 'grey',
+                                children: "Preparing"
+                            }]}
+                        />}
 
                         {dataset?.steps && dataset?.steps?.length > 0 && <Timeline
                             items={
