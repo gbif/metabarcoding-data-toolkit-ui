@@ -29,35 +29,138 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
   const [validationId, setValidationId] = useState(dataset?.publishing?.validationId || null)
   const [processingButtonClicked, setProcessingButtonClicked] = useState(false);
   const navigate = useNavigate()
-  let hdl = useRef();
-  let dwcdpHdl  = useRef();
- 
+
+  const POLL_INTERVAL = 1000;
+
+  // Reading a step list is only meaningful when there is one - steps[steps.length - 1] on an
+  // empty array is undefined, and reading .status off that throws
+  const lastStatus = (steps) => Array.isArray(steps) && steps.length > 0 ? steps[steps.length - 1]?.status : undefined;
+  const stepsFinished = (steps) => lastStatus(steps) === 'finished';
+  const stepsFailed = (steps) => Array.isArray(steps) && steps.some(s => s?.status === 'failed');
+  const stepsDone = (steps) => stepsFinished(steps) || stepsFailed(steps);
+
+  const pollingDwc = useRef(false);
+  const pollingDwcDp = useRef(false);
+  const dwcDpStarted = useRef(false);
+  // setDataset from the context is not a functional setter, so the latest value has to be
+  // kept somewhere the poll loops can read it
+  const datasetRef = useRef(dataset);
+
+  useEffect(() => { datasetRef.current = dataset }, [dataset]);
+
+  // stop the loops if the user navigates away mid run
+  useEffect(() => () => { pollingDwc.current = false; pollingDwcDp.current = false }, []);
+
+  // Each endpoint returns the whole report with only its own job taken from memory - the other
+  // one is read from disk, which is only written when a run ends and so can still describe the
+  // previous one. Applying a response wholesale lets the two pollers overwrite each other.
+  const keepIfAhead = (mine, theirs, stillPolling) =>
+    (stillPolling || (stepsFinished(mine?.steps) && !stepsFinished(theirs?.steps))) ? (mine ?? theirs) : theirs;
+
+  const applyDwcResponse = (data) =>
+    setDataset({ ...data, dwcdp: keepIfAhead(datasetRef.current?.dwcdp, data?.dwcdp, pollingDwcDp.current) })
+
+  const applyDwcDpResponse = (data) =>
+    setDataset({ ...data, dwc: keepIfAhead(datasetRef.current?.dwc, data?.dwc, pollingDwc.current) })
+
   useEffect(() => {
     if (!!dataset) {
-      setFailed(dataset?.dwc?.steps?.find(s => s.status === 'failed') || false)
-      setFinished(dataset?.dwc?.steps[dataset?.dwc?.steps.length - 1].status === 'finished' || false)
+      setFailed(stepsFailed(dataset?.dwc?.steps))
+      setFinished(stepsFinished(dataset?.dwc?.steps))
       setGbifUatKey(dataset?.publishing?.gbifUatDatasetKey || dataset?.publishing?.gbifDatasetKey)
     }
   }, [dataset])
 
   useEffect(() => {
-    if(processingButtonClicked && finished && !!dataset?.id) {
+    if(processingButtonClicked && finished && !!dataset?.id && !dwcDpStarted.current) {
+      dwcDpStarted.current = true;
       setDwcDpFailed(false)
-    setDwcDpFinished(false)
-     axiosWithAuth.post(`${config.backend}/dataset/${dataset?.id}/dwc-dp`);
-      dwcdpHdl.current = setInterval(() => getDwcDpData(dataset?.id, dwcdpHdl.current), 1000);
+      setDwcDpFinished(false)
+      axiosWithAuth.post(`${config.backend}/dataset/${dataset?.id}/dwc-dp`);
+      pollDwcDp(dataset?.id)
     }
-  }, [processingButtonClicked,finished, dataset?.id]);
+  }, [processingButtonClicked, finished, dataset?.id]);
+
+  // Self scheduling rather than setInterval: one request in flight at a time, and the next is
+  // only scheduled once the previous answer has been applied. With an interval a slow response
+  // could be overtaken by a newer one, and then land last - leaving the page showing a state
+  // the run had already moved past, with nothing still polling to correct it.
+  const pollDwc = async (key) => {
+    if (pollingDwc.current) {
+      return
+    }
+    pollingDwc.current = true;
+    try {
+      while (pollingDwc.current) {
+        try {
+          setLoading(true)
+          const res = await axiosWithAuth.get(`${config.backend}/dataset/${key}/dwc`)
+          setLoading(false)
+          if (!pollingDwc.current) {
+            return
+          }
+          const steps = res?.data?.dwc?.steps;
+          applyDwcResponse(res?.data)
+          setFailed(stepsFailed(steps))
+          setFinished(stepsFinished(steps))
+          if (stepsDone(steps)) {
+            return
+          }
+        } catch (error) {
+          setLoading(false)
+          console.log("Could not read the DWC status, trying again:")
+          console.log(error)
+        }
+        await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL));
+      }
+    } finally {
+      pollingDwc.current = false;
+    }
+  }
+
+  const pollDwcDp = async (key) => {
+    if (pollingDwcDp.current) {
+      return
+    }
+    pollingDwcDp.current = true;
+    try {
+      while (pollingDwcDp.current) {
+        try {
+          setDwcDpLoading(true)
+          const res = await axiosWithAuth.get(`${config.backend}/dataset/${key}/dwc-dp`)
+          setDwcDpLoading(false)
+          if (!pollingDwcDp.current) {
+            return
+          }
+          const steps = res?.data?.dwcdp?.steps;
+          applyDwcDpResponse(res?.data)
+          setDwcDpFailed(stepsFailed(steps))
+          setDwcDpFinished(stepsFinished(steps))
+          if (stepsDone(steps)) {
+            return
+          }
+        } catch (error) {
+          setDwcDpLoading(false)
+          console.log("Could not read the DWC data package status, trying again:")
+          console.log(error)
+        }
+        await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL));
+      }
+    } finally {
+      pollingDwcDp.current = false;
+    }
+  }
 
   const processData = async key => {
     setProcessingButtonClicked(true);
     setFailed(false)
     setFinished(false)
+    dwcDpStarted.current = false;
     try {
       const processRes = await axiosWithAuth.post(`${config.backend}/dataset/${key}/dwc`);
       message.info("Processing data");
 
-      hdl.current = setInterval(() => getData(key, hdl.current), 1000);
+      pollDwc(key)
 
     } catch (error) {
       if(error?.response?.status > 399 && error?.response?.status < 404){
@@ -65,68 +168,6 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
       }
     message.error(error?.message || error);     
       //setError(error)
-    }
-
-
-
-
-  }
-
-   
-
-  const shouldClearInterval = (data) => {
-    const isFinished = data?.dwc?.steps[data?.dwc?.steps.length - 1].status === 'finished';
-    const isFailed = !!data?.dwc?.steps.find(s => s.status === 'failed');
-    const hasDwcDp = !!data?.dwcdp?.steps && data?.dwcdp?.steps.length > 0;
-    const isDwcDpFinished = hasDwcDp && data?.dwcdp?.steps[data?.dwcdp?.steps.length - 1].status === 'finished';
-    const isDwcDpFailed = hasDwcDp && !!data?.dwcdp?.steps.find(s => s.status === 'failed');
-    if ((isFinished || isFailed) && (!hasDwcDp || (isDwcDpFinished || isDwcDpFailed))) {
-      clearInterval(hdl.current);
-    }
-    if (processingButtonClicked && (isDwcDpFinished || isDwcDpFailed)) {
-      clearInterval(dwcdpHdl.current);
-    }
-    setFailed(isFailed)
-      setFinished(isFinished)
-      setDwcDpFailed(isDwcDpFailed)
-      setDwcDpFinished(isDwcDpFinished)
-  }
-
-  const getData = async (key) => {
-    try {
-      setLoading(true)
-      const res = await axiosWithAuth.get(`${config.backend}/dataset/${key}/dwc`)
-      setDataset(res?.data)
-
-      setLoading(false)
-      shouldClearInterval(res?.data)
-    
-
-
-    } catch (error) {
-      setLoading(false)
-      console.log("getData error:")
-      console.log(error)
-
-    }
-  }
-
-    const getDwcDpData = async (key) => {
-    try {
-      setDwcDpLoading(true)
-      const res = await axiosWithAuth.get(`${config.backend}/dataset/${key}/dwc-dp`)
-      setDataset(res?.data)
-
-      setDwcDpLoading(false)
-      shouldClearInterval(res?.data)
-   
-
-
-    } catch (error) {
-      setDwcDpLoading(false)
-      console.log("getData error:")
-      console.log(error)
-
     }
   }
 
