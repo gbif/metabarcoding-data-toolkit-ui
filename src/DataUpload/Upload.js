@@ -77,16 +77,20 @@ const Uploader = ({onSuccess, onError, datasetKey, dataset}) => {
             setFileList(newFileList);
         },
         beforeUpload: (file, fileList_) => {
+            // Excel keeps a ~$name.xlsx lock file next to any open workbook. Selecting a whole
+            // folder picks it up, and it is not data - it would just count against the upload
+            // limit and be treated as a table.
+            const selected = fileList_.filter(f => !f?.name?.startsWith('~$'));
             let err = false;
             for (let f of fileList) {
-                const duplicate = fileList_.find(s => s.name == f.name);
+                const duplicate = selected.find(s => s.name == f.name);
                 if (duplicate) {
                     err = true
                     setSubmissionError(`You have already selected a file named ${duplicate.name}`)
                 }
             }
             if (!err) {
-                setFileList([...fileList, ...fileList_]);
+                setFileList([...fileList, ...selected]);
             }
             return false;
         },

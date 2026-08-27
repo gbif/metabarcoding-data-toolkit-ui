@@ -146,7 +146,9 @@ const MetaDataForm = ({
           onSaveSuccess(res);
         }
         message.success("Metadata saved");
-        setDataset({ ...dataset, metadata: values });
+        // the save response carries the readiness, so the export and publish steps open as
+        // soon as the metadata is complete instead of waiting for the next poll
+        setDataset({ ...dataset, metadata: values, metadataReady: res?.data?.metadataReady, metadataMissing: res?.data?.metadataMissing });
         setSubmissionError(null);
       })
       .catch((err) => {

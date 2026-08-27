@@ -105,10 +105,11 @@ const Publish = ({ setDataset, dataset, user, installationSettings, networks }) 
       setDataset(registerRes?.data);
       setRegistering(false);
     } catch (error) {
-      alert(error);
       console.log(error);
       setRegistering(false);
-      setError(error);
+      // a refusal carries an explanation of what is missing - show that rather than "400"
+      message.error(error?.response?.data?.message || error?.message || error);
+      setError(null);
     }
   };
 
@@ -273,7 +274,7 @@ const Publish = ({ setDataset, dataset, user, installationSettings, networks }) 
             </Row>
           </Col>
           <Col span={6}>
-          <Button onClick={() => registerData(dataset?.id) }  loading={registering} type="primary" disabled={!!installationSettings?.termsLink && !userAgreedToterms}>Publish to gbif.org</Button>
+          <Button onClick={() => registerData(dataset?.id) }  loading={registering} type="primary" disabled={(!!installationSettings?.termsLink && !userAgreedToterms) || dataset?.metadataReady === false}>Publish to gbif.org</Button>
           {gbifProdKey && <Button  type="link" href={`https://www.${prodEnv}dataset/${gbifProdKey}`}>Dataset at gbif.org</Button>}
              <br /> 
              <Checkbox style={{marginTop: "10px"}} value={userAgreedToterms} onChange={e => setUserAgreedToterms(!!e?.target?.checked)}>
