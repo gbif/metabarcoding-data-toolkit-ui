@@ -105,7 +105,7 @@ const deleteDataset = async (id) => {
                         {d?.sample_count ? <p style={{marginBottom: "0px"}}>{`Samples: ${numberFormatter.format(d?.sample_count)}`}</p> : ""}
                         {d?.taxon_count ? <p style={{marginBottom: "0px"}}>{`Taxa/ASVs: ${numberFormatter.format(d?.taxon_count)}`}</p> : ""}
                         {d?.occurrence_count ? <p >{`Occurrences: ${numberFormatter.format(d?.occurrence_count)}`}</p> : ""}
-                        {d?.validation_id ? <Button type="link" href={`https://www.gbif.org/tools/data-validator/${d.validation_id}`} target="_blank" rel="noreferrer" >Validation report <LuExternalLink style={{marginLeft: "4px"}} /></Button> : ""}
+                        {d?.validation_id ? <Button type="link" href={`https://tools.gbif.org/tools/data-validator/${d.validation_id}`} target="_blank" rel="noreferrer" >Validation report <LuExternalLink style={{marginLeft: "4px"}} /></Button> : ""}
                         {d?.gbif_uat_key ? <Button type="link" href={`https://www.gbif-test.org/dataset/${d.gbif_uat_key}`} target="_blank" rel="noreferrer" >Test publishing (GBIF UAT) <LuExternalLink style={{marginLeft: "4px"}} /></Button> : ""}
                         {d?.gbif_prod_key ? <Button href={`https://www.gbif${config?.env !== "prod" ? "-uat" : ""}.org/dataset/${d.gbif_prod_key}`} target="_blank" rel="noreferrer" >Dataset published to GBIF <LuExternalLink style={{marginLeft: "4px"}} /></Button> : ""}
 

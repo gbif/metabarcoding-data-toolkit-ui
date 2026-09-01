@@ -178,7 +178,7 @@ function Admin({user, setLoginFormVisible}) {
               title: "",
               dataIndex: "log",
               key: "log",
-              render: (text, record) => <><Button type="link" href={`${config.backend}/dataset/${record.dataset_id}/log.txt`} target="_blank" rel="noreferrer" >Log</Button>{record?.validation_id && <>|<Button type="link" href={`https://www.gbif.org/tools/data-validator/${record.validation_id}`} target="_blank" rel="noreferrer" >Validation report</Button></> }</>,
+              render: (text, record) => <><Button type="link" href={`${config.backend}/dataset/${record.dataset_id}/log.txt`} target="_blank" rel="noreferrer" >Log</Button>{record?.validation_id && <>|<Button type="link" href={`https://tools.gbif.org/tools/data-validator/${record.validation_id}`} target="_blank" rel="noreferrer" >Validation report</Button></> }</>,
           },
             {
                 title: "Created",

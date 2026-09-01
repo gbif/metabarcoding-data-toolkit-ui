@@ -331,7 +331,7 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
        </Col>
         <Col>
         <Row> {gbifUatKey && <Button  type="link" target="_blank" href={`https://www.gbif-test.org/dataset/${gbifUatKey}`}>See test publication</Button>}</Row>
-        <Row> {validationId && <Button  type="link" target="_blank" href={`https://www.gbif.org/tools/data-validator/${validationId}`}>Validation report</Button>}</Row> 
+        <Row> {validationId && <Button  type="link" target="_blank" href={`https://tools.gbif.org/tools/data-validator/${validationId}`}>Validation report</Button>}</Row> 
         </Col>
       </Row>
       <Modal title="Info" open={showRegisterModal && gbifUatKey} onOk={() => setShowRegisterModal(false)} onCancel={() => setShowRegisterModal(false)}>
