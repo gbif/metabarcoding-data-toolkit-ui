@@ -8,7 +8,9 @@ import hashCode from '../Util/hashCode';
 HC_exporting(Highcharts);
 HC_sunburst(Highcharts);
 
-const RANKS = ['kingdom', 'phylum', 'class', 'order', 'family', 'genus'];
+// Default only - the dashboard passes the ranks the dataset actually has, which may be a
+// subset. Rendering a level for a rank the rows do not carry produces a chain of "Unknown".
+const ALL_RANKS = ['kingdom', 'phylum', 'class', 'order', 'family', 'genus'];
 
 /**
  * Build a Highcharts sunburst node array from the flat aggregated rows
@@ -21,7 +23,7 @@ const RANKS = ['kingdom', 'phylum', 'class', 'order', 'family', 'genus'];
  * and parent = id of the node one rank up.
  * Value at every node = cumulative asvCount of all paths passing through it.
  */
-const buildSunburstData = (rows) => {
+const buildSunburstData = (rows, ranks = ALL_RANKS) => {
     const nodeMap = new Map();
 
     nodeMap.set('0', { id: '0', parent: '', name: 'Root', value: 0 });
@@ -31,11 +33,11 @@ const buildSunburstData = (rows) => {
         let parentId = '0';
         nodeMap.get('0').value += asvCount;
 
-        for (let i = 0; i < RANKS.length; i++) {
-            const rank = RANKS[i];
+        for (let i = 0; i < ranks.length; i++) {
+            const rank = ranks[i];
             const taxon = row[rank] || 'Unknown';
             // Full path ID guarantees uniqueness across homonymous taxa at different ranks
-            const nodeId = RANKS.slice(0, i + 1).map(r => row[r] || 'Unknown').join('|');
+            const nodeId = ranks.slice(0, i + 1).map(r => row[r] || 'Unknown').join('|');
 
             if (!nodeMap.has(nodeId)) {
                 nodeMap.set(nodeId, { id: nodeId, parent: parentId, name: taxon, value: 0, rank });
@@ -55,20 +57,20 @@ const buildSunburstData = (rows) => {
  *   rows           – all aggregated taxonomy rows from the current query
  *   selectedSample – optional eventID string; when omitted, all rows are aggregated
  */
-const ExploreSunburst = ({ rows, selectedSample, eventCount: eventCountProp }) => {
+const ExploreSunburst = ({ rows, selectedSample, eventCount: eventCountProp, ranks = ALL_RANKS }) => {
     const { chartData, title, subtitle } = useMemo(() => {
-        if (!rows?.length) return { chartData: null };
+        if (!rows?.length || !ranks?.length) return { chartData: null };
 
         if (selectedSample) {
             const eventRows = rows.filter(r => r.eventID === selectedSample);
             return {
-                chartData: buildSunburstData(eventRows),
+                chartData: buildSunburstData(eventRows, ranks),
                 title: selectedSample,
                 subtitle: 'Taxonomic composition (ASVs)',
             };
         }
 
-        const chartData = buildSunburstData(rows);
+        const chartData = buildSunburstData(rows, ranks);
         const totalAsvs = chartData.find(d => d.id === '0')?.value ?? 0;
         const count = eventCountProp ?? new Set(rows.map(r => r.eventID)).size;
         return {
@@ -76,7 +78,7 @@ const ExploreSunburst = ({ rows, selectedSample, eventCount: eventCountProp }) =
             title: `${count} event${count !== 1 ? 's' : ''}`,
             subtitle: `Combined taxonomic composition — ${totalAsvs.toLocaleString()} ASVs`,
         };
-    }, [rows, selectedSample, eventCountProp]);
+    }, [rows, selectedSample, eventCountProp, ranks]);
 
     if (!chartData) return null;
 

@@ -13,16 +13,23 @@ import ExploreSunburst from './ExploreSunburst';
 
 const { Title, Text } = Typography;
 
-const RANKS = ['kingdom', 'phylum', 'class', 'order', 'family', 'genus'];
+// Every rank the dashboard can chart, most general first. Which of them a dataset actually
+// has varies - the identification table is written from the user's own taxon columns
+// (converters/dwcdp.js), so a dataset determined only to family and genus has no kingdom
+// column at all and naming one in the SQL is a DuckDB binder error, not an empty column.
+const ALL_RANKS = ['kingdom', 'phylum', 'class', 'order', 'family', 'genus'];
+
+// class and order are SQL keywords in DuckDB and have to stay quoted
+const quoteRank = (rank) => (rank === 'class' || rank === 'order') ? `"${rank}"` : rank;
 
 // ─── Data helpers ─────────────────────────────────────────────────────────────
 
-const buildTaxonomyDataMap = (aggRows) => {
-    const map = Object.fromEntries(RANKS.map(r => [r, {}]));
+const buildTaxonomyDataMap = (aggRows, ranks) => {
+    const map = Object.fromEntries(ranks.map(r => [r, {}]));
     for (const row of aggRows) {
         const asvCount = Number(row.asvCount) || 0;
         const readCount = Number(row.readCount) || 0;
-        for (const rank of RANKS) {
+        for (const rank of ranks) {
             const taxon = row[rank] || 'Unknown';
             if (!map[rank][taxon]) map[rank][taxon] = { value: 0, readCount: 0 };
             map[rank][taxon].value += asvCount;
@@ -32,14 +39,14 @@ const buildTaxonomyDataMap = (aggRows) => {
     return map;
 };
 
-const buildTaxonomyBySampleMap = (perEventRows) => {
+const buildTaxonomyBySampleMap = (perEventRows, ranks) => {
     const map = {};
     for (const row of perEventRows) {
         const { eventID } = row;
         const asvCount = Number(row.asvCount) || 0;
         const readCount = Number(row.readCount) || 0;
-        if (!map[eventID]) map[eventID] = Object.fromEntries(RANKS.map(r => [r, {}]));
-        for (const rank of RANKS) {
+        if (!map[eventID]) map[eventID] = Object.fromEntries(ranks.map(r => [r, {}]));
+        for (const rank of ranks) {
             const taxon = row[rank] || 'Unknown';
             if (!map[eventID][rank][taxon]) map[eventID][rank][taxon] = { value: 0, readCount: 0 };
             map[eventID][rank][taxon].value += asvCount;
@@ -124,22 +131,23 @@ const buildWhereClause = (assertionFilters, readCountFilter = {}, dateFilter = {
     return clauses.length > 0 ? `WHERE ${clauses.join('\nAND ')}` : '';
 };
 
-const buildAggregateSql = (assertionFilters, readCountFilter, dateFilter) => {
+// Only the ranks the dataset actually carries may be named - see ALL_RANKS above
+const rankSelectList = (ranks) =>
+    ranks.map(r => `  COALESCE(i.${quoteRank(r)}, 'Unknown') AS ${quoteRank(r)},`).join('\n');
+
+const rankGroupList = (ranks) => ranks.map(r => `i.${quoteRank(r)}`).join(', ');
+
+const buildAggregateSql = (assertionFilters, readCountFilter, dateFilter, ranks = ALL_RANKS) => {
     const where = buildWhereClause(assertionFilters, readCountFilter, dateFilter);
     return `
 SELECT
-  COALESCE(i.kingdom, 'Unknown') AS kingdom,
-  COALESCE(i.phylum,  'Unknown') AS phylum,
-  COALESCE(i."class", 'Unknown') AS "class",
-  COALESCE(i."order", 'Unknown') AS "order",
-  COALESCE(i.family,  'Unknown') AS family,
-  COALESCE(i.genus,   'Unknown') AS genus,
+${rankSelectList(ranks)}
   COUNT(DISTINCT na.nucleotideSequenceID) AS asvCount,
   SUM(CAST(na.readCount AS INTEGER))      AS readCount
 FROM "nucleotide-analysis" na
 JOIN "identification" i ON na.nucleotideSequenceID = i.nucleotideSequenceID
 ${where}
-GROUP BY i.kingdom, i.phylum, i."class", i."order", i.family, i.genus
+GROUP BY ${rankGroupList(ranks)}
 ORDER BY asvCount DESC`.trim();
 };
 
@@ -153,7 +161,7 @@ ${where}`.trim();
 
 const BARPLOT_EVENT_LIMIT = 200;
 
-const buildPerEventSql = (assertionFilters, readCountFilter, dateFilter) => {
+const buildPerEventSql = (assertionFilters, readCountFilter, dateFilter, ranks = ALL_RANKS) => {
     const where = buildWhereClause(assertionFilters, readCountFilter, dateFilter);
     return `
 WITH top_events AS (
@@ -166,19 +174,14 @@ WITH top_events AS (
 )
 SELECT
   na.eventID,
-  COALESCE(i.kingdom, 'Unknown') AS kingdom,
-  COALESCE(i.phylum,  'Unknown') AS phylum,
-  COALESCE(i."class", 'Unknown') AS "class",
-  COALESCE(i."order", 'Unknown') AS "order",
-  COALESCE(i.family,  'Unknown') AS family,
-  COALESCE(i.genus,   'Unknown') AS genus,
+${rankSelectList(ranks)}
   COUNT(*)                               AS asvCount,
   SUM(CAST(na.readCount AS INTEGER))     AS readCount
 FROM "nucleotide-analysis" na
 JOIN "identification" i ON na.nucleotideSequenceID = i.nucleotideSequenceID
 JOIN top_events te ON na.eventID = te.eventID
 ${where}
-GROUP BY na.eventID, i.kingdom, i.phylum, i."class", i."order", i.family, i.genus
+GROUP BY na.eventID, ${rankGroupList(ranks)}
 ORDER BY na.eventID`.trim();
 };
 
@@ -208,6 +211,7 @@ const DashBoardContent = ({ dataset }) => {
     const [sampleRows, setSampleRows] = useState([]);
     const [error, setError] = useState(null);
     const [eventCount, setEventCount] = useState(null);
+    const [availableRanks, setAvailableRanks] = useState(null); // null = not yet loaded
 
     // Map state
     const [allGeoJson, setAllGeoJson] = useState(null);
@@ -228,6 +232,10 @@ const DashBoardContent = ({ dataset }) => {
 
     const dateFilterRef = useRef(EMPTY_DATE_FILTER);
     useEffect(() => { dateFilterRef.current = dateFilter; }, [dateFilter]);
+
+    // written by loadAvailableRanks before the first query runs, so the filter handlers and
+    // the selected-event effect can read it without waiting on a state update
+    const availableRanksRef = useRef(ALL_RANKS);
 
     // ── Derive map filter function ────────────────────────────────────────────
     const geoJsonFilter = useMemo(() => {
@@ -271,6 +279,32 @@ const DashBoardContent = ({ dataset }) => {
         }
     }, [datasetId]);
 
+    // ── Fetch which taxon ranks the identification table actually has ────────
+    // datapackage.json lists only the columns that were written (converters/dwcdp.js filters
+    // the schema fields by the headers it wrote), so it is an accurate description of the
+    // parquet rather than of the DwC-DP standard.
+    const loadAvailableRanks = useCallback(async () => {
+        if (!datasetId) return ALL_RANKS;
+        try {
+            const res = await axios.get(
+                `${config.backend}/dataset/${datasetId}/explore/schema`
+            );
+            const identification = (res.data || []).find(r => r.name === 'identification');
+            const fields = new Set((identification?.fields || []).map(f => f.name));
+            const ranks = ALL_RANKS.filter(r => fields.has(r));
+            availableRanksRef.current = ranks;
+            setAvailableRanks(ranks);
+            return ranks;
+        } catch (e) {
+            console.log(e);
+            // the schema and the query endpoint read the same datapackage.json, so if this
+            // failed the queries will fail too and report their own error
+            availableRanksRef.current = ALL_RANKS;
+            setAvailableRanks(ALL_RANKS);
+            return ALL_RANKS;
+        }
+    }, [datasetId]);
+
     // ── Fetch distinct assertion types for the filter dropdowns ──────────────
     const loadAssertionTypes = useCallback(async () => {
         if (!datasetId) return;
@@ -297,6 +331,16 @@ const DashBoardContent = ({ dataset }) => {
         dfFilter = EMPTY_DATE_FILTER,
     ) => {
         if (!datasetId) return;
+        const ranks = availableRanksRef.current;
+        // nothing to group by - the taxonomy charts have no rank to draw, and the SQL would
+        // be invalid rather than merely empty
+        if (ranks.length === 0) {
+            setTaxonomyDataMap(null);
+            setTaxonomyBySampleDataMap(null);
+            setAggRows([]);
+            setPerEventRows([]);
+            return;
+        }
         setLoading(true);
         setError(null);
         try {
@@ -304,9 +348,9 @@ const DashBoardContent = ({ dataset }) => {
                 axios.post(`${config.backend}/dataset/${datasetId}/explore/query`, { sql, ...opts });
 
             const [aggRes, eventIdsRes, perEventRes] = await Promise.all([
-                post(buildAggregateSql(assertionFilters, rcFilter, dfFilter)),
+                post(buildAggregateSql(assertionFilters, rcFilter, dfFilter, ranks)),
                 post(buildEventIdsSql(assertionFilters, rcFilter, dfFilter)),
-                post(buildPerEventSql(assertionFilters, rcFilter, dfFilter), { maxRows: 50000 }),
+                post(buildPerEventSql(assertionFilters, rcFilter, dfFilter, ranks), { maxRows: 50000 }),
             ]);
 
             const aggData = aggRes.data.rows;
@@ -321,8 +365,8 @@ const DashBoardContent = ({ dataset }) => {
                 setEventCount(0);
                 setFilteredEventIds(new Set());
             } else {
-                setTaxonomyDataMap(buildTaxonomyDataMap(aggData));
-                setTaxonomyBySampleDataMap(buildTaxonomyBySampleMap(perEventData));
+                setTaxonomyDataMap(buildTaxonomyDataMap(aggData, ranks));
+                setTaxonomyBySampleDataMap(buildTaxonomyBySampleMap(perEventData, ranks));
                 setAggRows(aggData);
                 setPerEventRows(perEventData);
 
@@ -351,11 +395,14 @@ const DashBoardContent = ({ dataset }) => {
         setDateFilter(EMPTY_DATE_FILTER);
         setFilters([]);
         setAvailableResources(null);
+        setAvailableRanks(null);
         loadAvailableResources().then(resources => {
             if (resources.has('event-assertion')) loadAssertionTypes();
         });
         loadGeoJson();
-        runTaxonomyQuery([], EMPTY_RC_FILTER, EMPTY_DATE_FILTER);
+        // the queries name rank columns, so which ones exist has to be known before the first
+        // one is built - otherwise a dataset without the higher ranks fails to bind
+        loadAvailableRanks().then(() => runTaxonomyQuery([], EMPTY_RC_FILTER, EMPTY_DATE_FILTER));
     }, [datasetId]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // ── Handle filter changes ────────────────────────────────────────────────
@@ -374,11 +421,17 @@ const DashBoardContent = ({ dataset }) => {
         runTaxonomyQuery(filters, readCountFilter, newDfFilter);
     };
 
-    const previewSql = useMemo(() => [
-        { label: 'Aggregated taxonomy',                sql: buildAggregateSql(filters, readCountFilter, dateFilter) },
-        { label: 'Matched event IDs',                  sql: buildEventIdsSql(filters, readCountFilter, dateFilter) },
-        { label: `Per-event taxonomy (top ${BARPLOT_EVENT_LIMIT})`, sql: buildPerEventSql(filters, readCountFilter, dateFilter) },
-    ], [filters, readCountFilter, dateFilter]);
+    const previewSql = useMemo(() => {
+        const ranks = availableRanks ?? ALL_RANKS;
+        if (ranks.length === 0) {
+            return [{ label: 'Matched event IDs', sql: buildEventIdsSql(filters, readCountFilter, dateFilter) }];
+        }
+        return [
+            { label: 'Aggregated taxonomy',                sql: buildAggregateSql(filters, readCountFilter, dateFilter, ranks) },
+            { label: 'Matched event IDs',                  sql: buildEventIdsSql(filters, readCountFilter, dateFilter) },
+            { label: `Per-event taxonomy (top ${BARPLOT_EVENT_LIMIT})`, sql: buildPerEventSql(filters, readCountFilter, dateFilter, ranks) },
+        ];
+    }, [filters, readCountFilter, dateFilter, availableRanks]);
 
     // ── Load taxonomy for the selected event ─────────────────────────────────
     useEffect(() => {
@@ -402,21 +455,21 @@ const DashBoardContent = ({ dataset }) => {
         const eventCondition = `na.eventID = '${escaped}'`;
         const fullWhere = baseWhere ? `${baseWhere}\nAND ${eventCondition}` : `WHERE ${eventCondition}`;
 
+        const ranks = availableRanksRef.current;
+        if (ranks.length === 0) {
+            setSampleRows([]);
+            return;
+        }
         const sql = `
 SELECT
   na.eventID,
-  COALESCE(i.kingdom, 'Unknown') AS kingdom,
-  COALESCE(i.phylum,  'Unknown') AS phylum,
-  COALESCE(i."class", 'Unknown') AS "class",
-  COALESCE(i."order", 'Unknown') AS "order",
-  COALESCE(i.family,  'Unknown') AS family,
-  COALESCE(i.genus,   'Unknown') AS genus,
+${rankSelectList(ranks)}
   COUNT(*)                               AS asvCount,
   SUM(CAST(na.readCount AS INTEGER))     AS readCount
 FROM "nucleotide-analysis" na
 JOIN "identification" i ON na.nucleotideSequenceID = i.nucleotideSequenceID
 ${fullWhere}
-GROUP BY na.eventID, i.kingdom, i.phylum, i."class", i."order", i.family, i.genus`.trim();
+GROUP BY na.eventID, ${rankGroupList(ranks)}`.trim();
 
         axios.post(`${config.backend}/dataset/${datasetId}/explore/query`, { sql })
             .then(res => { if (!cancelled) setSampleRows(res.data.rows); })
@@ -492,6 +545,7 @@ GROUP BY na.eventID, i.kingdom, i.phylum, i."class", i."order", i.family, i.genu
                                                 taxonomyLoading={loading}
                                                 onSampleClick={setSelectedSample}
                                                 selectedSample={selectedSample}
+                                                ranks={availableRanks}
                                             />
                                         ),
                                     },
@@ -499,7 +553,7 @@ GROUP BY na.eventID, i.kingdom, i.phylum, i."class", i."order", i.family, i.genu
                                         key: 'composition',
                                         label: 'Composition',
                                         children: (
-                                            <ExploreSunburst rows={aggRows} eventCount={eventCount} />
+                                            <ExploreSunburst rows={aggRows} eventCount={eventCount} ranks={availableRanks ?? ALL_RANKS} />
                                         ),
                                     },
                                 ]}
@@ -519,7 +573,16 @@ GROUP BY na.eventID, i.kingdom, i.phylum, i."class", i."order", i.family, i.genu
                 </>
             )}
 
-            {!taxonomyDataMap && !loading && !error && (
+            {availableRanks?.length === 0 && (
+                <Alert
+                    type="info"
+                    message="No taxonomic ranks to chart"
+                    description="The identifications in this data package carry no kingdom, phylum, class, order, family or genus, so the taxonomy charts cannot be drawn. The map and the filters still work."
+                    style={{ marginTop: 8 }}
+                />
+            )}
+
+            {availableRanks?.length !== 0 && !taxonomyDataMap && !loading && !error && (
                 <Alert
                     type="info"
                     message="No data matches the current filters"
@@ -536,6 +599,7 @@ GROUP BY na.eventID, i.kingdom, i.phylum, i."class", i."order", i.family, i.genu
                             <ExploreSunburst
                                 rows={sampleRows}
                                 selectedSample={selectedSample}
+                                ranks={availableRanks ?? ALL_RANKS}
                             />
                         </Col>
                         <Col xs={24} md={14} style={{ paddingTop: 8 }}>
