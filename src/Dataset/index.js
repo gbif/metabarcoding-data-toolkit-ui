@@ -17,7 +17,7 @@ const Dataset = ({ dataset }) => {
         )}
         <Tabs
           tabBarExtraContent={dataset?.publishing?.gbifDatasetKey ? {
-            right: <Button target="_blank" type="link" href={`https://www.gbif-uat.org/dataset/${dataset?.publishing?.gbifDatasetKey}`}>gbif-uat.org</Button>
+            right: <Button target="_blank" type="link" href={`https://www.gbif-test.org/dataset/${dataset?.publishing?.gbifDatasetKey}`}>gbif-uat.org</Button>
           } : null}
           defaultActiveKey="1"
           items={[

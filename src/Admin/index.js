@@ -232,7 +232,7 @@ function Admin({user, setLoginFormVisible}) {
                     {text: "Not published", value: false},
                 ],
                 onFilter: (value, record) => value ? !!record.gbif_uat_key : !record.gbif_uat_key,
-                render: (text, record) => !!text ? <Button type="link" href={`https://www.gbif-uat.org/dataset/${text}`} target="_blank" rel="noreferrer" ><LuExternalLink /></Button> : ""
+                render: (text, record) => !!text ? <Button type="link" href={`https://www.gbif-test.org/dataset/${text}`} target="_blank" rel="noreferrer" ><LuExternalLink /></Button> : ""
 
             },
             {
