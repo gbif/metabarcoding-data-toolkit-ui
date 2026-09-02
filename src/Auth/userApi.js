@@ -20,7 +20,10 @@ const storeToken = (jwt) => {
   localStorage.setItem(JWT_STORAGE_NAME, jwt);    
 }
 export const authenticate = async (username, password) => {
+  // POST, not GET: the response body carries the JWT, and as a GET the request was a
+  // cacheable URL distinguished from every other user's only by the Authorization header
   return axios(`${config.backend}/auth/login`, {
+    method: "post",
     headers: {
       Authorization: `Basic ${base64.encode(username + ":" + password)}`,
     },
