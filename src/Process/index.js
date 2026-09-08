@@ -354,7 +354,18 @@ const ProcessDataset = ({
                                 dataset?.steps.map((s, idx) => ({
                                     dot:  getStepDot(s),//s.status === "finished" ? <CheckCircleOutlined /> : s.status === "failed" ? <ExclamationCircleOutlined /> : s.status === "pending" ? <ClockCircleOutlined /> : null,
                                     color: getStatusColor(s.status),
-                                    children: (s.status === "finished" && idx === dataset?.steps?.length - 1) ? "Finished" :
+                                    // The timeline is the only thing moving while the job runs, so this
+                                    // last entry is where the user is looking when it finishes - while the
+                                    // Proceed button off to the right just quietly stops being disabled.
+                                    // A link, not a button: the primary control stays where the step bar
+                                    // points. Gated on the same `finished` as that button, so the two
+                                    // cannot disagree.
+                                    children: (s.status === "finished" && idx === dataset?.steps?.length - 1)
+                                        ? <>Finished{finished ? <> &mdash; <Button
+                                              type="link"
+                                              style={{ padding: 0, height: 'auto' }}
+                                              onClick={() => navigate(`/dataset/${dataset?.id}/review`)}
+                                            >proceed to review</Button></> : ''}</> :
                                         // the queued step has no name or messages, it is dropped once the job starts
                                         (s.status === "queued") ? "Preparing" :
                                         (s.status === "failed") ? `${s.messagePending} - Failed${s?.message ? ": " + s.message + ( typeof s.message === "string" && s.message?.includes('This data matrix has out of bounds value') ? ' - Check that column names in the OTU table corresponds to the IDs in the sample file.':'') : ""}` :

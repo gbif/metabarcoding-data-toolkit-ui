@@ -244,6 +244,7 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
       }
   }
   const hasDWC = dataset?.filesAvailable?.find(f => f?.format === "DWC")
+  const hasParquet = dataset?.filesAvailable?.find(f => f?.format === "DWCDP_PARQUET")
   // creating a dataset writes an eml.json holding nothing but the title, so metadata can be
   // present but unusable. An archive built from it has no eml.xml, while its meta.xml still
   // declares metadata="eml.xml" - the backend refuses to generate one, and this explains why
@@ -275,7 +276,17 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
               dataset?.dwc?.steps.map((s, idx) => ({
                 dot: s.status === "finished" ? <CheckCircleOutlined /> : s.status === "pending" ? <ClockCircleOutlined /> : null,
                 color: getStatusColor(s.status),
-                children: (s.status === "finished" && idx === dataset?.dwc?.steps?.length - 1) ? "Finished" :
+                // The timeline is the only thing moving while the job runs, so this last entry
+                // is where the user is looking at the moment it finishes - while the Proceed
+                // button on the far right of the page just quietly stops being disabled. A
+                // shortcut here is a link, not a button: the primary control stays on the
+                // right, where the step bar points.
+                children: (s.status === "finished" && idx === dataset?.dwc?.steps?.length - 1)
+                  ? <>Finished{hasDWC ? <> &mdash; <Button
+                        type="link"
+                        style={{ padding: 0, height: 'auto' }}
+                        onClick={() => navigate(`/dataset/${dataset?.id}/publish`)}
+                      >proceed to publishing</Button></> : ''}</> :
                   <>
                     {`${s.status === "processing" ? s.message : s.messagePending}${s.subTask && idx === dataset?.dwc?.steps.length - 1 ? " - " + s.subTask : ""}`}
                     {s.total && s.progress && s.status === "processing" &&
@@ -297,7 +308,14 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
               dataset?.dwcdp?.steps.map((s, idx) => ({
                 dot: s.status === "finished" ? <CheckCircleOutlined /> : s.status === "pending" ? <ClockCircleOutlined /> : null,
                 color: getStatusColor(s.status),
-                children: (s.status === "finished" && idx === dataset?.dwcdp?.steps?.length - 1) ? "Finished" :
+                // as above - the parquet may not be listed yet when the last step reports
+                // finished, so fall back to the plain text rather than a dead link
+                children: (s.status === "finished" && idx === dataset?.dwcdp?.steps?.length - 1)
+                  ? <>Finished{hasParquet ? <> &mdash; <Button
+                        type="link"
+                        style={{ padding: 0, height: 'auto' }}
+                        onClick={() => navigate(`/dataset/${dataset?.id}/dashboard`)}
+                      >explore the data</Button></> : ''}</> :
                   <>
                     {`${s.status === "processing" ? s.message : s.messagePending}${s.subTask && idx === dataset?.dwcdp?.steps.length - 1 ? " - " + s.subTask : ""}`}
                     {s.total && s.progress && s.status === "processing" &&
