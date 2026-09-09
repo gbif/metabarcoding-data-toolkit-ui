@@ -58,9 +58,41 @@ const tailFormItemLayout = {
   },
 };
 
+// The four fields that block the export and publish steps, and the section each one lives
+// on. These mirror metadataReadiness in the backend (validation/readiness.js), which is what
+// actually gates archive generation - so the tab badges, the hint next to Proceed and the
+// warning on the export page all name the same four things.
+export const REQUIRED_FIELDS = [
+  { name: "title", section: "basic", label: "a title" },
+  { name: "license", section: "basic", label: "a license" },
+  { name: "contact", section: "contacts", label: "a contact" },
+  { name: "creator", section: "contacts", label: "at least one creator" },
+];
+
+const isFilled = (field, values) => {
+  const value = values?.[field.name];
+  if (field.name === "contact") {
+    // an agent with no address is treated as absent, as the backend does
+    return !!value && typeof value === "object" && !!`${value.electronicMailAddress ?? ""}`.trim();
+  }
+  if (field.name === "creator") {
+    return Array.isArray(value) && value.some(a => !!a && Object.keys(a).length > 0);
+  }
+  return !!`${value ?? ""}`.trim();
+};
+
+// "a license and a contact" / "a license, a contact and at least one creator"
+const listMissing = (missing) => {
+  const labels = missing.map(f => f.label);
+  if (labels.length <= 1) return labels.join("");
+  return `${labels.slice(0, -1).join(", ")} and ${labels[labels.length - 1]}`;
+};
+
 const MetaDataForm = ({
   data,
   section,
+  setSection,
+  onMissingChange,
   onSaveSuccess,
   saveButtonLabel,
   dataset,
@@ -91,7 +123,32 @@ const MetaDataForm = ({
         },
       );
   }, [values, form]);
+
+  // useWatch is undefined until the form has mounted, so fall back to what was loaded
+  const currentValues = values ?? dataset?.metadata ?? {};
+  const missingFields = REQUIRED_FIELDS.filter(f => !isFilled(f, currentValues));
+
+  // hand the per-section counts up so the tab rail can show which sections still need
+  // something - a required field on an inactive tab is rendered but hidden, so without this
+  // there is nothing at all to tell the user where to look
+  const missingKey = missingFields.map(f => f.name).join(",");
+  useEffect(() => {
+    if (typeof onMissingChange === "function") {
+      onMissingChange(missingFields.reduce((acc, f) => ({ ...acc, [f.section]: (acc[f.section] || 0) + 1 }), {}));
+    }
+  }, [missingKey]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const onFinishFailed = ({ errorFields }) => {
+    // Fields on other sections are hidden, not unmounted, so scrolling to one of those
+    // changes nothing on screen - the click appears to do nothing at all. Switch to the
+    // section that owns the field first, then scroll once it has been rendered.
+    const firstName = errorFields?.[0]?.name?.[0];
+    const owner = REQUIRED_FIELDS.find(f => f.name === firstName);
+    if (owner && owner.section !== section && typeof setSection === "function") {
+      setSection(owner.section);
+      setTimeout(() => form.scrollToField(errorFields[0].name), 0);
+      return;
+    }
     form.scrollToField(errorFields[0].name);
   };
 
@@ -212,9 +269,14 @@ const MetaDataForm = ({
           {/* <Col span={4}>
             Show help <Switch onChange={setShowHelp} checked={showHelp} />
           </Col> */}
-          {isTouched && (
+          {(isTouched || missingFields.length > 0) && (
             <Col>
-              <Text type="warning">You have unsaved changes</Text>
+              {isTouched && <Text type="warning">You have unsaved changes</Text>}
+              
+ {missingFields.length > 0 && 
+              <div><Text type="secondary">Add {listMissing(missingFields)} to continue</Text></div>
+          }
+
             </Col>
           )}
           <Col flex="auto"></Col>
@@ -250,6 +312,7 @@ const MetaDataForm = ({
             </Button>
           </Col>
         </Row>
+
 
         {submissionError && (
           <FormItem>
