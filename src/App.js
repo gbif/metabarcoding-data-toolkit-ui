@@ -16,6 +16,7 @@ import Publish from "./Publish"
 import UserProfile from "./UserProfile"
 import Dataset from "./Dataset"
 import DashBoard from "./DashBoard";
+import Administrators from "./Admin/Administrators";
 import Faq from "./Faq"
 import HowTo from "./HowTo"
 import Admin from "./Admin";
@@ -40,6 +41,7 @@ const App = () => {
     { key: "user-profile",path: "/user-profile", element: [<UserProfile /> ]},
     { key: "admin",path: "/admin", element: [<Admin /> ]},
     { key: "organisationadmin",path: "/admin/organizations", element: [<OrganizationAdmin /> ]},
+    { key: "administrators",path: "/admin/administrators", element: [<Administrators /> ]},
     { key: "dashboard",path: "/dataset/:key/dashboard", element: [<DatasetProvider />,<DashBoard /> ]}
 
     
