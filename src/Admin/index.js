@@ -194,7 +194,11 @@ function Admin({user, setLoginFormVisible}) {
                 dataIndex: "user_name",
                 key: "user_name",
                 filters: userFilter,
-                onFilter: (value, record) => record.user_name.indexOf(value) === 0,
+                // Deployments with many users get an unusable list of checkboxes without this.
+                // Matching on value rather than the default (text) so the dataset count in the
+                // label - "someone (12)" - is not searchable as if it were part of the name.
+                filterSearch: (input, record) => `${record.value}`.toLowerCase().includes(input.toLowerCase()),
+                onFilter: (value, record) => record.user_name === value,
 
             },
             {
