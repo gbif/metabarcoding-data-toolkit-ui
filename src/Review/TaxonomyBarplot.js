@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import { Row, Col, Spin, Select, Checkbox, Typography } from "antd";
+import { Row, Col, Spin, Select, Checkbox, Typography, Empty } from "antd";
 import axios from "axios";
 import Highcharts from "highcharts";
 import config from "../config";
@@ -18,11 +18,18 @@ const configOptions = [
     { byAbundance: false, stacking: 'percent', label: 'Relative OTU/ASV abundance' },
     { byAbundance: false, stacking: 'normal', label: 'Absolute OTU/ASV abundance' }];
 
-const TaxonomyBarplot = ({ dataset, onSampleClick, selectedSample, taxonomyDataMap, taxonomyBySampleDataMap, taxonomyLoading: loading }) => {
+// Kingdom is deliberately absent: it is offered by neither the review nor the dashboard view
+const DEFAULT_RANKS = ['phylum', 'class', 'order', 'family', 'genus'];
+
+const TaxonomyBarplot = ({ dataset, onSampleClick, selectedSample, taxonomyDataMap, taxonomyBySampleDataMap, taxonomyLoading: loading, ranks, unavailableMessage }) => {
+    // A dataset determined only to family and genus has no data for the higher ranks, so the
+    // caller may restrict the selector to what it actually holds. Defaults to the full list,
+    // which is what the review page passes.
+    const rankOptions = (ranks?.length ? DEFAULT_RANKS.filter(r => ranks.includes(r)) : DEFAULT_RANKS);
     const [data, setData] = useState(null)
     const [options, setOptions] = useState(null)
   //  const [loading, setLoading] = useState(false)
-    const [rank, setRank] = useState('class')
+    const [rank, setRank] = useState(rankOptions.includes('class') ? 'class' : rankOptions[rankOptions.length - 1])
     const [chartConfig, setChartConfig] = useState(configOptions[0])
     const [hoverPoint, setHoverPoint] = useState(null);
     const chartRef = useRef()
@@ -59,9 +66,17 @@ const TaxonomyBarplot = ({ dataset, onSampleClick, selectedSample, taxonomyDataM
     }, [selectedSample])
 
 
+    const rankOptionsKey = rankOptions.join(',');
+    useEffect(() => {
+        if (!rankOptions.includes(rank)) {
+            setRank(rankOptions.includes('class') ? 'class' : rankOptions[rankOptions.length - 1])
+        }
+    }, [rankOptionsKey]) // eslint-disable-line react-hooks/exhaustive-deps
+
     const getChartData = (rank,  byAbundance) => {
         try {
             const dataMap = taxonomyDataMap[rank]
+            if (!dataMap) return { series: [], categories: [] };
            
             const sortedData = Object.keys(dataMap).map(key => {
                return { name: key, value: byAbundance ? dataMap[key].readCount :  dataMap[key].value}
@@ -164,6 +179,20 @@ const TaxonomyBarplot = ({ dataset, onSampleClick, selectedSample, taxonomyDataM
 
     }
 
+    // The chart is only built once the data map arrives, so !options on its own cannot tell
+    // "still building" from "the data was refused". /data/taxonomy answers 413 for datasets
+    // over the cardinality limit, and without this the spinner ran forever.
+    const hasData = !!taxonomyDataMap && Object.keys(taxonomyDataMap).length > 0;
+
+    if (!loading && !hasData) {
+        return (
+            <Empty
+                style={{ padding: "48px" }}
+                description={unavailableMessage || "The taxonomy chart is not available for this dataset"}
+            />
+        );
+    }
+
     return loading || !options ? (
         <Row style={{ padding: "48px" }}>
             <Col flex="auto"></Col>
@@ -196,7 +225,7 @@ const TaxonomyBarplot = ({ dataset, onSampleClick, selectedSample, taxonomyDataM
                 <Col>
                     <Text>Taxon rank:</Text>
                     <Select style={{ marginLeft: '8px', width: "100px" }}   value={rank} onChange={setRank}>
-                        {['phylum', 'class', 'order', 'family', 'genus'].map(r => <Select.Option value={r} key={r}>{r}</Select.Option>)}
+                        {rankOptions.map(r => <Select.Option value={r} key={r}>{r}</Select.Option>)}
 
                     </Select>
                 </Col>

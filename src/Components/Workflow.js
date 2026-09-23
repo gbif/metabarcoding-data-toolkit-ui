@@ -139,12 +139,15 @@ const Workflow = ({ dataset, installationSettings, format }) => {
                 disabled: !dataset
             },
             {
+                // metadataReady, not metadata - creating a dataset writes an eml.json holding
+                // nothing but the title, so a truthy metadata let both steps open immediately
+                // and an archive generated from it had no eml.xml
                 title: 'Export',
-                disabled: !(dataset?.metadata && dataset?.filesAvailable?.find(f => f.format === 'BIOM 1.0'))
+                disabled: !(dataset?.metadataReady && dataset?.filesAvailable?.find(f => f.format === 'BIOM 1.0'))
             },
             {
                 title: 'Publish',
-                disabled: !(dataset?.metadata && dataset?.filesAvailable?.find(f => f.format === 'BIOM 1.0'))
+                disabled: !(dataset?.metadataReady && dataset?.filesAvailable?.find(f => f.format === 'BIOM 1.0'))
             },
         ]}
     />

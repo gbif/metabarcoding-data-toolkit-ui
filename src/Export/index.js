@@ -28,104 +28,148 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
   const [validating, setValidating] = useState(false)
   const [validationId, setValidationId] = useState(dataset?.publishing?.validationId || null)
   const [processingButtonClicked, setProcessingButtonClicked] = useState(false);
-  let hdl = useRef();
-  let dwcdpHdl  = useRef();
- 
+  const navigate = useNavigate()
+
+  const POLL_INTERVAL = 1000;
+
+  // Reading a step list is only meaningful when there is one - steps[steps.length - 1] on an
+  // empty array is undefined, and reading .status off that throws
+  const lastStatus = (steps) => Array.isArray(steps) && steps.length > 0 ? steps[steps.length - 1]?.status : undefined;
+  const stepsFinished = (steps) => lastStatus(steps) === 'finished';
+  const stepsFailed = (steps) => Array.isArray(steps) && steps.some(s => s?.status === 'failed');
+  const stepsDone = (steps) => stepsFinished(steps) || stepsFailed(steps);
+
+  const pollingDwc = useRef(false);
+  const pollingDwcDp = useRef(false);
+  const dwcDpStarted = useRef(false);
+  // setDataset from the context is not a functional setter, so the latest value has to be
+  // kept somewhere the poll loops can read it
+  const datasetRef = useRef(dataset);
+
+  useEffect(() => { datasetRef.current = dataset }, [dataset]);
+
+  // stop the loops if the user navigates away mid run
+  useEffect(() => () => { pollingDwc.current = false; pollingDwcDp.current = false }, []);
+
+  // Each endpoint returns the whole report with only its own job taken from memory - the other
+  // one is read from disk, which is only written when a run ends and so can still describe the
+  // previous one. Applying a response wholesale lets the two pollers overwrite each other.
+  const keepIfAhead = (mine, theirs, stillPolling) =>
+    (stillPolling || (stepsFinished(mine?.steps) && !stepsFinished(theirs?.steps))) ? (mine ?? theirs) : theirs;
+
+  const applyDwcResponse = (data) =>
+    setDataset({ ...data, dwcdp: keepIfAhead(datasetRef.current?.dwcdp, data?.dwcdp, pollingDwcDp.current) })
+
+  const applyDwcDpResponse = (data) =>
+    setDataset({ ...data, dwc: keepIfAhead(datasetRef.current?.dwc, data?.dwc, pollingDwc.current) })
+
   useEffect(() => {
     if (!!dataset) {
-      setFailed(dataset?.dwc?.steps?.find(s => s.status === 'failed') || false)
-      setFinished(dataset?.dwc?.steps[dataset?.dwc?.steps.length - 1].status === 'finished' || false)
+      setFailed(stepsFailed(dataset?.dwc?.steps))
+      setFinished(stepsFinished(dataset?.dwc?.steps))
       setGbifUatKey(dataset?.publishing?.gbifUatDatasetKey || dataset?.publishing?.gbifDatasetKey)
     }
   }, [dataset])
 
   useEffect(() => {
-    if(processingButtonClicked && finished && !!dataset?.id) {
+    if(processingButtonClicked && finished && !!dataset?.id && !dwcDpStarted.current) {
+      dwcDpStarted.current = true;
       setDwcDpFailed(false)
-    setDwcDpFinished(false)
-     axiosWithAuth.post(`${config.backend}/dataset/${dataset?.id}/dwc-dp`);
-      dwcdpHdl.current = setInterval(() => getDwcDpData(dataset?.id, dwcdpHdl.current), 1000);
+      setDwcDpFinished(false)
+      axiosWithAuth.post(`${config.backend}/dataset/${dataset?.id}/dwc-dp`);
+      pollDwcDp(dataset?.id)
     }
-  }, [processingButtonClicked,finished, dataset?.id]);
+  }, [processingButtonClicked, finished, dataset?.id]);
+
+  // Self scheduling rather than setInterval: one request in flight at a time, and the next is
+  // only scheduled once the previous answer has been applied. With an interval a slow response
+  // could be overtaken by a newer one, and then land last - leaving the page showing a state
+  // the run had already moved past, with nothing still polling to correct it.
+  const pollDwc = async (key) => {
+    if (pollingDwc.current) {
+      return
+    }
+    pollingDwc.current = true;
+    try {
+      while (pollingDwc.current) {
+        try {
+          setLoading(true)
+          const res = await axiosWithAuth.get(`${config.backend}/dataset/${key}/dwc`)
+          setLoading(false)
+          if (!pollingDwc.current) {
+            return
+          }
+          const steps = res?.data?.dwc?.steps;
+          applyDwcResponse(res?.data)
+          setFailed(stepsFailed(steps))
+          setFinished(stepsFinished(steps))
+          if (stepsDone(steps)) {
+            return
+          }
+        } catch (error) {
+          setLoading(false)
+          console.log("Could not read the DWC status, trying again:")
+          console.log(error)
+        }
+        await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL));
+      }
+    } finally {
+      pollingDwc.current = false;
+    }
+  }
+
+  const pollDwcDp = async (key) => {
+    if (pollingDwcDp.current) {
+      return
+    }
+    pollingDwcDp.current = true;
+    try {
+      while (pollingDwcDp.current) {
+        try {
+          setDwcDpLoading(true)
+          const res = await axiosWithAuth.get(`${config.backend}/dataset/${key}/dwc-dp`)
+          setDwcDpLoading(false)
+          if (!pollingDwcDp.current) {
+            return
+          }
+          const steps = res?.data?.dwcdp?.steps;
+          applyDwcDpResponse(res?.data)
+          setDwcDpFailed(stepsFailed(steps))
+          setDwcDpFinished(stepsFinished(steps))
+          if (stepsDone(steps)) {
+            return
+          }
+        } catch (error) {
+          setDwcDpLoading(false)
+          console.log("Could not read the DWC data package status, trying again:")
+          console.log(error)
+        }
+        await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL));
+      }
+    } finally {
+      pollingDwcDp.current = false;
+    }
+  }
 
   const processData = async key => {
     setProcessingButtonClicked(true);
     setFailed(false)
     setFinished(false)
+    dwcDpStarted.current = false;
     try {
       const processRes = await axiosWithAuth.post(`${config.backend}/dataset/${key}/dwc`);
       message.info("Processing data");
 
-      hdl.current = setInterval(() => getData(key, hdl.current), 1000);
+      pollDwc(key)
 
     } catch (error) {
       if(error?.response?.status > 399 && error?.response?.status < 404){
         setLoginFormVisible(true)
       }
-    message.error(error?.message || error);     
+      setProcessingButtonClicked(false)
+      // a refusal carries an explanation of what is missing - show that rather than "400"
+      message.error(error?.response?.data?.message || error?.message || error);
       //setError(error)
-    }
-
-
-
-
-  }
-
-   
-
-  const shouldClearInterval = (data) => {
-    const isFinished = data?.dwc?.steps[data?.dwc?.steps.length - 1].status === 'finished';
-    const isFailed = !!data?.dwc?.steps.find(s => s.status === 'failed');
-    const hasDwcDp = !!data?.dwcdp?.steps && data?.dwcdp?.steps.length > 0;
-    const isDwcDpFinished = hasDwcDp && data?.dwcdp?.steps[data?.dwcdp?.steps.length - 1].status === 'finished';
-    const isDwcDpFailed = hasDwcDp && !!data?.dwcdp?.steps.find(s => s.status === 'failed');
-    if ((isFinished || isFailed) && (!hasDwcDp || (isDwcDpFinished || isDwcDpFailed))) {
-      clearInterval(hdl.current);
-    }
-    if (processingButtonClicked && (isDwcDpFinished || isDwcDpFailed)) {
-      clearInterval(dwcdpHdl.current);
-    }
-    setFailed(isFailed)
-      setFinished(isFinished)
-      setDwcDpFailed(isDwcDpFailed)
-      setDwcDpFinished(isDwcDpFinished)
-  }
-
-  const getData = async (key) => {
-    try {
-      setLoading(true)
-      const res = await axiosWithAuth.get(`${config.backend}/dataset/${key}/dwc`)
-      setDataset(res?.data)
-
-      setLoading(false)
-      shouldClearInterval(res?.data)
-    
-
-
-    } catch (error) {
-      setLoading(false)
-      console.log("getData error:")
-      console.log(error)
-
-    }
-  }
-
-    const getDwcDpData = async (key) => {
-    try {
-      setDwcDpLoading(true)
-      const res = await axiosWithAuth.get(`${config.backend}/dataset/${key}/dwc-dp`)
-      setDataset(res?.data)
-
-      setDwcDpLoading(false)
-      shouldClearInterval(res?.data)
-   
-
-
-    } catch (error) {
-      setDwcDpLoading(false)
-      console.log("getData error:")
-      console.log(error)
-
     }
   }
 
@@ -146,10 +190,11 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
       setDataset(registerRes?.data)
       setRegistering(false)
     } catch (error) {
-      alert(error)
       console.log(error)
       setRegistering(false)
-      setError(error)
+      // a refusal carries an explanation of what is missing - show that rather than "400"
+      message.error(error?.response?.data?.message || error?.message || error)
+      setError(null)
     }
 
 
@@ -198,15 +243,31 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
 
       }
   }
-
+  const hasDWC = dataset?.filesAvailable?.find(f => f?.format === "DWC")
+  const hasParquet = dataset?.filesAvailable?.find(f => f?.format === "DWCDP_PARQUET")
+  // creating a dataset writes an eml.json holding nothing but the title, so metadata can be
+  // present but unusable. An archive built from it has no eml.xml, while its meta.xml still
+  // declares metadata="eml.xml" - the backend refuses to generate one, and this explains why
+  const metadataIncomplete = dataset?.metadataReady === false;
+  const missingMetadata = dataset?.metadataMissing || [];
   return (
     <Layout><PageContent>
       {error && <Alert type="error" >{error}</Alert>}
       <Row>
         <Col span={6}>
-          <Button style={{ marginBottom: "24px" }} onClick={() => processData(dataset?.id)} type="primary" >Create Darwin Core Archive</Button> 
+          {metadataIncomplete && <Alert
+            style={{ marginBottom: "24px" }}
+            type="warning"
+            showIcon
+            message="The metadata is not complete"
+            description={<>
+              <div>A Darwin Core Archive cannot be created until the metadata has been filled in{missingMetadata.length > 0 ? <>. Missing: <Text strong>{missingMetadata.join(', ')}</Text></> : ''}.</div>
+              <Button type="link" style={{ paddingLeft: 0 }} onClick={() => navigate(`/dataset/${dataset?.id}/metadata`)}>Go to metadata</Button>
+            </>}
+          />}
+          <Button style={{ marginBottom: "24px" }} disabled={metadataIncomplete} onClick={() => processData(dataset?.id)} type="primary" >Create Darwin Core Archive</Button> 
           <Help style={{marginLeft: '8px'}} title="Darwin Core" content={<>
-          <div>The Darwin Core Standard (DwC) offers a stable, straightforward and flexible framework for compiling biodiversity data from varied and variable sources. The majority of the datasets shared through GBIF.org are published using the Darwin Core Archive format (DwC-A).
+          <div>This will create a Darwin Core Archive – the file archive that can be published to GBIF. The Darwin Core Standard (DwC) offers a stable, straightforward and flexible framework for compiling biodiversity data from varied and variable sources. The majority of the datasets shared through GBIF.org are published using the Darwin Core Archive format (DwC-A).
           </div>
                                   <a href="https://gcube.wiki.gcube-system.org/gcube/Darwin_Core_Terms" target="_blank" rel="noreferrer">More about Darwin Core Archives.</a>
                             </>}/>
@@ -215,7 +276,17 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
               dataset?.dwc?.steps.map((s, idx) => ({
                 dot: s.status === "finished" ? <CheckCircleOutlined /> : s.status === "pending" ? <ClockCircleOutlined /> : null,
                 color: getStatusColor(s.status),
-                children: (s.status === "finished" && idx === dataset?.dwc?.steps?.length - 1) ? "Finished" :
+                // The timeline is the only thing moving while the job runs, so this last entry
+                // is where the user is looking at the moment it finishes - while the Proceed
+                // button on the far right of the page just quietly stops being disabled. A
+                // shortcut here is a link, not a button: the primary control stays on the
+                // right, where the step bar points.
+                children: (s.status === "finished" && idx === dataset?.dwc?.steps?.length - 1)
+                  ? <>Finished{hasDWC ? <> &mdash; <Button
+                        type="link"
+                        style={{ padding: 0, height: 'auto' }}
+                        onClick={() => navigate(`/dataset/${dataset?.id}/publish`)}
+                      >proceed to publishing</Button></> : ''}</> :
                   <>
                     {`${s.status === "processing" ? s.message : s.messagePending}${s.subTask && idx === dataset?.dwc?.steps.length - 1 ? " - " + s.subTask : ""}`}
                     {s.total && s.progress && s.status === "processing" &&
@@ -237,7 +308,14 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
               dataset?.dwcdp?.steps.map((s, idx) => ({
                 dot: s.status === "finished" ? <CheckCircleOutlined /> : s.status === "pending" ? <ClockCircleOutlined /> : null,
                 color: getStatusColor(s.status),
-                children: (s.status === "finished" && idx === dataset?.dwcdp?.steps?.length - 1) ? "Finished" :
+                // as above - the parquet may not be listed yet when the last step reports
+                // finished, so fall back to the plain text rather than a dead link
+                children: (s.status === "finished" && idx === dataset?.dwcdp?.steps?.length - 1)
+                  ? <>Finished{hasParquet ? <> &mdash; <Button
+                        type="link"
+                        style={{ padding: 0, height: 'auto' }}
+                        onClick={() => navigate(`/dataset/${dataset?.id}/dashboard`)}
+                      >explore the data</Button></> : ''}</> :
                   <>
                     {`${s.status === "processing" ? s.message : s.messagePending}${s.subTask && idx === dataset?.dwcdp?.steps.length - 1 ? " - " + s.subTask : ""}`}
                     {s.total && s.progress && s.status === "processing" &&
@@ -259,16 +337,23 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
                     </Col>}
         <Col flex="auto"></Col>
         <Col>
-          <Row><Button  loading={registering}  disabled={ registering || !finished  } type="primary" onClick={() => registerData(dataset?.id) } >Publish to GBIF test environment (UAT)</Button><Help style={{marginLeft: "8px"}} title="Publishing" content={<Text>You can "publish" your Darwin Core Archive to the GBIF test environment, also known as the User Acceptance Testing (UAT) environment. In UAT, the data will be indexed and processed almost exactly as on GBIF.org, and it allows you to verify that the data looks as you expect and is being indexed correctly. The indexing takes some time, and not all elements are added immediately (e.g. the map of the samples).</Text>} /></Row>
-          <Row><Button style={{marginTop: "10px"}} loading={validating} onClick={() => validateDWCa(dataset?.id)} >Validate DWC archive</Button><Help style={{marginLeft: "8px", marginTop: "10px"}} title="Publishing" content={<Text>You can validate the Darwin Core Archive using the GBIF data validator. The GBIF data validator is a service that allows anyone with a GBIF-relevant dataset to receive a report on the syntactical correctness and the validity of the content contained within the dataset. By submitting a dataset to the validator, you can go through the validation and interpretation procedures usually associated with publishing in GBIF and quickly determine potential issues in data - without having to publish it.</Text>} /></Row>
+           {<Row><Button
+                         disabled={!hasDWC}
+                         type="primary"
+                         onClick={ () => navigate(`/dataset/${dataset?.id}/publish`)}
+                       >
+                         Proceed
+                       </Button></Row> }
+          <Row><Button  style={{marginTop: "10px"}} loading={registering}  disabled={ registering || !finished || metadataIncomplete } onClick={() => registerData(dataset?.id) } >TEST publication</Button><Help style={{marginLeft: "8px"}} title="Publishing" content={<Text>You can "publish" your Darwin Core Archive to the GBIF test environment. In TEST, the data will be indexed and processed almost exactly as on GBIF.org, and it allows you to verify that the data looks as you expect and is being indexed correctly. The indexing takes some time, and not all elements are added immediately (e.g. the map of the samples).</Text>} /></Row>
+          <Row><Button style={{marginTop: "10px"}} loading={validating} disabled={!hasDWC} onClick={() => validateDWCa(dataset?.id)} >Validate DWC archive</Button><Help style={{marginLeft: "8px", marginTop: "10px"}} title="Publishing" content={<Text>You can validate the Darwin Core Archive using the GBIF data validator. The GBIF data validator is a service that allows anyone with a GBIF-relevant dataset to receive a report on the syntactical correctness and the validity of the content contained within the dataset. By submitting a dataset to the validator, you can go through the validation and interpretation procedures usually associated with publishing in GBIF and quickly determine potential issues in data - without having to publish it.</Text>} /></Row>
        </Col>
         <Col>
-        <Row> {gbifUatKey && <Button  type="link" target="_blank" href={`https://www.gbif-uat.org/dataset/${gbifUatKey}`}>Dataset at gbif-uat.org</Button>}</Row>
-        <Row> {validationId && <Button  type="link" target="_blank" href={`https://www.gbif.org/tools/data-validator/${validationId}`}>Validation report</Button>}</Row> 
+        <Row> {gbifUatKey && <Button  type="link" target="_blank" href={`https://www.gbif-test.org/dataset/${gbifUatKey}`}>See test publication</Button>}</Row>
+        <Row> {validationId && <Button  type="link" target="_blank" href={`https://tools.gbif.org/tools/data-validator/${validationId}`}>Validation report</Button>}</Row> 
         </Col>
       </Row>
       <Modal title="Info" open={showRegisterModal && gbifUatKey} onOk={() => setShowRegisterModal(false)} onCancel={() => setShowRegisterModal(false)}>
-        <p>Your data is being processed and "published" on the test environment. Depending on the data volume, it may take from 15 minutes to a an hour before it is finished. This means that you may initally see "0 occurrences" on the new <a  href={`https://www.gbif-uat.org/dataset/${gbifUatKey}`}>dataset page</a> if it is accessed before the processing has finished. You can also find the link to the dataset on the test environment (gbif-uat) in the list of datasets in your user profile.</p>
+        <p>Your data is being processed and "published" on the test environment. Depending on the data volume, it may take from 15 minutes to a an hour before it is finished. This means that you may initally see "0 occurrences" on the new <a  href={`https://www.gbif-test.org/dataset/${gbifUatKey}`}>dataset page</a> if it is accessed before the processing has finished. You can also find the link to the dataset on the test environment (gbif-uat) in the list of datasets in your user profile.</p>
         
       </Modal>
 

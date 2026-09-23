@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
-import { Table, Descriptions, Row, Col, Alert, Button, Timeline, Progress, Statistic, Space, Typography, Tooltip, Checkbox, message, theme, Popover } from "antd"
+import { Table, Descriptions, Row, Col, Alert, Button, Timeline, Progress, Statistic, Space, Spin, Typography, Tooltip, Checkbox, message, theme, Popover } from "antd"
 import { CheckCircleOutlined, ClockCircleOutlined, WarningOutlined, ExclamationCircleOutlined, SettingOutlined } from '@ant-design/icons';
 import {dateFormatter, numberFormatter} from '../Util/formatters'
 import FilesAvailable from '../Components/FilesAvailable'
@@ -42,6 +42,10 @@ const ProcessDataset = ({
     const [assignTaxonomy, setAssignTaxonomy] = useState(dataset?.assignTaxonomy || false)
     const [skipSimiliarityPlots, setSkipSimiliarityPlots] = useState(false)
     const [showAssignTaxonomyCheckbox, setShowAssignTaxonomyCheckbox] = useState(false)
+    // The POST returns as soon as the job is queued, but the job only shows up in the status
+    // response once the backend has read the report and cleaned up the previous run. Until
+    // then there are no steps to show at all, which looks like nothing happened.
+    const [preparing, setPreparing] = useState(false)
     const [metrics, setMetrics] = useState(null)
     const { token } = useToken();
     //    let hdl = useRef();
@@ -114,7 +118,7 @@ const ProcessDataset = ({
         if (!dataset) {
             return false
         } else {
-            return  ['TSV', 'TSV_WITH_FASTA','XLSX' , 'XLSX_WITH_FASTA', 'BIOM_2_1' ].includes(dataset?.files?.format)  // dataset?.files?.format === 'TSV' || dataset?.files?.format === 'TSV_WITH_FASTA' || dataset?.files?.format === 'XLSX' || dataset?.files?.format === 'XLSX_WITH_FASTA' || dataset?.files?.format === 'XLSX_WITH_FASTA'
+            return  ['TSV', 'TSV_WITH_FASTA','XLSX' , 'XLSX_WITH_FASTA', 'BIOM_2_1', 'FAIRe' ].includes(dataset?.files?.format)  // dataset?.files?.format === 'TSV' || dataset?.files?.format === 'TSV_WITH_FASTA' || dataset?.files?.format === 'XLSX' || dataset?.files?.format === 'XLSX_WITH_FASTA' || dataset?.files?.format === 'XLSX_WITH_FASTA'
         }
     }
 
@@ -144,10 +148,13 @@ const ProcessDataset = ({
 
     const processData = async () => {
         if (isValidForProcessing()) {
-            setDataset({steps: [], processingErrors: null})
+            // keep the rest of the dataset - replacing it drops sampleHeaders,
+            // taxonHeaders, files and mapping until the first poll comes back
+            setDataset({...dataset, steps: [], processingErrors: null})
             setShowProcessingErrors(false)
             setFailed(false)
             setFinished(false)
+            setPreparing(true)
             try {
                 const processRes = await axiosWithAuth.post(`${config.backend}/dataset/${dataset?.id}/process${(showAssignTaxonomyCheckbox && assignTaxonomy) ? '?assignTaxonomy=true' : ''}${(skipSimiliarityPlots) ? '?skipSimiliarityPlots=true' : ''}`);
                 message.info("Processing data");
@@ -155,6 +162,7 @@ const ProcessDataset = ({
 
                 subscribe()
             } catch (error) {
+                setPreparing(false)
                 setError(error)
             }
 
@@ -203,6 +211,10 @@ const ProcessDataset = ({
                 }
                 setFailed(isFailed)
                 setFinished(isFinished)
+                // the backend has picked the job up, its own steps take over from here
+                if (res?.data?.steps?.length > 0) {
+                    setPreparing(false)
+                }
                 setDataset(res?.data)
                 if (!(isFinished || isFailed)) {
                     await new Promise(resolve => setTimeout(resolve, interval));
@@ -327,12 +339,35 @@ const ProcessDataset = ({
                            <Checkbox  checked={skipSimiliarityPlots} onChange={(e) => setSkipSimiliarityPlots(e?.target?.checked)}>Skip similarity plots <Help trigger="hover" title="Similarity plots" content="If checked, similarity plots (Ordinations) will be skipped during the processing. For large datasets, this lowers processing time significantly." /></Checkbox></div>
                            </div>
 
+                        {/* stands in until the backend reports steps of its own, so pressing
+                            Process does not look like nothing happened */}
+                        {preparing && !(dataset?.steps?.length > 0) && <Timeline
+                            items={[{
+                                dot: <Spin size="small" />,
+                                color: 'grey',
+                                children: "Preparing"
+                            }]}
+                        />}
+
                         {dataset?.steps && dataset?.steps?.length > 0 && <Timeline
                             items={
                                 dataset?.steps.map((s, idx) => ({
                                     dot:  getStepDot(s),//s.status === "finished" ? <CheckCircleOutlined /> : s.status === "failed" ? <ExclamationCircleOutlined /> : s.status === "pending" ? <ClockCircleOutlined /> : null,
                                     color: getStatusColor(s.status),
-                                    children: (s.status === "finished" && idx === dataset?.steps?.length - 1) ? "Finished" :
+                                    // The timeline is the only thing moving while the job runs, so this
+                                    // last entry is where the user is looking when it finishes - while the
+                                    // Proceed button off to the right just quietly stops being disabled.
+                                    // A link, not a button: the primary control stays where the step bar
+                                    // points. Gated on the same `finished` as that button, so the two
+                                    // cannot disagree.
+                                    children: (s.status === "finished" && idx === dataset?.steps?.length - 1)
+                                        ? <>Finished{finished ? <> &mdash; <Button
+                                              type="link"
+                                              style={{ padding: 0, height: 'auto' }}
+                                              onClick={() => navigate(`/dataset/${dataset?.id}/review`)}
+                                            >proceed to review</Button></> : ''}</> :
+                                        // the queued step has no name or messages, it is dropped once the job starts
+                                        (s.status === "queued") ? "Preparing" :
                                         (s.status === "failed") ? `${s.messagePending} - Failed${s?.message ? ": " + s.message + ( typeof s.message === "string" && s.message?.includes('This data matrix has out of bounds value') ? ' - Check that column names in the OTU table corresponds to the IDs in the sample file.':'') : ""}` :
                                             <>
                                                 {`${s.status === "processing" ? s.message : s.messagePending}${(s.subTask && idx === dataset?.steps.length - 1) ? " - " + s.subTask : ""}`}

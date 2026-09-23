@@ -48,6 +48,11 @@ const DataBrowser = ({ dataset }) => {
     const [taxonomyBySampleDataMap, setTaxonomyBySampleDataMap] = useState({})
     const [taxonomyDataMap, setTaxonomyDataMap] = useState(null)
     const [taxonomyLoading, setTaxonomyLoading] = useState(false)
+    const [taxonomyUnavailable, setTaxonomyUnavailable] = useState(null)
+    // "the request finished", success or failure. The shared `loading` below is set by both
+    // the geojson and the sample fetch, so either can clear it while the other is in flight -
+    // which is not a signal a chart can use to decide it has waited long enough.
+    const [samplesLoaded, setSamplesLoaded] = useState(false)
     const [topTaxa, setTopTaxa] = useState(null)
     const [loading, setLoading] = useState(false)
     const [datasetId, setDatasetId] = useState(null)
@@ -66,6 +71,8 @@ const DataBrowser = ({ dataset }) => {
             setGeoJson(null)
             getGeoJson(dataset?.id)
             setSamples({})
+            setSamplesLoaded(false)
+            setTaxonomyUnavailable(null)
 
             getSampleData(dataset?.id)
             getTaxonomyData(dataset?.id)
@@ -149,9 +156,11 @@ const DataBrowser = ({ dataset }) => {
             setSamples(res?.data)
             setSamplIdToArrayIndex(new Map(res?.data?.id.map((f, idx) => ([f.toString(), idx]))))
 
+            setSamplesLoaded(true)
             setLoading(false)
 
         } catch (error) {
+            setSamplesLoaded(true)
             setLoading(false)
 
         }
@@ -176,6 +185,11 @@ const DataBrowser = ({ dataset }) => {
             setTaxonomyLoading(false)
 
         } catch (error) {
+            // 413 is the backend refusing on size (metrics/index.js CARDINALITY_LIMIT), not a
+            // failure - say so, rather than leaving the chart to guess
+            setTaxonomyUnavailable(error?.response?.status === 413
+                ? "This dataset is too large for the taxonomy chart to be generated"
+                : "The taxonomy data could not be loaded")
             setTaxonomyLoading(false)
 
         }
@@ -289,7 +303,7 @@ const geoJsonFilterFn = (geoJsonFeature) => {
                     {
                         key: '1',
                         label: `Taxonomy barplot`,
-                        children: <TaxonomyBarplot onSampleClick={setSelectedSample} selectedSample={selectedSample} taxonomyBySampleDataMap={taxonomyBySampleDataMap} taxonomyDataMap={taxonomyDataMap} /* taxonomyData={taxonomyData} */ taxonomyLoading={taxonomyLoading}/>,
+                        children: <TaxonomyBarplot onSampleClick={setSelectedSample} selectedSample={selectedSample} taxonomyBySampleDataMap={taxonomyBySampleDataMap} taxonomyDataMap={taxonomyDataMap} /* taxonomyData={taxonomyData} */ taxonomyLoading={taxonomyLoading} unavailableMessage={taxonomyUnavailable}/>,
                     },
 
                     {
@@ -297,7 +311,7 @@ const geoJsonFilterFn = (geoJsonFeature) => {
                         label: `PCoA/MDS plot`,
                         children: <TaxonomicSimilarity 
                                         datasetKey={dataset?.id} 
-                                        sampleHeaders={(sampleDataTypes || []).filter(e => e.type.startsWith("<")).map(e => e.key) } loading={!(!!metrics?.jaccard && !!metrics?.brayCurtis && !!samples?.id)} jaccard={metrics?.jaccard} brayCurtis={metrics?.brayCurtis} sampleLabels={samples?.id} onSampleClick={setSelectedSample} selectedSample={selectedSample} />,
+                                        sampleHeaders={(sampleDataTypes || []).filter(e => e.type.startsWith("<")).map(e => e.key) } loading={!samplesLoaded} jaccard={metrics?.jaccard} brayCurtis={metrics?.brayCurtis} sampleLabels={samples?.id} onSampleClick={setSelectedSample} selectedSample={selectedSample} />,
                     },
                     {
                         key: '3',

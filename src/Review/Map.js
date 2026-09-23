@@ -83,39 +83,36 @@ const MapContent = ({ geoJson, onFeatureClick, selectedSample, setError, geoJson
   }, [selectedSample, map])
 
   useEffect(() => {
+    if (!geoJson) return;
 
     try {
-      
-      
+      // Remove the previous cluster group from the map before rebuilding
+      if (markerRef.current) {
+        map.removeLayer(markerRef.current);
+      }
+
       const markers = L.markerClusterGroup();
       markerRef.current = markers;
+
       const geoJsonLayer = L.geoJson(geoJson, {
+        ...(geoJsonFilter ? { filter: geoJsonFilter } : {}),
         onEachFeature,
         pointToLayer: (feature, latlng) => {
           return L.circleMarker(latlng, geojsonMarkerOptions)
         }
       });
       geoJsonRef.current = geoJsonLayer;
-  
+
       markers.addLayer(geoJsonLayer);
       markers.on('mouseover', function (a) {
         a.layer.openPopup();
       });
       map.addLayer(markers);
-      if(selectedSample){
-        const layers = geoJsonRef.current.getLayers();
 
-        const selectedLayer = layers.find(l => l?.feature?.properties?.id == selectedSample);
-       
-          
-        if (selectedLayer) {
-          
-           map.flyTo([selectedLayer?.feature?.geometry?.coordinates[1],selectedLayer?.feature?.geometry?.coordinates[0]], 14)
-           selectedLayer.openPopup()
-        } else {
-          map.fitBounds(markers.getBounds());
-
-        }
+      // Fit to the visible (possibly filtered) markers, unless a specific
+      // sample is already selected (handled by the selectedSample effect).
+      if (!selectedSample && markers.getLayers().length > 0) {
+        map.fitBounds(markers.getBounds());
       }
     } catch (error) {
       console.log(error.message)
@@ -126,35 +123,7 @@ const MapContent = ({ geoJson, onFeatureClick, selectedSample, setError, geoJson
       setError(<><p>{`${geoJson?.metadata?.errors?.length} samples have invalid coordinates:`}</p><ul>{geoJson?.metadata?.errors.slice(0,3).map(e => <li>{`${e?.properties?.id} : [${e?.geometry?.coordinates?.[0]}, ${e?.geometry?.coordinates?.[1]}]`}</li>)}</ul></>)
     }
 
-  }, [geoJson])
-
-  useEffect(()=>{
-    
-    try {
-      if(geoJsonFilter &&  markerRef.current ){
-        const markers =  markerRef.current
-        markers.clearLayers()
-        const geoJsonLayer = L.geoJson(geoJson, {
-          filter: geoJsonFilter,
-          onEachFeature,
-          pointToLayer: (feature, latlng) => {
-            return L.circleMarker(latlng, geojsonMarkerOptions)
-          }
-        });
-        geoJsonRef.current = geoJsonLayer;
-    
-        markers.addLayer(geoJsonLayer);
-        markers.on('mouseover', function (a) {
-          a.layer.openPopup();
-        });
-      }
-    } catch (error) {
-      console.log(error.message)
-      setError(error.message)
-    }
-   
-
-  }, [geoJsonFilter])
+  }, [geoJson, geoJsonFilter])
 
 
   // return geoJson ?  <GeoJSON ref={geoJsonRef} key="whatever" data={geoJson} pointToLayer={pointToLayer}  onClick={console.log} onEachFeature={onEachFeature} /> : null;

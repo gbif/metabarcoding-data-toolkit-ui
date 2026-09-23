@@ -5,6 +5,7 @@ import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
 import DataBrowser from "../Review/DataBrowser";
 import MetaDataView from "./MetaDataView";
+import DashBoardContent from "../DashBoard/DashBoardContent";
 import withContext from "../Components/hoc/withContext";
 const { Title } = Typography;
 const Dataset = ({ dataset }) => {
@@ -15,16 +16,26 @@ const Dataset = ({ dataset }) => {
           <Title level={4}>{dataset?.metadata?.title}</Title>
         )}
         <Tabs
-          tabBarExtraContent={dataset?.publishing?.gbifDatasetKey ? {
-            right: <Button target="_blank" type="link" href={`https://www.gbif-uat.org/dataset/${dataset?.publishing?.gbifDatasetKey}`}>gbif-uat.org</Button>
+          // gbifProdDatasetKey is a key in the GBIF production registry, so the link is
+          // always www.gbif.org - not derived from config.env the way the admin table does
+          // it, which would send a prod key to gbif-uat.org where it does not exist.
+          tabBarExtraContent={dataset?.publishing?.gbifProdDatasetKey ? {
+            right: <Button target="_blank" rel="noreferrer" type="link" href={`https://www.gbif.org/dataset/${dataset?.publishing?.gbifProdDatasetKey}`}>View at gbif.org</Button>
+          } : dataset?.publishing?.gbifDatasetKey ? {
+            right: <Button target="_blank" type="link" href={`https://www.gbif-test.org/dataset/${dataset?.publishing?.gbifDatasetKey}`}>gbif-uat.org</Button>
           } : null}
           defaultActiveKey="1"
           items={[
             {
               key: "1",
-              label: `Browse`,
+              label: `Data`,
               children: <DataBrowser />,
             },
+           /*  {
+              key: "explore",
+              label: `Explore`,
+              children: <DashBoardContent />,
+            }, */
             {
               key: "2",
               label: `Metadata`,

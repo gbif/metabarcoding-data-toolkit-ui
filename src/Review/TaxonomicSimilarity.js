@@ -1,5 +1,5 @@
  import React, { useState, useEffect, useRef, useMemo } from "react";
-import { Row, Col, Spin, Select, Typography } from "antd";
+import { Row, Col, Spin, Select, Typography, Empty } from "antd";
 import Highcharts, { setOptions } from "highcharts";
 import HC_exporting from "highcharts/modules/exporting";
 import HC_sunburst from "highcharts/modules/sunburst";
@@ -152,6 +152,18 @@ const TaxonomyChart = ({loading, onSampleClick, selectedSample, sampleLabels, ja
     }
 
  }
+
+      // The ordination plots are skipped for large datasets, so the matrices never arrive.
+      // The caller can only report whether it is still waiting; deciding "absent" has to
+      // happen here, where the data itself is in hand.
+      if (!loading && !(jaccard && brayCurtis && sampleLabels)) {
+        return (
+          <Empty
+            style={{ padding: "48px" }}
+            description="The ordination plots were not generated for this dataset"
+          />
+        );
+      }
 
       return loading  ? (
         <Row style={{ padding: "48px" }}>

@@ -178,7 +178,7 @@ function Admin({user, setLoginFormVisible}) {
               title: "",
               dataIndex: "log",
               key: "log",
-              render: (text, record) => <><Button type="link" href={`${config.backend}/dataset/${record.dataset_id}/log.txt`} target="_blank" rel="noreferrer" >Log</Button>{record?.validation_id && <>|<Button type="link" href={`https://www.gbif.org/tools/data-validator/${record.validation_id}`} target="_blank" rel="noreferrer" >Validation report</Button></> }</>,
+              render: (text, record) => <><Button type="link" href={`${config.backend}/dataset/${record.dataset_id}/log.txt`} target="_blank" rel="noreferrer" >Log</Button>{record?.validation_id && <>|<Button type="link" href={`https://tools.gbif.org/tools/data-validator/${record.validation_id}`} target="_blank" rel="noreferrer" >Validation report</Button></> }</>,
           },
             {
                 title: "Created",
@@ -194,7 +194,11 @@ function Admin({user, setLoginFormVisible}) {
                 dataIndex: "user_name",
                 key: "user_name",
                 filters: userFilter,
-                onFilter: (value, record) => record.user_name.indexOf(value) === 0,
+                // Deployments with many users get an unusable list of checkboxes without this.
+                // Matching on value rather than the default (text) so the dataset count in the
+                // label - "someone (12)" - is not searchable as if it were part of the name.
+                filterSearch: (input, record) => `${record.value}`.toLowerCase().includes(input.toLowerCase()),
+                onFilter: (value, record) => record.user_name === value,
 
             },
             {
@@ -232,7 +236,7 @@ function Admin({user, setLoginFormVisible}) {
                     {text: "Not published", value: false},
                 ],
                 onFilter: (value, record) => value ? !!record.gbif_uat_key : !record.gbif_uat_key,
-                render: (text, record) => !!text ? <Button type="link" href={`https://www.gbif-uat.org/dataset/${text}`} target="_blank" rel="noreferrer" ><LuExternalLink /></Button> : ""
+                render: (text, record) => !!text ? <Button type="link" href={`https://www.gbif-test.org/dataset/${text}`} target="_blank" rel="noreferrer" ><LuExternalLink /></Button> : ""
 
             },
             {

@@ -1,7 +1,7 @@
 
 
 
-const getUatDatasetText = (gbifUatKey) => gbifUatKey ? `I have published a test-version in the GBIF test environment (UAT): https://www.gbif-uat.org/dataset/${gbifUatKey}` : "";
+const getUatDatasetText = (gbifUatKey) => gbifUatKey ? `I have published a test-version in the GBIF test environment: https://www.gbif-test.org/dataset/${gbifUatKey}` : "";
 
 const getSignature = user => (user?.firstName && user?.lastName ) ? `${user?.firstName} ${user?.lastName}` : ''
 
