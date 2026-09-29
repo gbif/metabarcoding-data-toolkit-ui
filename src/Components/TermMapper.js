@@ -194,8 +194,8 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset, fileNameSy
                 message: 'Attention',
                 description: <ul>
                    
-                   {!hasSampleID && <li>You have no 'id' field in your sample file and you have not provided a mapping for that field. PLease pick the id in your sample file before proceeding.</li>}
-            {!hasTaxonID && <li>You have no 'id' field in your taxon file and you have not provided a mapping for that field. PLease pick the id in your taxon file before proceeding.</li>}
+                   {!hasSampleID && <li>You have no 'id' field in your sample file and you have not provided a mapping for that field. Please pick the id in your sample file before proceeding.</li>}
+            {!hasTaxonID && <li>You have no 'id' field in your taxon file and you have not provided a mapping for that field. Please pick the id in your taxon file before proceeding.</li>}
                     </ul>,
               })
         }

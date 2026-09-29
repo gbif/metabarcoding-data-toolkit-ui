@@ -60,7 +60,7 @@ const AppLayout = ({ children, setDataset, user }) => {
       </Button>
       <Button 
         type={"link"} 
-        onClick={() => window.open('https://docs.gbif-uat.org/mdt-user-guide/en/#faq', '_blank')}
+        onClick={() => window.open('https://doi.org/10.35035/doc-wkpc-m352#faq', '_blank')}
         > 
         <span style={{  color: "white"  }}>FAQ </span></Button>
       <UserMenu />
@@ -106,8 +106,8 @@ const AppLayout = ({ children, setDataset, user }) => {
 
         <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://www.gbif.org/dna" /* onClick={() => navigate("/faq")} */>About GBIF & DNA </Button>
 
-        <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://docs.gbif-uat.org/mdt-user-guide/en/" /* onClick={() => navigate("/faq")} */>User guide</Button>
-        <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://docs.gbif-uat.org/mdt-user-guide/en/#faq" /* onClick={() => navigate("/faq")} */>FAQ</Button>
+        <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://doi.org/10.35035/doc-wkpc-m352" /* onClick={() => navigate("/faq")} */>User guide</Button>
+        <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://doi.org/10.35035/doc-wkpc-m352#faq" /* onClick={() => navigate("/faq")} */>FAQ</Button>
         <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://github.com/gbif/metabarcoding-data-toolkit-backend?tab=readme-ov-file#api" /* onClick={() => navigate("/faq")} */>API</Button>
     <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://github.com/gbif/metabarcoding-data-toolkit-ui/issues/new">Report a bug</Button>
     <Button style={{paddingLeft: 8}} type="link" target="_blank" href="https://github.com/gbif/metabarcoding-data-toolkit-ui/issues/new">Request a feature</Button>

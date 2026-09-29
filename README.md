@@ -15,7 +15,7 @@ It works on top of [metabarcoding-data-toolkit-backend](https://github.com/gbif/
 ## Installations and Guide
 * [MDT user guide](https://doi.org/10.35035/doc-wkpc-m352)
 * [GBIF test installation](https://mdt.gbif-test.org/)
-* [More installations](https://docs.gbif-uat.org/mdt-user-guide/en/#mdt_installations)
+* [More installations](https://doi.org/10.35035/doc-wkpc-m352#mdt_installations)
 
 # Technical details
 

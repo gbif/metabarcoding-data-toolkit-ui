@@ -52,7 +52,7 @@ function App({installationSettingsHasLoaded,
           <Col flex="auto"></Col>
           <Col style={{padding: "24px"}}>
             <Card
-              onClick={() => window.open('https://docs.gbif-uat.org/mdt-user-guide/en/', '_blank')}
+              onClick={() => window.open('https://doi.org/10.35035/doc-wkpc-m352', '_blank')}
               className="home-card"
               style={{
                 width: 200,
@@ -83,7 +83,7 @@ function App({installationSettingsHasLoaded,
           </Col>
           <Col style={{padding: "24px"}}>
             <Card
-              onClick={() => window.open('https://docs.gbif-uat.org/mdt-user-guide/en/#faq', '_blank')}
+              onClick={() => window.open('https://doi.org/10.35035/doc-wkpc-m352#faq', '_blank')}
               className="home-card"
               style={{
                 width: 200,

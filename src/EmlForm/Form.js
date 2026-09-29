@@ -685,7 +685,7 @@ const MetaDataForm = ({
           <FormItem
           hidden={section !== "citations" }
             {...formItemLayout}
-            label={<>Bibliografic references {help?.bibliographicReferences && <Help title="Bibliografic references"  style={{marginLeft: "6px"}} content={help?.bibliographicReferences} />}</>}
+            label={<>Bibliographic references {help?.bibliographicReferences && <Help title="Bibliographic references"  style={{marginLeft: "6px"}} content={help?.bibliographicReferences} />}</>}
             name="bibliographicReferences"
             help={showHelp && (help?.bibliographicReferences || null)}
           >

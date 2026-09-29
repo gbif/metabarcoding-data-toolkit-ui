@@ -7,7 +7,7 @@ const ProdPublishingNotEnabled = ({installationSettings, user, dataset}) => {
 
     return <Result
     status="404"
-    title={<>This MDT installation is not enabled for publishing directly to <a target="_blank"  href="https://www,gbif.org" rel="noreferrer">GBIF.org</a> </>}
+    title={<>This MDT installation is not enabled for publishing directly to <a target="_blank"  href="https://www.gbif.org" rel="noreferrer">GBIF.org</a> </>}
     subTitle={<Row>
       <Col flex="auto"></Col>
       <Col style={{textAlign: "left"}}>
