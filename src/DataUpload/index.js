@@ -346,6 +346,15 @@ const DataUpload = ({ user,
                                 {dataFormat?.name && dataFormat?.name !== "Invalid format" && <Tag icon={<CheckCircleOutlined />} color="success">
                                     {dataFormat?.name}
                                 </Tag>}
+                                {/* The enum's description explains what the detected format
+                                    expects - which files, and what has to be in them. Until
+                                    now it was served by /enum/format and shown nowhere. */}
+                                {dataFormat?.description && dataFormat?.name !== "Invalid format" &&
+                                    <Help
+                                        style={{ marginLeft: "4px" }}
+                                        title={dataFormat?.name}
+                                        content={dataFormat?.description}
+                                    />}
                                 {dataFormat?.name && dataFormat?.name === "Invalid format" && <Tag icon={<CloseCircleOutlined />} color="error">
                                     {dataFormat?.name}{dataset?.files?.invalidMessage ? ` - ${dataset?.files?.invalidMessage}`:""}
                                 </Tag>}
