@@ -151,6 +151,25 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
     }
   }
 
+  // A package written before the DwC-DP surrogate-key migration. The dashboard still reads it
+  // (see the column map in DashBoard/DashBoardContent.js) and the zip still downloads, so this
+  // is informational - only publishing and validation need the current schema.
+  const dwcdpIsLegacy = !!dataset?.dwcdpVersion && dataset.dwcdpVersion !== '1.0-DEV';
+
+  const regenerateDwcDp = async key => {
+    setDwcDpLoading(true)
+    setDwcDpFinished(false)
+    setDwcDpFailed(false)
+    try {
+      await axiosWithAuth.post(`${config.backend}/dataset/${key}/dwc-dp`);
+      message.info("Regenerating the Darwin Core Data Package");
+      pollDwcDp(key)
+    } catch (error) {
+      setDwcDpLoading(false)
+      message.error(error?.response?.data?.message || error?.message || error);
+    }
+  }
+
   const processData = async key => {
     setProcessingButtonClicked(true);
     setFailed(false)
@@ -255,6 +274,25 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
       {error && <Alert type="error" >{error}</Alert>}
       <Row>
         <Col span={6}>
+          {dwcdpIsLegacy && <Alert
+            style={{ marginBottom: "24px" }}
+            type="info"
+            showIcon
+            message="This data package uses an older DwC-DP schema"
+            description={<>
+              <div>It was built before the schema moved to surrogate keys. Everything still
+              works - the dashboard reads it and the download is unchanged - but regenerating
+              produces the current schema. Your record identifiers stay the same, so a
+              regenerated package can be republished without creating duplicates.</div>
+              <Button
+                type="link"
+                style={{ paddingLeft: 0 }}
+                loading={dwcdpLoading}
+                onClick={() => regenerateDwcDp(dataset?.id)}
+              >Regenerate the data package</Button>
+            </>}
+          />}
+
           {metadataIncomplete && <Alert
             style={{ marginBottom: "24px" }}
             type="warning"

@@ -22,6 +22,40 @@ const ALL_RANKS = ['kingdom', 'phylum', 'class', 'order', 'family', 'genus'];
 // class and order are SQL keywords in DuckDB and have to stay quoted
 const quoteRank = (rank) => (rank === 'class' || rank === 'order') ? `"${rank}"` : rank;
 
+// DwC-DP moved from natural keys to surrogate keys, renaming the columns this SQL selects and
+// joins on. Packages generated before that migration are still on disk - and still published -
+// so the dashboard has to read both shapes. The generation is reported by
+// /explore/resources as dwcdpVersion (see backend util/dwcdpVersion.js).
+//
+// Selected key columns are aliased back to the legacy names, so everything downstream of the
+// query - the row handlers, the geojson builder, selectedSample - keeps working unchanged
+// whichever generation it is reading.
+const LEGACY_COLUMNS = {
+    naEvent: 'na.eventID',                    // nucleotide-analysis -> event
+    naSequence: 'na.nucleotideSequenceID',    // nucleotide-analysis -> nucleotide-sequence
+    iSequence: 'i.nucleotideSequenceID',      // identification      -> nucleotide-sequence
+    naTotalReads: 'na.totalReadCount',
+    evKey: 'ev.eventID',                      // the event table's own key
+    eventKey: 'eventID',                      // unqualified, for SELECT ... FROM "event"
+    eaEvent: 'eventID',                       // unqualified, for the ea{i} alias
+};
+
+const CURRENT_COLUMNS = {
+    naEvent: 'na.event_fk',
+    naSequence: 'na.nucleotideSequence_fk',
+    iSequence: 'i.nucleotideSequence_fk',
+    naTotalReads: 'na.processedTotalReadCount',
+    evKey: 'ev.event_pk',
+    eventKey: 'event_pk',
+    eaEvent: 'event_fk',
+};
+
+// Anything that is not explicitly the current generation is read as legacy: a package we cannot
+// identify is far more likely to be an old one than a future one, and the legacy queries are
+// the ones that have always worked.
+export const columnsFor = (dwcdpVersion) =>
+    dwcdpVersion === '1.0-DEV' ? CURRENT_COLUMNS : LEGACY_COLUMNS;
+
 // ─── Data helpers ─────────────────────────────────────────────────────────────
 
 const buildTaxonomyDataMap = (aggRows, ranks) => {
@@ -77,7 +111,7 @@ const buildGeoJson = (rows) => ({
  * Assertion filters become correlated EXISTS subqueries (event-level).
  * Read count filters become direct conditions on nucleotide-analysis rows (ASV-level).
  */
-const buildWhereClause = (assertionFilters, readCountFilter = {}, dateFilter = {}) => {
+const buildWhereClause = (assertionFilters, readCountFilter = {}, dateFilter = {}, c = LEGACY_COLUMNS) => {
     const clauses = [];
 
     // ── Assertion (event-level) filters ───────────────────────────────────────
@@ -91,7 +125,7 @@ const buildWhereClause = (assertionFilters, readCountFilter = {}, dateFilter = {
             : `ea${i}.assertionValue IN (${f.values.map(v => `'${v.replace(/'/g, "''")}'`).join(', ')})`;
         clauses.push(
             `EXISTS (\n  SELECT 1 FROM "event-assertion" ea${i}\n` +
-            `  WHERE ea${i}.eventID = na.eventID\n` +
+            `  WHERE ea${i}.${c.eaEvent} = ${c.naEvent}\n` +
             `    AND ea${i}.assertionType = '${escapedType}'\n` +
             `    AND ${valueClause}\n)`
         );
@@ -112,7 +146,7 @@ const buildWhereClause = (assertionFilters, readCountFilter = {}, dateFilter = {
         }
         clauses.push(
             `EXISTS (\n  SELECT 1 FROM "event" ev\n` +
-            `  WHERE ev.eventID = na.eventID\n` +
+            `  WHERE ${c.evKey} = ${c.naEvent}\n` +
             `    AND ${dateClauses.join('\n    AND ')}\n)`
         );
     }
@@ -123,7 +157,7 @@ const buildWhereClause = (assertionFilters, readCountFilter = {}, dateFilter = {
     }
     if (readCountFilter.minRelative != null) {
         clauses.push(
-            `CAST(na.readCount AS DOUBLE) / NULLIF(CAST(na.totalReadCount AS DOUBLE), 0)` +
+            `CAST(na.readCount AS DOUBLE) / NULLIF(CAST(${c.naTotalReads} AS DOUBLE), 0)` +
             ` >= ${readCountFilter.minRelative}`
         );
     }
@@ -137,52 +171,53 @@ const rankSelectList = (ranks) =>
 
 const rankGroupList = (ranks) => ranks.map(r => `i.${quoteRank(r)}`).join(', ');
 
-const buildAggregateSql = (assertionFilters, readCountFilter, dateFilter, ranks = ALL_RANKS) => {
-    const where = buildWhereClause(assertionFilters, readCountFilter, dateFilter);
+const buildAggregateSql = (assertionFilters, readCountFilter, dateFilter, ranks = ALL_RANKS, c = LEGACY_COLUMNS) => {
+    const where = buildWhereClause(assertionFilters, readCountFilter, dateFilter, c);
     return `
 SELECT
 ${rankSelectList(ranks)}
-  COUNT(DISTINCT na.nucleotideSequenceID) AS asvCount,
+  COUNT(DISTINCT ${c.naSequence}) AS asvCount,
   SUM(CAST(na.readCount AS INTEGER))      AS readCount
 FROM "nucleotide-analysis" na
-JOIN "identification" i ON na.nucleotideSequenceID = i.nucleotideSequenceID
+JOIN "identification" i ON ${c.naSequence} = ${c.iSequence}
 ${where}
 GROUP BY ${rankGroupList(ranks)}
 ORDER BY asvCount DESC`.trim();
 };
 
-const buildEventIdsSql = (assertionFilters, readCountFilter, dateFilter) => {
-    const where = buildWhereClause(assertionFilters, readCountFilter, dateFilter);
+const buildEventIdsSql = (assertionFilters, readCountFilter, dateFilter, c = LEGACY_COLUMNS) => {
+    const where = buildWhereClause(assertionFilters, readCountFilter, dateFilter, c);
+    // aliased so the caller keeps reading r.eventID whichever generation this is
     return `
-SELECT DISTINCT na.eventID
+SELECT DISTINCT ${c.naEvent} AS eventID
 FROM "nucleotide-analysis" na
 ${where}`.trim();
 };
 
 const BARPLOT_EVENT_LIMIT = 200;
 
-const buildPerEventSql = (assertionFilters, readCountFilter, dateFilter, ranks = ALL_RANKS) => {
-    const where = buildWhereClause(assertionFilters, readCountFilter, dateFilter);
+const buildPerEventSql = (assertionFilters, readCountFilter, dateFilter, ranks = ALL_RANKS, c = LEGACY_COLUMNS) => {
+    const where = buildWhereClause(assertionFilters, readCountFilter, dateFilter, c);
     return `
 WITH top_events AS (
-  SELECT na.eventID
+  SELECT ${c.naEvent} AS eventID
   FROM "nucleotide-analysis" na
   ${where}
-  GROUP BY na.eventID
+  GROUP BY ${c.naEvent}
   ORDER BY COUNT(*) DESC
   LIMIT ${BARPLOT_EVENT_LIMIT}
 )
 SELECT
-  na.eventID,
+  ${c.naEvent} AS eventID,
 ${rankSelectList(ranks)}
   COUNT(*)                               AS asvCount,
   SUM(CAST(na.readCount AS INTEGER))     AS readCount
 FROM "nucleotide-analysis" na
-JOIN "identification" i ON na.nucleotideSequenceID = i.nucleotideSequenceID
-JOIN top_events te ON na.eventID = te.eventID
+JOIN "identification" i ON ${c.naSequence} = ${c.iSequence}
+JOIN top_events te ON ${c.naEvent} = te.eventID
 ${where}
-GROUP BY na.eventID, ${rankGroupList(ranks)}
-ORDER BY na.eventID`.trim();
+GROUP BY ${c.naEvent}, ${rankGroupList(ranks)}
+ORDER BY ${c.naEvent}`.trim();
 };
 
 const EMPTY_RC_FILTER = { minAbsolute: null, minRelative: null };
@@ -212,6 +247,10 @@ const DashBoardContent = ({ dataset }) => {
     const [error, setError] = useState(null);
     const [eventCount, setEventCount] = useState(null);
     const [availableRanks, setAvailableRanks] = useState(null); // null = not yet loaded
+    // Which DwC-DP generation this dataset's package was written against. Reported by
+    // /explore/resources; until it arrives the legacy columns are assumed, which is the shape
+    // every package on disk before the migration has.
+    const [dwcdpVersion, setDwcdpVersion] = useState(null);
 
     // Map state
     const [allGeoJson, setAllGeoJson] = useState(null);
@@ -237,6 +276,9 @@ const DashBoardContent = ({ dataset }) => {
     // the selected-event effect can read it without waiting on a state update
     const availableRanksRef = useRef(ALL_RANKS);
 
+    // read by the filter handlers and the selected-event effect without becoming a dependency
+    const columnsRef = useRef(LEGACY_COLUMNS);
+
     // ── Derive map filter function ────────────────────────────────────────────
     const geoJsonFilter = useMemo(() => {
         if (!filteredEventIds) return null;
@@ -248,7 +290,7 @@ const DashBoardContent = ({ dataset }) => {
         if (!datasetId) return;
         try {
             const sql =
-                `SELECT eventID, decimalLatitude, decimalLongitude\n` +
+                `SELECT ${columnsRef.current.eventKey} AS eventID, decimalLatitude, decimalLongitude\n` +
                 `FROM "event"\n` +
                 `WHERE decimalLatitude IS NOT NULL\n` +
                 `  AND decimalLongitude IS NOT NULL`;
@@ -271,6 +313,9 @@ const DashBoardContent = ({ dataset }) => {
             );
             const resources = new Set(res.data.resources);
             setAvailableResources(resources);
+            // the column names the SQL below must use depend on this
+            columnsRef.current = columnsFor(res.data.dwcdpVersion);
+            setDwcdpVersion(res.data.dwcdpVersion ?? null);
             return resources;
         } catch (e) {
             console.log(e);
@@ -332,6 +377,7 @@ const DashBoardContent = ({ dataset }) => {
     ) => {
         if (!datasetId) return;
         const ranks = availableRanksRef.current;
+        const cols = columnsRef.current;
         // nothing to group by - the taxonomy charts have no rank to draw, and the SQL would
         // be invalid rather than merely empty
         if (ranks.length === 0) {
@@ -348,9 +394,9 @@ const DashBoardContent = ({ dataset }) => {
                 axios.post(`${config.backend}/dataset/${datasetId}/explore/query`, { sql, ...opts });
 
             const [aggRes, eventIdsRes, perEventRes] = await Promise.all([
-                post(buildAggregateSql(assertionFilters, rcFilter, dfFilter, ranks)),
-                post(buildEventIdsSql(assertionFilters, rcFilter, dfFilter)),
-                post(buildPerEventSql(assertionFilters, rcFilter, dfFilter, ranks), { maxRows: 50000 }),
+                post(buildAggregateSql(assertionFilters, rcFilter, dfFilter, ranks, cols)),
+                post(buildEventIdsSql(assertionFilters, rcFilter, dfFilter, cols)),
+                post(buildPerEventSql(assertionFilters, rcFilter, dfFilter, ranks, cols), { maxRows: 50000 }),
             ]);
 
             const aggData = aggRes.data.rows;
@@ -423,15 +469,16 @@ const DashBoardContent = ({ dataset }) => {
 
     const previewSql = useMemo(() => {
         const ranks = availableRanks ?? ALL_RANKS;
+        const cols = columnsFor(dwcdpVersion);
         if (ranks.length === 0) {
-            return [{ label: 'Matched event IDs', sql: buildEventIdsSql(filters, readCountFilter, dateFilter) }];
+            return [{ label: 'Matched event IDs', sql: buildEventIdsSql(filters, readCountFilter, dateFilter, cols) }];
         }
         return [
-            { label: 'Aggregated taxonomy',                sql: buildAggregateSql(filters, readCountFilter, dateFilter, ranks) },
-            { label: 'Matched event IDs',                  sql: buildEventIdsSql(filters, readCountFilter, dateFilter) },
-            { label: `Per-event taxonomy (top ${BARPLOT_EVENT_LIMIT})`, sql: buildPerEventSql(filters, readCountFilter, dateFilter, ranks) },
+            { label: 'Aggregated taxonomy',                sql: buildAggregateSql(filters, readCountFilter, dateFilter, ranks, cols) },
+            { label: 'Matched event IDs',                  sql: buildEventIdsSql(filters, readCountFilter, dateFilter, cols) },
+            { label: `Per-event taxonomy (top ${BARPLOT_EVENT_LIMIT})`, sql: buildPerEventSql(filters, readCountFilter, dateFilter, ranks, cols) },
         ];
-    }, [filters, readCountFilter, dateFilter, availableRanks]);
+    }, [filters, readCountFilter, dateFilter, availableRanks, dwcdpVersion]);
 
     // ── Load taxonomy for the selected event ─────────────────────────────────
     useEffect(() => {
@@ -451,8 +498,9 @@ const DashBoardContent = ({ dataset }) => {
         let cancelled = false;
         const escaped = selectedSample.replace(/'/g, "''");
 
-        const baseWhere = buildWhereClause(filtersRef.current, readCountFilterRef.current, dateFilterRef.current);
-        const eventCondition = `na.eventID = '${escaped}'`;
+        const c = columnsRef.current;
+        const baseWhere = buildWhereClause(filtersRef.current, readCountFilterRef.current, dateFilterRef.current, c);
+        const eventCondition = `${c.naEvent} = '${escaped}'`;
         const fullWhere = baseWhere ? `${baseWhere}\nAND ${eventCondition}` : `WHERE ${eventCondition}`;
 
         const ranks = availableRanksRef.current;
@@ -462,14 +510,14 @@ const DashBoardContent = ({ dataset }) => {
         }
         const sql = `
 SELECT
-  na.eventID,
+  ${c.naEvent} AS eventID,
 ${rankSelectList(ranks)}
   COUNT(*)                               AS asvCount,
   SUM(CAST(na.readCount AS INTEGER))     AS readCount
 FROM "nucleotide-analysis" na
-JOIN "identification" i ON na.nucleotideSequenceID = i.nucleotideSequenceID
+JOIN "identification" i ON ${c.naSequence} = ${c.iSequence}
 ${fullWhere}
-GROUP BY na.eventID, ${rankGroupList(ranks)}`.trim();
+GROUP BY ${c.naEvent}, ${rankGroupList(ranks)}`.trim();
 
         axios.post(`${config.backend}/dataset/${datasetId}/explore/query`, { sql })
             .then(res => { if (!cancelled) setSampleRows(res.data.rows); })
