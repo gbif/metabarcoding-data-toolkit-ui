@@ -442,13 +442,18 @@ const DashBoardContent = ({ dataset }) => {
         setFilters([]);
         setAvailableResources(null);
         setAvailableRanks(null);
-        loadAvailableResources().then(resources => {
+        // Nothing that builds SQL may start before both of these have answered:
+        //  - loadAvailableResources reports the schema generation, which decides the column
+        //    names (event_pk vs eventID, and so on)
+        //  - loadAvailableRanks reports which taxon ranks the dataset actually carries
+        // Either one missing produces a binder error rather than an empty result. The geojson
+        // query counts too - it selects the event table's key column, which the migration
+        // renamed, and firing it unawaited is what silently emptied the map.
+        Promise.all([loadAvailableResources(), loadAvailableRanks()]).then(([resources]) => {
             if (resources.has('event-assertion')) loadAssertionTypes();
+            loadGeoJson();
+            runTaxonomyQuery([], EMPTY_RC_FILTER, EMPTY_DATE_FILTER);
         });
-        loadGeoJson();
-        // the queries name rank columns, so which ones exist has to be known before the first
-        // one is built - otherwise a dataset without the higher ranks fails to bind
-        loadAvailableRanks().then(() => runTaxonomyQuery([], EMPTY_RC_FILTER, EMPTY_DATE_FILTER));
     }, [datasetId]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // ── Handle filter changes ────────────────────────────────────────────────

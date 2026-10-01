@@ -156,13 +156,13 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
   // is informational - only publishing and validation need the current schema.
   const dwcdpIsLegacy = !!dataset?.dwcdpVersion && dataset.dwcdpVersion !== '1.0-DEV';
 
-  const regenerateDwcDp = async key => {
+  const createDwcDp = async key => {
     setDwcDpLoading(true)
     setDwcDpFinished(false)
     setDwcDpFailed(false)
     try {
       await axiosWithAuth.post(`${config.backend}/dataset/${key}/dwc-dp`);
-      message.info("Regenerating the Darwin Core Data Package");
+      message.info("Building the Darwin Core Data Package");
       pollDwcDp(key)
     } catch (error) {
       setDwcDpLoading(false)
@@ -274,25 +274,6 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
       {error && <Alert type="error" >{error}</Alert>}
       <Row>
         <Col span={6}>
-          {dwcdpIsLegacy && <Alert
-            style={{ marginBottom: "24px" }}
-            type="info"
-            showIcon
-            message="This data package uses an older DwC-DP schema"
-            description={<>
-              <div>It was built before the schema moved to surrogate keys. Everything still
-              works - the dashboard reads it and the download is unchanged - but regenerating
-              produces the current schema. Your record identifiers stay the same, so a
-              regenerated package can be republished without creating duplicates.</div>
-              <Button
-                type="link"
-                style={{ paddingLeft: 0 }}
-                loading={dwcdpLoading}
-                onClick={() => regenerateDwcDp(dataset?.id)}
-              >Regenerate the data package</Button>
-            </>}
-          />}
-
           {metadataIncomplete && <Alert
             style={{ marginBottom: "24px" }}
             type="warning"
@@ -340,7 +321,21 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
               }))
             }
           />}
-{dataset?.dwcdp?.steps && dataset?.dwcdp?.steps?.length > 0 && <Title level={5}>Darwin Core Data Package</Title>}
+          <Title level={5} style={{ marginTop: "24px" }}>Darwin Core Data Package</Title>
+          {/* The data package is also built automatically after an archive, but only within the
+              session where the archive button was clicked. Without this button a dataset whose
+              archive was built through the API, or in an earlier visit, had no way to get one. */}
+          <Button
+            style={{ marginBottom: "24px" }}
+            disabled={metadataIncomplete}
+            loading={dwcdpLoading}
+            onClick={() => createDwcDp(dataset?.id)}
+            type="primary"
+          >Create Darwin Core Data Package</Button>
+          <Help style={{marginLeft: '8px'}} title="Darwin Core Data Package" content={<>
+          <div>This will create a Darwin Core Data Package (DwC-DP) - the newer GBIF publishing format, written both as tab-delimited text and as Parquet. It is built from the processed data, so it does not require a Darwin Core Archive first.
+          </div>
+          </>}/>
 {dataset?.dwcdp?.steps && dataset?.dwcdp?.steps?.length > 0 && <Timeline
             items={
               dataset?.dwcdp?.steps.map((s, idx) => ({
@@ -373,7 +368,29 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
         {dataset?.filesAvailable && dataset?.filesAvailable.length > 0 && <Col span={6}>
                         <FilesAvailable dataset={dataset}/>
                     </Col>}
-        <Col flex="auto"></Col>
+        <Col flex="auto" style={{ paddingLeft: "16px" }}>
+          {/* Sits here rather than above the archive steps so it reads next to the
+              dwc-dp.zip / dwc-dp.parquet.zip rows it is actually about - the top offset
+              drops it down past the biom and archive entries to line up with those two. */}
+          {dwcdpIsLegacy && <Alert
+            style={{ marginTop: "360px", maxWidth: "420px" }}
+            type="info"
+            showIcon
+            message="This data package uses an older DwC-DP schema"
+            description={<>
+              <div>Everything still works - the dashboard reads it and the download is
+              unchanged - but regenerating produces the current schema. Your record
+              identifiers stay the same, so a regenerated package can be republished
+              without creating duplicates.</div>
+              <Button
+                type="link"
+                style={{ paddingLeft: 0 }}
+                loading={dwcdpLoading}
+                onClick={() => createDwcDp(dataset?.id)}
+              >Regenerate the data package</Button>
+            </>}
+          />}
+        </Col>
         <Col>
            {<Row><Button
                          disabled={!hasDWC}
