@@ -9,6 +9,7 @@ import {dateFormatter, numberFormatter} from '../Util/formatters'
 import FilesAvailable from '../Components/FilesAvailable'
 import _ from "lodash"
 import Help from "../Components/Help";
+import { resolveSupportedMarker } from "../Util/markers";
 import config from "../config";
 import withContext from "../Components/hoc/withContext";
 import { axiosWithAuth } from "../Auth/userApi";
@@ -53,7 +54,9 @@ const ProcessDataset = ({
 
     useEffect(() => {
 
-        if (dataset?.mapping?.defaultValues?.target_gene && supportedMarkers.map(m => m?.name).includes(dataset?.mapping?.defaultValues?.target_gene?.toLowerCase())) {
+        // target_gene is a GBIF vocabulary concept name now, so comparing it against the short
+        // marker names would never match and the checkbox would never appear
+        if (resolveSupportedMarker(dataset?.mapping?.defaultValues?.target_gene, supportedMarkers)) {
             setShowAssignTaxonomyCheckbox(true)
         }
         if (dataset?.assignTaxonomy) {
@@ -314,7 +317,7 @@ const ProcessDataset = ({
 
                             <div style={{display: 'inline'}}><Checkbox disabled={!showAssignTaxonomyCheckbox || (!!dataset?.steps && !(failed || finished))}  checked={assignTaxonomy} onChange={(e) => setAssignTaxonomy(e?.target?.checked)}>Assign taxonomy <Help trigger="hover" style={{display: 'inline'}} title="Taxonomic assigment" content={showAssignTaxonomyCheckbox ? <>
                             <p>
-                            This will blast the ASVs against <strong> {`${supportedMarkers.find(m => m?.name === dataset?.mapping?.defaultValues?.target_gene?.toLowerCase())?.database}`}</strong>
+                            This will blast the ASVs against <strong> {`${resolveSupportedMarker(dataset?.mapping?.defaultValues?.target_gene, supportedMarkers)?.database}`}</strong>
                             </p>
                             <ul>
                                 <li>{`If the best match based on bit score has identity >= 99, it is considered a an exact match and the scientificName field is filled`} </li>
@@ -330,7 +333,7 @@ const ProcessDataset = ({
                             </> : <>
                             To assign taxonomy, you must select a defaultValue for 'target_gene' in the mapping section. We support the following options:
                             <ul>
-                                {supportedMarkers.map(e => <li>{e.name} : {e.database}</li>)}
+                                {supportedMarkers.map(e => <li key={e.name}>{(e.concepts || [e.name]).join(', ')} : {e.database}</li>)}
                             </ul>
                             </>}/></Checkbox>
 

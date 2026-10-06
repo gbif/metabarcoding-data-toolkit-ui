@@ -19,6 +19,18 @@ export const getFormat = async () => {
     }
 }
 
+// The GBIF target_gene vocabulary, served through the backend so it can be cached and so there
+// is something to fall back to when api.gbif.org is unreachable. Fetched when the mapping step
+// renders rather than with the other enums at boot - filling the backend cache takes seconds.
+export const getTargetGeneVocabulary = async () => {
+    try {
+        const res = await axios(`${config.backend}/enum/target-gene`)
+        return res
+    } catch (error) {
+        throw error
+    }
+}
+
 export const getSupportedMarkers = async () => {
     try {
         const res = await axios(`${config.backend}/enum/supported-markers`)
