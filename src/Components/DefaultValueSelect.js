@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { Row, Col, Typography, Select, Input, theme } from "antd"
 import OntologySelect from "./OntologySelect";
+import TargetGeneSelect from "./TargetGeneSelect";
 const { Text, Divider, Link } = Typography;
 
-const DefaultValueSelect = ({style = { width: 300 }, onChange, term, vocabulary = null, ontology, initialValue }) => {
+const DefaultValueSelect = ({style = { width: 300 }, onChange, term, vocabulary = null, gbifVocabulary = null, ontology, initialValue }) => {
     const [value, setValue] = useState(initialValue || null)
     useEffect(() => {
         
@@ -24,7 +25,8 @@ const DefaultValueSelect = ({style = { width: 300 }, onChange, term, vocabulary 
 
     return <Row>
         <Col>
-    {vocabulary ? <Select placeholder="Add default value" style={style} value={value} defaultValue={initialValue} onChange={val => {
+    {gbifVocabulary === 'target_gene' ? <TargetGeneSelect style={style} onChange={val => setValue(val)} initialValue={initialValue}/> :
+    vocabulary ? <Select placeholder="Add default value" style={style} value={value} defaultValue={initialValue} onChange={val => {
         setValue(val)
     }}>
         {vocabulary?.map(h => <Select.Option key={h} value={h}>{h}</Select.Option>)}

@@ -306,7 +306,7 @@ const TermMapper = ({ dwcTerms, requiredTerms, defaultTerms, dataset, fileNameSy
             title: <span ref={ref}>or select/enter a Default value</span>,
             dataIndex: 'defaultValue',
             key: 'defaultValue',
-            render: (text, term) =>  defaultTermMap.has(term?.name)  ? <DefaultValueSelect initialValue={state?.defaultValues?.[term?.name]} vocabulary={defaultTermMap.get(term?.name)?.vocabulary} ontology={defaultTermMap.get(term?.name)?.ontology} term={term} onChange={ val => {
+            render: (text, term) =>  defaultTermMap.has(term?.name)  ? <DefaultValueSelect initialValue={state?.defaultValues?.[term?.name]} vocabulary={defaultTermMap.get(term?.name)?.vocabulary} gbifVocabulary={defaultTermMap.get(term?.name)?.gbifVocabulary} ontology={defaultTermMap.get(term?.name)?.ontology} term={term} onChange={ val => {
                
                     dispatch({ type: 'createDefaultValue', payload: {term: term.name, value: val} })
                 
