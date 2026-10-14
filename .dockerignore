@@ -1,0 +1,14 @@
+.git
+.gitignore
+.dockerignore
+node_modules
+build
+coverage
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.env*
+env
+Dockerfile*
+README.md
+LICENSE.txt
