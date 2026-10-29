@@ -302,6 +302,10 @@ const ProcessDataset = ({
                                 && <li>
                                     {truncateMissingIdError`${dataset?.processingErrors?.consistencyCheck?.sampleIdsWithNoRecordInOtuTable} in the SAMPLE table are not present in the OTU table`}
                                 </li>}
+                                {dataset?.processingErrors?.consistencyCheck?.duplicateEventIdsInSampleFile?.length > 0
+                                && <li>
+                                    {truncateMissingIdError`${dataset?.processingErrors?.consistencyCheck?.duplicateEventIdsInSampleFile} are used by more than one sample in the SAMPLE table, so eventID was not taken from it`}
+                                </li>}
                         </ul>} />}
                 <Row justify="space-evenly">
                     <Col span={6}>
