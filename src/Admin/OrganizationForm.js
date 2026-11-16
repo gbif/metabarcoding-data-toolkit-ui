@@ -16,6 +16,7 @@ import config from "../config";
 import { useNavigate, useLocation, useMatch } from "react-router-dom";
 // import axios from "axios";
 import { axiosWithAuth } from "../Auth/userApi";
+import useGbifLogin, { GBIF_LOGIN_CANCELLED } from "../Auth/GbifLogin";
 import OrganizationControl from "./OrganizationControl";
 import TagControl from "../EmlForm/TagControl";
 import {getEmailBodyForTokenRequest} from "../Publish/EmailTemplate";
@@ -24,6 +25,7 @@ const FormItem = Form.Item;
 
 
 const OrganizationForm = ({initialValues, submitData, user}) => {
+    const [withGbifLogin, gbifLoginModal] = useGbifLogin(user?.userName)
 
     const [submissionError, setSubmissionError] = useState(null);
     const [showHelp, setShowHelp] = useState(false);
@@ -70,11 +72,13 @@ const OrganizationForm = ({initialValues, submitData, user}) => {
         try {
             const url = `${config.backend}/organization/${values?.key}/password`;
             console.log(url)
-            const res = await axiosWithAuth.get(url)
+            const res = await withGbifLogin(() => axiosWithAuth.get(url))
             setTokenError(null)
             form.setFieldValue('token', res.data)
         } catch (error) {
-
+            if(error === GBIF_LOGIN_CANCELLED){
+                return
+            }
             if(error?.response?.status === 403){
                 setTokenError(<>You don´t have permissions to see the token for this organisation. Please contact <a target="_blank" href={`mailto:helpdesk@gbif.org?subject=${encodeURIComponent("Organization token")}&body=${encodeURIComponent(getEmailBodyForTokenRequest({organizationKey: values?.key, toolBaseUrl: window.location.protocol +"//"+ window.location.hostname, user
                 }))}`} rel="noreferrer">GBIF Helpdesk</a>.</>)
@@ -163,6 +167,7 @@ const OrganizationForm = ({initialValues, submitData, user}) => {
         </Row>
         
       </Form>
+      {gbifLoginModal}
     </>
 }
 

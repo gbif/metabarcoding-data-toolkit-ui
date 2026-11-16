@@ -15,6 +15,7 @@ import withContext from "../Components/hoc/withContext";
 import { refreshLogin } from "../Auth/userApi";
 import { axiosWithAuth } from "../Auth/userApi";
 import {dateFormatter, numberFormatter} from '../Util/formatters'
+import ApiTokens from './ApiTokens'
 const { useToken } = theme;
 
 const { Title } = Typography;
@@ -114,7 +115,7 @@ const deleteDataset = async (id) => {
             </List.Item>
         )}
     />
-    
+    <ApiTokens />
             </Col>
             <Col flex="auto"></Col>
             </Row>

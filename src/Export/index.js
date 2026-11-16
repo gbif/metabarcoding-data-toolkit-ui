@@ -11,8 +11,10 @@ import FilesAvailable from '../Components/FilesAvailable'
 import Help from "../Components/Help";
 import withContext from "../Components/hoc/withContext";
 import { axiosWithAuth } from "../Auth/userApi";
+import useGbifLogin, { GBIF_LOGIN_CANCELLED } from "../Auth/GbifLogin";
 const { Title, Text } = Typography;
-const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
+const Export = ({ setDataset, dataset, setLoginFormVisible, user }) => {
+  const [withGbifLogin, gbifLoginModal] = useGbifLogin(user?.userName)
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -236,7 +238,7 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
       
     try {
       setValidating(true)
-      const validateRes = await axiosWithAuth.post(`${config.backend}/dataset/${key}/data-validator`);
+      const validateRes = await withGbifLogin(() => axiosWithAuth.post(`${config.backend}/dataset/${key}/data-validator`));
         console.log(validateRes)
         setValidationId(validateRes?.data?.key)
         setDataset({...dataset, publishing: {...dataset.publishing || {}, validationId: validateRes?.data?.key}})
@@ -247,6 +249,10 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
         });
         setValidating(false)
       } catch (error) {
+        if (error === GBIF_LOGIN_CANCELLED) {
+          setValidating(false)
+          return
+        }
         try {
           console.log(error)
           notification.error({
@@ -411,6 +417,7 @@ const Export = ({ setDataset, dataset, setLoginFormVisible }) => {
         <p>Your data is being processed and "published" on the test environment. Depending on the data volume, it may take from 15 minutes to a an hour before it is finished. This means that you may initally see "0 occurrences" on the new <a  href={`https://www.gbif-test.org/dataset/${gbifUatKey}`}>dataset page</a> if it is accessed before the processing has finished. You can also find the link to the dataset on the test environment (gbif-uat) in the list of datasets in your user profile.</p>
         
       </Modal>
+      {gbifLoginModal}
 
     </PageContent></Layout>
   );

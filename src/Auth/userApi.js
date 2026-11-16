@@ -48,16 +48,43 @@ export const refreshLogin = async () => {
 }
 
 export const logout = () => {
+  // End the session on the server too; the token is dropped here whether or not that succeeds
+  if (axiosWithAuth.defaults.headers.common["Authorization"]) {
+    axiosWithAuth.post(`${config.backend}/auth/logout`).catch(() => {});
+  }
   localStorage.removeItem(JWT_STORAGE_NAME);
   sessionStorage.removeItem(JWT_STORAGE_NAME);
   // Unset Authorization header after logout
   axiosWithAuth.defaults.headers.common["Authorization"] = "";
 };
 
+// A few actions use the user's GBIF account at GBIF (the data validator, an organization's
+// token). When the GBIF login from logging in to the MDT has expired, the backend answers
+// 401 gbif-login-required, and the user gives their GBIF password again.
+export const isGbifLoginRequired = (error) =>
+  error?.response?.status === 401 && error?.response?.data?.error === "gbif-login-required";
+
+export const gbifLogin = (username, password) =>
+  axios.post(`${config.backend}/auth/gbif-login`, null, {
+    headers: {
+      Authorization: `Basic ${base64.encode(username + ":" + password)}`,
+      "X-MDT-Token": axiosWithAuth.defaults.headers.common["Authorization"],
+    },
+  });
+
+export const listApiTokens = () => axiosWithAuth.get(`${config.backend}/user/tokens`).then((res) => res?.data);
+
+export const createApiToken = (label, days) =>
+  axiosWithAuth.post(`${config.backend}/user/tokens`, { label, days }).then((res) => res?.data);
+
+export const revokeApiToken = (id) => axiosWithAuth.delete(`${config.backend}/user/tokens/${id}`);
+
 export const getTokenUser = () => {
   const jwt = sessionStorage.getItem(JWT_STORAGE_NAME);
   if (jwt && jwt !== "undefined") {
-    const user = JSON.parse(base64.decode(jwt.split(".")[1]));
+    // the payload is base64url, without padding
+    const payload = jwt.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    const user = JSON.parse(base64.decode(payload + "=".repeat((4 - (payload.length % 4)) % 4)));
     // is the token still valid - if not then delete it. This of course is only to ensure the client knows that the token has expired. any authenticated requests would fail anyhow
     if (new Date(user.exp * 1000).toISOString() < new Date().toISOString()) {
       logout();

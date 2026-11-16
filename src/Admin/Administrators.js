@@ -9,9 +9,9 @@ import config from "../config";
 
 const { Title, Text } = Typography;
 
-// User accounts are always managed in the GBIF production registry - the backend logs in and
-// resolves tokens against gbifRegistryBaseUrl.prod regardless of which environment this
-// installation publishes to (see Auth/user.model.js) - so this link is correct everywhere.
+// User accounts are always managed in the GBIF production registry - the backend checks logins
+// against gbifRegistryBaseUrl.prod regardless of which environment this installation publishes
+// to (see Auth/user.model.js) - so this link is correct everywhere.
 const REGISTRY_USER_URL = "https://registry.gbif.org/user/";
 
 const AdminList = ({ title, userNames, loading }) => (
