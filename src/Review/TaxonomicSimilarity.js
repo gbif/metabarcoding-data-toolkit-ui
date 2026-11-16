@@ -14,14 +14,25 @@ const {Text} = Typography
 HC_exporting(Highcharts);
 HC_colorAxis(Highcharts)
 
+// A blank cell arrives as null, and Number(null) is 0, so it was coloured as a real 0. Null
+// leaves the point in the colour axis' nullColor instead.
+const toColorValue = value => {
+  if (value === null || value === undefined || `${value}`.trim() === '') {
+    return null
+  }
+  const number = Number(value)
+  return Number.isFinite(number) ? number : null
+}
+
 const getChartOptions = (data, type, onSampleClick) => {
   
        //  console.log(JSON.stringify(data))
+  const colorValues = data.map(e => e.colorValue).filter(v => typeof v === 'number')
   let options = {
     colorAxis: {
       
-        min: Math.min(...data.map(e => e.colorValue)), 
-        max: Math.max(...data.map(e => e.colorValue)),
+        min: colorValues.length > 0 ? Math.min(...colorValues) : undefined, 
+        max: colorValues.length > 0 ? Math.max(...colorValues) : undefined,
         },
 
       chart: {
@@ -111,8 +122,8 @@ const TaxonomyChart = ({loading, onSampleClick, selectedSample, sampleLabels, ja
   const [colorBy, setColorBy] = useState(null)
   const [colorByData, setColorByData] = useState(null)
   // const options = useMemo(() => !(sparseMatrix && sampleLabels) ? null : getChartOptions(getDataForDissimilarityPlot(sparseMatrix, indexType, sampleLabels) ,indexType, onSampleClick), [sparseMatrix, indexType, sampleLabels]);
-  const jaccardOptions = useMemo(() => !(jaccard && sampleLabels) ? null : getChartOptions(jaccard.map((e,i) => colorByData ? {...e, colorValue: Number(colorByData?.[i])} : e), "jaccard" , onSampleClick), [jaccard, sampleLabels, colorByData]);
-  const brayCurtisOptions = useMemo(() => !(brayCurtis && sampleLabels) ? null : getChartOptions(brayCurtis.map((e,i) => colorByData ? {...e, colorValue: Number(colorByData?.[i])} : e), "bray-curtis" , onSampleClick), [brayCurtis, sampleLabels, colorByData]);
+  const jaccardOptions = useMemo(() => !(jaccard && sampleLabels) ? null : getChartOptions(jaccard.map((e,i) => colorByData ? {...e, colorValue: toColorValue(colorByData?.[i])} : e), "jaccard" , onSampleClick), [jaccard, sampleLabels, colorByData]);
+  const brayCurtisOptions = useMemo(() => !(brayCurtis && sampleLabels) ? null : getChartOptions(brayCurtis.map((e,i) => colorByData ? {...e, colorValue: toColorValue(colorByData?.[i])} : e), "bray-curtis" , onSampleClick), [brayCurtis, sampleLabels, colorByData]);
 
    const chartRef = useRef()
    useEffect(() => {
