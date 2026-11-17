@@ -12,7 +12,7 @@ Currently, GBIF is developing and testing the tool, but it is now open to early 
 
 
 # Is there a template?
-Yes, there are a few templates with a dummy dataset [here](https://edna-tool.gbif-uat.org/how-to-use-the-tool). These template are rather basic. Further DwC fields (including MiXS terms from the dna-derived darwin core extension) may be added manually. Eventually a larger set of dedicated templates will be available. A richer test dataset is available [here](https://drive.google.com/drive/folders/1ctnmvbj0mTsDmBPCvks4vm1PxeVGj98K?usp=drive_link). A selection of recommended fields to use can be found in in the DNA publishing guides section on [Mapping metabarcoding (eDNA) and barcoding data](https://docs.gbif.org/publishing-dna-derived-data/en/#mapping-metabarcoding-edna-and-barcoding-data)
+Yes, there are a few templates with a dummy dataset [here](https://mdt.gbif.org/how-to-use-the-tool). These template are rather basic. Further DwC fields (including MiXS terms from the dna-derived darwin core extension) may be added manually. Eventually a larger set of dedicated templates will be available. A richer test dataset is available [here](https://drive.google.com/drive/folders/1ctnmvbj0mTsDmBPCvks4vm1PxeVGj98K?usp=drive_link). A selection of recommended fields to use can be found in in the DNA publishing guides section on [Mapping metabarcoding (eDNA) and barcoding data](https://docs.gbif.org/publishing-dna-derived-data/en/#mapping-metabarcoding-edna-and-barcoding-data)
 
     
 # What kind of data can be published/submitted using this tool?

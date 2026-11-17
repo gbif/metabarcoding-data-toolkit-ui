@@ -248,7 +248,7 @@ function Admin({user, setLoginFormVisible}) {
                   {text: "Not published", value: false},
               ],
               onFilter: (value, record) => value ? !!record.gbif_prod_key : !record.gbif_prod_key,
-              render: (text, record) => !!text ? <Button type="link" href={`https://www.gbif${config.env !== "prod" ? "-uat" : ""}.org/dataset/${text}`} target="_blank" rel="noreferrer" ><LuExternalLink /></Button> : ""
+              render: (text, record) => !!text ? <Button type="link" href={`https://www.gbif${config.env !== "prod" ? "-test" : ""}.org/dataset/${text}`} target="_blank" rel="noreferrer" ><LuExternalLink /></Button> : ""
 
           },
             {

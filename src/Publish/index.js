@@ -307,7 +307,7 @@ const Publish = ({ setDataset, dataset, user, installationSettings, networks }) 
         </> : <ProdPublishingNotEnabled />}
       </PageContent>
       <Modal title="Info" open={showRegisterModal && gbifProdKey} onOk={() => setShowRegisterModal(false)} onCancel={() => setShowRegisterModal(false)}>
-        <p>Your data is being published. Depending on the data volume, it may take from 15 minutes to a an hour before it is finished. This means that you may initally see "0 occurrences" on the new <a  href={`https://www.gbif${config?.env !== 'prod' ? '-uat':''}.org/dataset/${gbifProdKey}`}>dataset page</a> if it is accessed before the processing has finished.</p>
+        <p>Your data is being published. Depending on the data volume, it may take from 15 minutes to a an hour before it is finished. This means that you may initally see "0 occurrences" on the new <a  href={`https://www.gbif${config?.env !== 'prod' ? '-test':''}.org/dataset/${gbifProdKey}`}>dataset page</a> if it is accessed before the processing has finished.</p>
         
       </Modal>
     </Layout>
