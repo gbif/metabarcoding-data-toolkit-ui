@@ -57,15 +57,13 @@ const ApiTokens = () => {
 
   return (
     <List
-      style={{ marginTop: "24px" }}
       bordered
       loading={loading}
       dataSource={tokens}
       locale={{ emptyText: "No API tokens" }}
       header={
         <>
-          <Text>API tokens</Text>
-          <Paragraph type="secondary" style={{ marginTop: "8px" }}>
+          <Paragraph type="secondary">
             For scripts and tools, such as the MDT plugin for Claude Code. A token gives access to your datasets on this
             MDT only, and nothing else of your GBIF account. Keep it private: paste it where the tool asks for it, not
             into a chat or a shared document. It ends when it expires, when you revoke it here, or when the MDT is

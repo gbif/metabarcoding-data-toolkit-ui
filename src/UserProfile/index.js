@@ -1,10 +1,10 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios"
-import { useNavigate, useLocation, useMatch } from "react-router-dom";
+import { useNavigate, useLocation, useMatch, useParams } from "react-router-dom";
 import Layout from "../Layout/Layout";
 import PageContent from "../Layout/PageContent";
-import { Row, Col, Button, Result, Typography, List,theme, Popconfirm, message } from "antd"
+import { Row, Col, Button, Result, Typography, List, Tabs, theme, Popconfirm, message } from "antd"
 import { EditOutlined, EyeOutlined, DeleteOutlined } from '@ant-design/icons';
 import { LuExternalLink } from "react-icons/lu";
 
@@ -30,6 +30,8 @@ const {token} = useToken()
  const [loading, setLoading] = useState(false)
  const [deleteInrogress, setDeleteInProgress] = useState(false)
   const navigate = useNavigate();
+  const { tab } = useParams();
+  const activeTab = tab === "api-tokens" ? "api-tokens" : "datasets";
 
 useEffect(() => {
     if(user?.datasets?.length > 0){
@@ -80,6 +82,11 @@ const deleteDataset = async (id) => {
         {!!user &&        <> <Row>
             <Col flex="auto"></Col>
             <Col span={16}>
+            <Tabs
+              activeKey={activeTab}
+              onChange={(key) => navigate(key === "datasets" ? "/user-profile" : `/user-profile/${key}`)}
+              items={[
+                { key: "datasets", label: "My datasets", children: (
            <List
         itemLayout="horizontal"
         header={<Text>{`Datasets created by ${user?.userName}`}</Text>}
@@ -115,7 +122,10 @@ const deleteDataset = async (id) => {
             </List.Item>
         )}
     />
-    <ApiTokens />
+                ) },
+                { key: "api-tokens", label: "API tokens", children: <ApiTokens /> },
+              ]}
+            />
             </Col>
             <Col flex="auto"></Col>
             </Row>

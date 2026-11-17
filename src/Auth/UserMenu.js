@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, createContext, useContext } from "react";
 //import injectSheet from "react-jss";
 import { useNavigate } from "react-router-dom";
-import { LogoutOutlined, BarsOutlined, SettingOutlined } from "@ant-design/icons";
+import { LogoutOutlined, BarsOutlined, SettingOutlined, KeyOutlined } from "@ant-design/icons";
 import { Menu, Dropdown, Avatar, Modal, Button, theme } from "antd";
 import hashCode from "../Util/hashCode"
 import withContext from "../Components/hoc/withContext";
@@ -84,6 +84,12 @@ const defaultMenuItems = [
     label: 'Datasets',
     icon: <BarsOutlined />,
     onClick: () => navigate('/user-profile')
+  },
+  {
+    key: 'api-tokens',
+    label: 'API tokens',
+    icon: <KeyOutlined />,
+    onClick: () => navigate('/user-profile/api-tokens')
   }
 ]
   useEffect(()=>{

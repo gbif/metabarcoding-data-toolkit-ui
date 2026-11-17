@@ -39,6 +39,7 @@ const App = () => {
     { key: "export",path: "/dataset/:key/export", element: [<DatasetProvider />,<Export /> ]},
     { key: "publish",path: "/dataset/:key/publish", element: [<DatasetProvider />,<Publish /> ]},
     { key: "user-profile",path: "/user-profile", element: [<UserProfile /> ]},
+    { key: "user-profile-tab",path: "/user-profile/:tab", element: [<UserProfile /> ]},
     { key: "admin",path: "/admin", element: [<Admin /> ]},
     { key: "organisationadmin",path: "/admin/organizations", element: [<OrganizationAdmin /> ]},
     { key: "administrators",path: "/admin/administrators", element: [<Administrators /> ]},
